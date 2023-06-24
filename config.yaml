@@ -1,0 +1,7 @@
+host: "127.0.0.1"
+port: 8000
+dbHost: "127.0.0.1"
+dbPort: 5432
+dbName: "srbolab_cpc"
+dbUser: "postgres"
+dbPassword: "passw0rd"

@@ -1,4 +1,4 @@
-package main
+package srbolab_cpc
 
 import (
 	"gopkg.in/yaml.v3"
@@ -9,12 +9,13 @@ type Config struct {
 	HTTP       string `yaml:"http"`
 	HTTPPort   int    `yaml:"http_port"`
 	DbHost     string `yaml:"db_host"`
+	DbPort     int    `yaml:"db_port"`
 	DbName     string `yaml:"db_name"`
 	DbUser     string `yaml:"db_user"`
 	DbPassword string `yaml:"db_password"`
 }
 
-func loadYamlConfig(conf *Config, fileName string) error {
+func LoadYamlConfig(conf *Config, fileName string) error {
 	f, err := os.Open(fileName)
 	if err != nil {
 		return err

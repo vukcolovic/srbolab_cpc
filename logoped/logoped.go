@@ -15,7 +15,7 @@ var (
 
 func init() {
 	pwd, err := os.Getwd()
-	pathLogs := filepath.Join(pwd, "logs")
+	pathLogs := filepath.Join(pwd, "../logs")
 	file, err := os.OpenFile(filepath.Join(pathLogs, "loger.log"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
 		log.Fatal(err)
