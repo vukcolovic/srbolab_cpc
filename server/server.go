@@ -4,8 +4,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
 	"net/http"
-	"srbolab_cpc/handlers/authhandler"
-	"srbolab_cpc/handlers/user"
+	"srbolab_cpc/handlers"
 )
 
 func RunServer(host string) {
@@ -15,15 +14,15 @@ func RunServer(host string) {
 		w.Write([]byte("pong"))
 	})
 
-	r.HandleFunc("/login", authhandler.Login).Methods("POST")
+	r.HandleFunc("/login", handlers.Login).Methods("POST")
 
 	s := r.PathPrefix("/api/users").Subrouter()
-	s.HandleFunc("/register", user.Register).Methods("POST")
-	s.HandleFunc("/update", user.UpdateUser).Methods("POST")
-	s.HandleFunc("/list", user.ListUsers).Methods("GET")
-	s.HandleFunc("/id/{id}", user.GetUserByID).Methods("GET")
-	s.HandleFunc("/delete/{id}", user.DeleteUser).Methods("GET")
-	s.HandleFunc("/count", user.CountUsers).Methods("GET")
+	s.HandleFunc("/register", handlers.Register).Methods("POST")
+	s.HandleFunc("/update", handlers.UpdateUser).Methods("POST")
+	s.HandleFunc("/list", handlers.ListUsers).Methods("GET")
+	s.HandleFunc("/id/{id}", handlers.GetUserByID).Methods("GET")
+	s.HandleFunc("/delete/{id}", handlers.DeleteUser).Methods("GET")
+	s.HandleFunc("/count", handlers.CountUsers).Methods("GET")
 
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{"*"}, // All origins

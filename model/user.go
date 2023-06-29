@@ -2,13 +2,6 @@ package model
 
 import "gorm.io/gorm"
 
-type Address struct {
-	Place       string
-	Street      string
-	HouseNumber string
-	PostCode    string
-}
-
 type Person struct {
 	FirstName   string
 	MiddleName  string
@@ -22,7 +15,7 @@ type User struct {
 	gorm.Model
 	Person   Person `gorm:"embedded"`
 	Password string
-	Roles    []Role `gorm:"many2many:user_roles;"`
+	Roles    []Role `gorm:"many2many:user_role;"`
 }
 
 type Role struct {
@@ -35,6 +28,17 @@ type Client struct {
 	Person       Person  `gorm:"embedded"`
 	Address      Address `gorm:"embedded"`
 	JMBG         string
+	DriveLicence string
 	PlaceBirth   string
 	CountryBirth string
+	CompanyID    uint
+	Company      Company
+	Verified     bool
+	Documents    []File `gorm:"many2many:client_file;"`
+}
+
+type ClientPresence struct {
+	ClientID     uint
+	Presence     bool
+	SeminarDayID uint
 }

@@ -19,7 +19,15 @@ func Connect(conf srbolab_cpc.Config) error {
 		return err
 	}
 
-	err = Client.AutoMigrate(&model.User{})
+	err = Client.AutoMigrate(
+		&model.Location{},
+		&model.File{},
+		&model.User{},
+		&model.Client{},
+		&model.Seminar{},
+		&model.SeminarDay{},
+		&model.SeminarClass{},
+	)
 	if err != nil {
 		return err
 	}

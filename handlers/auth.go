@@ -1,8 +1,7 @@
-package authhandler
+package handlers
 
 import (
 	"net/http"
-	"srbolab_cpc/handlers"
 )
 
 func Login(w http.ResponseWriter, r *http.Request) {
@@ -22,5 +21,5 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	//	return
 	//}
 
-	handlers.SetSuccessResponse(w, "")
+	SetSuccessResponse(w, "")
 }

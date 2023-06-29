@@ -17,6 +17,9 @@ type usersServiceInterface interface {
 	GetUserByID(id int) (*model.User, error)
 	GetUserByEmail(email string) (*model.User, error)
 	GetUsersCount() (int64, error)
+	DeleteUser(id int) error
+	CreateUser(user model.User) (*model.User, error)
+	UpdateUser(user model.User) (*model.User, error)
 }
 
 func (s *userService) GetAllUsers(skip, take int) ([]model.User, error) {
@@ -52,4 +55,26 @@ func (s *userService) GetUsersCount() (int64, error) {
 	}
 
 	return count, nil
+}
+
+func (s *userService) DeleteUser(id int) error {
+	return db.Client.Delete(&model.User{}, id).Error
+}
+
+func (s *userService) CreateUser(user model.User) (*model.User, error) {
+	result := db.Client.Create(&user)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &user, nil
+}
+
+func (s *userService) UpdateUser(user model.User) (*model.User, error) {
+	result := db.Client.Save(&user)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &user, nil
 }

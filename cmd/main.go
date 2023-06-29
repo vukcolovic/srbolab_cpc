@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 	"srbolab_cpc"
 	"srbolab_cpc/db"
@@ -16,11 +15,11 @@ func main() {
 	flag.IntVar(&conf.DbPort, "db_port", 5432, "Database port")
 	flag.StringVar(&conf.DbName, "db-name", "srbolab_cpc", "Database name")
 	flag.StringVar(&conf.DbUser, "db-user", "postgres", "Database user")
-	flag.StringVar(&conf.DbPassword, "db-password", "p0stgres", "Database password")
+	flag.StringVar(&conf.DbPassword, "db-password", "password", "Database password")
 
 	flag.Parse()
 
-	if err := srbolab_cpc.LoadYamlConfig(&conf, "../config.yaml"); err != nil {
+	if err := srbolab_cpc.LoadYamlConfig(&conf, "config.yaml"); err != nil {
 		log.Fatalf("Load configuration: %s", err)
 	}
 
@@ -30,5 +29,4 @@ func main() {
 	}
 
 	server.RunServer(conf.HTTP)
-	fmt.Println("cao")
 }
