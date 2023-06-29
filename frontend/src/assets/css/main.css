@@ -1,0 +1,55 @@
+html {
+    font-size: 1em !important;
+}
+
+
+/* Style buttons */
+.iconBtn {
+    background-color: gray; /* Blue background */
+    border: none; /* Remove borders */
+    color: white; /* White text */
+    padding: 6px 10px; /* Some padding */
+    font-size: 12px; /* Set a font size */
+    cursor: pointer; /* Mouse pointer on hover */
+    margin: 3px 8px;
+    border-radius: 50%;
+}
+
+/* Darker background on mouse-over */
+.iconBtn:hover {
+    background-color: darkgray;
+}
+
+
+.iconBtn:disabled {
+    background-color: #80bfff;
+}
+
+.iconBtn:hover:disabled{
+    background-color: #80bfff;
+}
+
+.iconSmallBtn {
+    background-color: DodgerBlue; /* Blue background */
+    border: none; /* Remove borders */
+    color: white; /* White text */
+    padding: 4px 8px; /* Some padding */
+    font-size: 10px; /* Set a font size */
+    cursor: pointer; /* Mouse pointer on hover */
+    margin: 3px 8px;
+    border-radius: 50%;
+}
+
+/* Darker background on mouse-over */
+.iconSmallBtn:hover {
+    background-color: RoyalBlue;
+}
+
+
+.iconSmallBtn:disabled {
+    background-color: #80bfff;
+}
+
+.iconSmallBtn:hover:disabled{
+    background-color: #80bfff;
+}
