@@ -24,6 +24,14 @@ func RunServer(host string) {
 	s.HandleFunc("/delete/{id}", handlers.DeleteUser).Methods("GET")
 	s.HandleFunc("/count", handlers.CountUsers).Methods("GET")
 
+	s = r.PathPrefix("/api/clients").Subrouter()
+	s.HandleFunc("/create", handlers.CreateClient).Methods("POST")
+	s.HandleFunc("/update", handlers.UpdateClient).Methods("POST")
+	s.HandleFunc("/list", handlers.ListClients).Methods("GET")
+	s.HandleFunc("/id/{id}", handlers.GetClientByID).Methods("GET")
+	s.HandleFunc("/delete/{id}", handlers.DeleteClient).Methods("GET")
+	s.HandleFunc("/count", handlers.CountClients).Methods("GET")
+
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{"*"}, // All origins
 		AllowedHeaders: []string{"*"},
