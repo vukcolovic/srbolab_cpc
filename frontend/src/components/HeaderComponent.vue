@@ -10,51 +10,30 @@
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
                aria-expanded="false">
-              Vozila
+              Vozači
             </a>
             <ul class="dropdown-menu" aria-labelledby="navBarDropDown">
               <li>
-                <router-link class="dropdown-item" to="/certificates">Novi zapisnik, sertifikati</router-link>
+                <router-link class="dropdown-item" to="/clients">Vozači</router-link>
               </li>
               <li>
-                <router-link class="dropdown-item" to="/printed-certificates">Izdate potvrde</router-link>
-              </li>
-              <li v-can="'PregledZapisnika'">
-                <router-link class="dropdown-item" to="/records">Zapisnici</router-link>
-              </li>
-              <li>
-                <router-link class="dropdown-item" to="/records-administration">Evidencija zapisnika</router-link>
+                <router-link class="dropdown-item" to="/clients-notverified">Vozači za verifikaciju</router-link>
               </li>
             </ul>
           </li>
-          <li v-can="'AdministracijaMeni'" class="nav-item dropdown">
+          <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
                aria-expanded="false">
-              Administracija
+              Seminari
             </a>
             <ul class="dropdown-menu" aria-labelledby="navBarDropDown">
               <li>
-                <router-link class="dropdown-item" to="/fuel-consumptions">Potrošnja goriva</router-link>
+                <router-link class="dropdown-item" to="/clients">Vozači</router-link>
               </li>
-              <li v-can="'UpravljanjeVozilima'">
-                <router-link class="dropdown-item" to="/vehicles">Vozni park</router-link>
-              </li>
-              <li v-can="'UpravljanjeVozilima'">
-                <router-link class="dropdown-item" to="/vehicle-services">Servis vozila</router-link>
-              </li>
-              <li v-can="'UpravljanjeVozilima'">
-                <router-link class="dropdown-item" to="/travel-orders">Putni nalozi</router-link>
-              </li>
-              <li v-can="'UpravljanjeVozilima'">
-                <router-link class="dropdown-item" to="/vehicle-analytics">Analitika</router-link>
-              </li>
-              <li v-can="'UpravljanjeVozilima'">
-                <router-link class="dropdown-item" to="/fuel-cards">Kartice za gorivo</router-link>
+              <li>
+                <router-link class="dropdown-item" to="/clients-notverified">Vozači za verifikaciju</router-link>
               </li>
             </ul>
-          </li>
-          <li v-can="'NepravilnostiMeni'" class="nav-item">
-            <router-link class="nav-link" to="/irregularities">Nepravilnosti</router-link>
           </li>
           <li v-can="'AdminPanelMeni'" class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"

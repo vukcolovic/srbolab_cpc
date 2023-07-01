@@ -10,7 +10,7 @@ import (
 
 func main() {
 	var conf srbolab_cpc.Config
-	flag.StringVar(&conf.HTTP, "http", "127.0.0.1:4444", "HTTP address listen to")
+	flag.StringVar(&conf.HTTP, "http", "127.0.0.1:8000", "HTTP address listen to")
 	flag.StringVar(&conf.DbHost, "db-host", "127.0.0.1", "Database host")
 	flag.IntVar(&conf.DbPort, "db_port", 5432, "Database port")
 	flag.StringVar(&conf.DbName, "db-name", "srbolab_cpc", "Database name")

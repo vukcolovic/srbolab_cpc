@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import BodyComponent from './../components/BodyComponent.vue'
 import LoginComponent from './../components/LoginComponent.vue'
+import ClientsList from '../components/ClientsList.vue'
+import ClientEdit from './../components/ClientEdit.vue'
 // import UsersList from '../components/UsersList.vue'
 // import UserEdit from './../components/UserEdit.vue'
 import SupportComponent from './../components/SupportComponent.vue'
@@ -20,6 +22,17 @@ const routes = [
     path: '/support',
     name: 'Support',
     component: SupportComponent,
+  },
+  {
+    path: '/clients',
+    name: 'Clients',
+    component: ClientsList,
+  },
+  {
+    path: '/client',
+    name: 'ClientEdit',
+    component: ClientEdit,
+    props: true,
   },
   // {
   //   path: '/users',
