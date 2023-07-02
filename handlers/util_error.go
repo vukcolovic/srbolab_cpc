@@ -13,7 +13,7 @@ func NewMissingRequestParamError(paramName string) error {
 }
 
 func (e MissingRequestParamError) Error() string {
-	return fmt.Sprintf("U requestu nije pronadjen parametar %s", e.ParamName)
+	return fmt.Sprintf("U requestu nije pronađen parametar %s", e.ParamName)
 }
 
 type WrongParamFormatError struct {
@@ -29,7 +29,7 @@ func NewWrongParamFormatErrorError(paramName, paramValue string) error {
 }
 
 func (e WrongParamFormatError) Error() string {
-	return fmt.Sprintf("Parametar %s (%s) nije u ocekivanom formatu", e.ParamName, e.ParamValue)
+	return fmt.Sprintf("Parametar %s (%s) nije u očekivanom formatu", e.ParamName, e.ParamValue)
 }
 
 type JSONDecodeError struct {
@@ -43,5 +43,5 @@ func NewJSONDecodeError(structName string) error {
 }
 
 func (e JSONDecodeError) Error() string {
-	return fmt.Sprintf("Greska prilikom dekodovanja strukture %s", e.StructName)
+	return fmt.Sprintf("Greška prilikom dekodovanja strukture %s", e.StructName)
 }

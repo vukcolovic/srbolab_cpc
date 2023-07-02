@@ -4,6 +4,6 @@ import "gorm.io/gorm"
 
 type File struct {
 	gorm.Model
-	Name    string
-	Content []byte
+	Name    string `json:"name"`
+	Content []byte `json:"content"`
 }

@@ -84,14 +84,14 @@ func GetClientByID(w http.ResponseWriter, req *http.Request) {
 		SetErrorResponse(w, NewWrongParamFormatErrorError("clientId", clientIdParam))
 		return
 	}
-	user, err := service.ClientService.GetClientByID(clientId)
+	client, err := service.ClientService.GetClientByID(clientId)
 	if err != nil {
 		logoped.ErrorLog.Println(err.Error())
-		SetErrorResponse(w, errors.New("Greška prilikom povlačenja korisnika: "+err.Error()))
+		SetErrorResponse(w, errors.New("Greška prilikom povlačenja klijenta: "+err.Error()))
 		return
 	}
 
-	SetSuccessResponse(w, user)
+	SetSuccessResponse(w, client)
 }
 
 func UpdateClient(w http.ResponseWriter, r *http.Request) {

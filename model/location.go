@@ -3,10 +3,10 @@ package model
 import "gorm.io/gorm"
 
 type Address struct {
-	Place       string
-	Street      string
-	HouseNumber string
-	PostCode    string
+	Place       string `json:"place"`
+	Street      string `json:"street"`
+	HouseNumber string `json:"house_number"`
+	PostCode    string `json:"post_code"`
 }
 
 type Location struct {
