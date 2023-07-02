@@ -28,10 +28,7 @@
             </a>
             <ul class="dropdown-menu" aria-labelledby="navBarDropDown">
               <li>
-                <router-link class="dropdown-item" to="/clients">Vozači</router-link>
-              </li>
-              <li>
-                <router-link class="dropdown-item" to="/clients-notverified">Vozači za verifikaciju</router-link>
+                <router-link class="dropdown-item" to="/seminars">Seminari</router-link>
               </li>
             </ul>
           </li>
@@ -42,48 +39,18 @@
             </a>
             <ul class="dropdown-menu" aria-labelledby="navBarDropDown">
               <li>
-                <router-link v-can="'PregledKorisnika'" class="dropdown-item" to="/users">Korisnici</router-link>
-              </li>
-              <li>
-                <router-link v-can="'UpravljanjeRolama'" class="dropdown-item" to="/roles">Role i aktivnosti</router-link>
+                <router-link class="dropdown-item" to="/users">Korisnici</router-link>
               </li>
             </ul>
           </li>
-          <li v-can="'SifarniciMeni'" class="nav-item dropdown">
+          <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="navBarDropDown" role="button" data-bs-toggle="dropdown"
                aria-expanded="false">
               Šifarnici
             </a>
             <ul class="dropdown-menu" aria-labelledby="navBarDropDown">
               <li>
-                <router-link class="dropdown-item" to="/irregularity-levels">Nivoi nepravilnosti</router-link>
-              </li>
-              <li>
-                <router-link class="dropdown-item" to="/examination-types">Vrste ispitivanja</router-link>
-              </li>
-              <li>
-                <router-link class="dropdown-item" to="/fuels">Goriva</router-link>
-              </li>
-              <li>
-                <router-link class="dropdown-item" to="/vehicle-types">Vrsta Vozila</router-link>
-              </li>
-              <li>
-                <router-link class="dropdown-item" to="/clients">Klijenti</router-link>
-              </li>
-              <li>
-                <router-link class="dropdown-item" to="/examination-places">Ispitna Mesta</router-link>
-              </li>
-              <li>
-                <router-link class="dropdown-item" to="/vehicle-brands">Marke Vozila</router-link>
-              </li>
-              <li>
-                <router-link class="dropdown-item" to="/notes">Napomene</router-link>
-              </li>
-              <li>
-                <router-link class="dropdown-item" to="/conclusions">Zaključci</router-link>
-              </li>
-              <li>
-                <router-link class="dropdown-item" to="/examination-prices">Cene</router-link>
+                <router-link class="dropdown-item" to="/irregularity-levels">Firme</router-link>
               </li>
             </ul>
           </li>

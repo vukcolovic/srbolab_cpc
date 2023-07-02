@@ -73,77 +73,83 @@
               :required=false
               :readonly="readonly">
           </text-input>
+
+          <div class="my-1">
+            <label for="verified">Klijent je verifikovan:</label>
+            <input id="verified" type="checkbox" :hidden="readonly" v-model="client.verified" />
+          </div>
+
         </div>
 
-          <div class="col-sm-5">
-            <text-input
-                v-model.trim="client.address.place"
-                label="Mesto"
-                type="text"
-                name="place"
-                :required=false
-                :readonly="readonly">
-            </text-input>
+        <div class="col-sm-5">
+          <text-input
+              v-model.trim="client.address.place"
+              label="Mesto"
+              type="text"
+              name="place"
+              :required=false
+              :readonly="readonly">
+          </text-input>
 
-            <text-input
-                v-model.trim="client.address.street"
-                label="Ulica"
-                type="text"
-                name="street"
-                :required=false
-                :readonly="readonly">
-            </text-input>
+          <text-input
+              v-model.trim="client.address.street"
+              label="Ulica"
+              type="text"
+              name="street"
+              :required=false
+              :readonly="readonly">
+          </text-input>
 
-            <text-input
-                v-model.trim="client.address.house_number"
-                label="Broj"
-                type="text"
-                name="house_number"
-                :required=false
-                :readonly="readonly">
-            </text-input>
+          <text-input
+              v-model.trim="client.address.house_number"
+              label="Broj"
+              type="text"
+              name="house_number"
+              :required=false
+              :readonly="readonly">
+          </text-input>
 
-            <text-input
-                v-model.trim="client.place_birth"
-                label="Mesto rođenja"
-                type="text"
-                name="place_birth"
-                :required=false
-                :readonly="readonly">
-            </text-input>
+          <text-input
+              v-model.trim="client.place_birth"
+              label="Mesto rođenja"
+              type="text"
+              name="place_birth"
+              :required=false
+              :readonly="readonly">
+          </text-input>
 
-            <text-input
-                v-model.trim="client.country_birth"
-                label="Država rođenja"
-                type="text"
-                name="country_birth"
-                :required=false
-                :readonly="readonly">
-            </text-input>
+          <text-input
+              v-model.trim="client.country_birth"
+              label="Država rođenja"
+              type="text"
+              name="country_birth"
+              :required=false
+              :readonly="readonly">
+          </text-input>
 
-            <label>Dokumenta: </label>
+          <label>Dokumenta: </label>
 
-            <ul>
-              <li v-for="(doc, index) in client.documents" :key="index" style="list-style-type: none;">
-                <label for="index">&nbsp; {{doc.name}}</label>
-                <button  class="iconBtn" title="Obriši" @click.prevent="removeFile(index)">
-                  <i class="fa fa-remove"></i>
-                </button>
+          <ul>
+            <li v-for="(doc, index) in client.documents" :key="index" style="list-style-type: none;">
+              <label for="index">&nbsp; {{ doc.name }}</label>
+              <button class="iconBtn" title="Obriši" @click.prevent="removeFile(index)">
+                <i class="fa fa-remove"></i>
+              </button>
 
-                <button  class="iconBtn" title="Preuzmi" @click.prevent="downloadFile(index)">
-                  <i class="fa fa-download"></i>
-                </button>
-              </li>
-            </ul>
+              <button class="iconBtn" title="Preuzmi" @click.prevent="downloadFile(index)">
+                <i class="fa fa-download"></i>
+              </button>
+            </li>
+          </ul>
 
-            <input id="fileId" type="file" ref="file" @change="uploadFile()" />
+          <input id="fileId" type="file" ref="file" @change="uploadFile()"/>
 
-          </div>
-          <div class="col-sm-5">
-            <input type="submit" v-if="this.action === 'add'" class="btn btn-secondary m-2" value="Snimi">
-            <input type="submit" v-if="this.action === 'update'" class="btn btn-secondary m-2" value="Snimi">
-          </div>
         </div>
+        <div class="col-sm-5">
+          <input type="submit" v-if="this.action === 'add'" class="btn btn-primary m-2" value="Snimi">
+          <input type="submit" v-if="this.action === 'update'" class="btn btn-primary m-2" value="Snimi">
+        </div>
+      </div>
     </form-tag>
   </div>
 </template>
@@ -154,7 +160,7 @@ import FormTag from "@/components/forms/FormTag";
 import axios from "axios";
 import router from "@/router";
 import {fileMixin} from "@/mixins/fileMixin";
-import { useToast } from "vue-toastification";
+import {useToast} from "vue-toastification";
 // import {commonMixin} from "@/mixins/commonMixin";
 
 export default {
@@ -171,7 +177,16 @@ export default {
   },
   data() {
     return {
-      client: {person: {first_name: "", last_name: "", email: "", phone_number: ""},  jmbg: "", address: {place: "", street: "", house_number: ""}, drive_licence: "", place_birth: "", country_birth: "", documents: []},
+      client: {
+        person: {first_name: "", last_name: "", email: "", phone_number: ""},
+        jmbg: "",
+        address: {place: "", street: "", house_number: ""},
+        drive_licence: "",
+        place_birth: "",
+        country_birth: "",
+        documents: [],
+        verified: true
+      },
       action: "",
     }
   },
@@ -248,9 +263,9 @@ export default {
       });
     },
   },
-  setup(){
+  setup() {
     const toast = useToast();
-    return { toast }
+    return {toast}
   },
   mounted() {
     if (this.$route.query.id !== '') {

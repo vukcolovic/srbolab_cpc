@@ -3,9 +3,11 @@ import BodyComponent from './../components/BodyComponent.vue'
 import LoginComponent from './../components/LoginComponent.vue'
 import ClientsList from '../components/ClientsList.vue'
 import ClientEdit from './../components/ClientEdit.vue'
-// import UsersList from '../components/UsersList.vue'
-// import UserEdit from './../components/UserEdit.vue'
+import UsersList from '../components/UsersList.vue'
+import UserEdit from './../components/UserEdit.vue'
 import SupportComponent from './../components/SupportComponent.vue'
+import SeminarsList from '../components/SeminarsList.vue'
+ import SeminarEdit from './../components/SeminarEdit.vue'
 
 const routes = [
   {
@@ -34,17 +36,28 @@ const routes = [
     component: ClientEdit,
     props: true,
   },
-  // {
-  //   path: '/users',
-  //   name: 'Users',
-  //   component: UsersList,
-  // },
-  // {
-  //   path: '/user',
-  //   name: 'UserEdit',
-  //   component: UserEdit,
-  //   props: true,
-  // },
+  {
+    path: '/seminars',
+    name: 'Seminars',
+    component: SeminarsList,
+  },
+  {
+    path: '/seminar',
+    name: 'SeminarEdit',
+    component: SeminarEdit,
+    props: true,
+  },
+  {
+    path: '/users',
+    name: 'Users',
+    component: UsersList,
+  },
+  {
+    path: '/user',
+    name: 'UserEdit',
+    component: UserEdit,
+    props: true,
+  },
 ]
 
 const router = createRouter({history: createWebHistory(), routes})
