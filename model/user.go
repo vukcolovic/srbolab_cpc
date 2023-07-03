@@ -17,6 +17,11 @@ type User struct {
 	Roles    []Role `json:"roles" gorm:"many2many:user_role;"`
 }
 
+func (u *User) AfterFind(tx *gorm.DB) (err error) {
+	u.Password = ""
+	return nil
+}
+
 type Role struct {
 	gorm.Model
 	Code string `json:"code"`
