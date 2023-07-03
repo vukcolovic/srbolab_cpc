@@ -12,12 +12,12 @@ type Person struct {
 
 type User struct {
 	gorm.Model
-	Person   Person `gorm:"embedded"`
-	Password string
-	Roles    []Role `gorm:"many2many:user_role;"`
+	Person   Person `json:"person" gorm:"embedded"`
+	Password string `json:"password"`
+	Roles    []Role `json:"roles" gorm:"many2many:user_role;"`
 }
 
 type Role struct {
 	gorm.Model
-	Code string
+	Code string `json:"code"`
 }

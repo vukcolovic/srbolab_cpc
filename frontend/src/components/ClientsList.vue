@@ -33,6 +33,7 @@
 import VueTableLite from "vue3-table-lite";
 import axios from "axios";
 import {reactive} from "vue";
+import {useToast} from "vue-toastification";
 
 export default {
   name: 'ClientsList',
@@ -104,7 +105,9 @@ export default {
       table.selectedClient = rowData;
     }
 
+    const toast = useToast();
     return {
+      toast,
       table,
       selectClient,
     };
@@ -115,12 +118,7 @@ export default {
       this.isLoading = true;
       await axios.get('/clients/list?skip=' + offset + '&take=' + limit).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
-          // notie.alert({
-          //   type: 'error',
-          //   text: response.data.ErrorMessage,
-          //   position: 'bottom',
-          // })
-
+          this.toast.error(response.data.ErrorMessage);
           return;
         }
         this.table.rows = JSON.parse(response.data.Data);
@@ -130,14 +128,8 @@ export default {
           vs.email = vs.person.email;
           vs.phone_number = vs.person.phone_number;
         });
-        console.log(this.rows);
       }, (error) => {
-        // notie.alert({
-        //   type: 'error',
-        //   text: "Greska: " + error,
-        //   position: 'bottom',
-        // })
-        alert(error);
+        this.toast.error(error);
       });
 
       this.isLoading = false;
@@ -145,20 +137,12 @@ export default {
     async countClients() {
         await axios.get('/clients/count').then((response) => {
           if (response.data === null || response.data.Status === 'error') {
-            // notie.alert({
-            //   type: 'error',
-            //   text: response.data.ErrorMessage,
-            //   position: 'bottom',
-            // })
+            this.toast.error(response.data.ErrorMessage);
             return;
           }
             this.table.totalCount = response.data.Data;
         }, (error) => {
-          // notie.alert({
-          //   type: 'error',
-          //   text: "Greska: " + error,
-          //   position: 'bottom',
-          // })
+          this.toast.error(error);
           alert(error);
         });
     }

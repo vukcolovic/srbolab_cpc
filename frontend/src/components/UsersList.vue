@@ -1,30 +1,29 @@
 <template>
   <div class="container">
-    <div class="row m-3">
+    <div class="row mt-2">
       <div class="btn-group">
-      <button v-can="'UpravljanjeKorisnicima'" class="iconBtn" title="Dodaj" @click="$router.push({name: 'UserEdit', params: {userId: '', action: 'add' }})">
-        <i class="fa fa-user-plus"></i>
-      </button>
-      <button class="iconBtn" title="Pregledaj" :disabled="selectedUser == null" @click="$router.push({name: 'UserEdit', params: {userId: selectedUser.id, action: 'view' }})">
-        <i class="fa fa-user"></i>
-      </button>
-      <button v-can="'UpravljanjeKorisnicima'" class="iconBtn" title="Izmeni" :disabled="selectedUser == null" @click="$router.push({name: 'UserEdit', params: {userId: selectedUser.id, action: 'update' }})">
-        <i class="fa fa-user-md">
-        </i></button>
-      <button v-can="'UpravljanjeKorisnicima'" class="iconBtn" title="Obrisi" @click="deleteUser" :disabled="selectedUser == null">
-        <i class="fa fa-user-times"></i>
-      </button>
+        <button class="iconBtn" title="Dodaj" @click="$router.push({name: 'UserEdit', query: {id: '', action: 'add' }})">
+          <i class="fa fa-user-plus"></i>
+        </button>
+        <button class="iconBtn" title="Pregledaj" :disabled="table.selectedUser == null" @click="$router.push({name: 'UserEdit', query: {id: table.selectedUser.ID, action: 'view' }})">
+          <i class="fa fa-user"></i>
+        </button>
+        <button class="iconBtn" title="Izmeni" :disabled="table.selectedUser == null" @click="$router.push({name: 'UserEdit', query: {id: table.selectedUser.ID, action: 'update' }})">
+          <i class="fa fa-user-md">
+          </i></button>
       </div>
     </div>
-    <div class="row m-3">
+    <div class="row mt-2">
       <vue-table-lite
+          ref="localTable"
           @row-clicked="selectUser"
-          :total= "totalCount"
-          :columns="columns"
-          :messages="messages"
-          :rows="rows"
+          :total= "table.totalCount"
+          :columns="table.columns"
+          :messages="table.messages"
+          :rows="table.rows"
           @do-search="doSearch"
-          :is-loading="isLoading"
+          :rowClasses=table.rowClasess
+          :is-loading="table.isLoading"
       ></vue-table-lite>
     </div>
   </div>
@@ -33,16 +32,28 @@
 <script>
 import VueTableLite from "vue3-table-lite";
 import axios from "axios";
+import {reactive} from "vue";
+import {useToast} from "vue-toastification";
 
 export default {
   name: 'UsersList',
   components: { VueTableLite },
   data() {
     return {
+    }
+  },
+  setup() {
+    // Table config
+    const table = reactive({
+      selectedUser: null,
+      isLoading: false,
+      isReSearch: false,
+      rowClasess: (row) => { return ['is-rows-el', 'row_id_' + row.ID]},
+      // filterObject: {},
       columns: [
         {
           label: 'ID',
-          field: 'id',
+          field: 'ID',
           width: '3%',
           isKey: true,
         },
@@ -57,106 +68,85 @@ export default {
           width: '10%',
         },
         {
-          label: 'Email',
-          field: 'email',
-          width: '10%',
-        },
-        {
           label: 'Broj telefona',
           field: 'phone_number',
           width: '10%',
         },
         {
-          label: 'JMBG',
-          field: 'jmbg',
+          label: 'Email',
+          field: 'email',
           width: '10%',
         }
       ],
+      rows: [],
+      totalCount: 0,
       messages: {
         pagingInfo: "Prikaz {0} - {1} od {2}",
         pageSizeChangeLabel: "Broj redova:",
         gotoPageLabel: "Idi na stranu:",
         noDataAvailable: "Nema podataka",
       },
-    rows: [],
-      selectedUser: null,
-      isLoading: false,
-      totalCount: 0
+    });
+
+    const selectUser= (rowData) => {
+      // clear all
+      Array.from(document.getElementsByClassName('is-rows-el')).map((el) => {
+        el.style.backgroundColor = 'white';
+      });
+      //style checked row
+      if (document.getElementsByClassName('row_id_' + rowData.ID)[0]) {
+        document.getElementsByClassName('row_id_' + rowData.ID)[0].style.backgroundColor = '#E8E8E8';
+      }
+      table.selectedUser = rowData;
     }
+
+    const toast = useToast();
+    return {
+      toast,
+      table,
+      selectUser,
+    };
   },
   methods: {
-    selectUser(rowData) {
-      this.selectedUser = rowData;
-    },
     async doSearch(offset, limit, order, sort) {
       console.log(order, sort)
       this.isLoading = true;
       await axios.get('/users/list?skip=' + offset + '&take=' + limit).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
-          // notie.alert({
-          //   type: 'error',
-          //   text: response.data.ErrorMessage,
-          //   position: 'bottom',
-          // })
+          this.toast.error(response.data.ErrorMessage);
           return;
         }
-        this.rows = JSON.parse(response.data.Data);
+        this.table.rows = JSON.parse(response.data.Data);
+        this.table.rows.forEach(vs => {
+          vs.first_name = vs.person.first_name;
+          vs.last_name = vs.person.last_name;
+          vs.email = vs.person.email;
+          vs.phone_number = vs.person.phone_number;
+        });
       }, (error) => {
-        // notie.alert({
-        //   type: 'error',
-        //   text: "Greska: " + error,
-        //   position: 'bottom',
-        // })
+        this.toast.error(error);
       });
 
       this.isLoading = false;
     },
-    async deleteUser() {
-      if (confirm("Da li ste sigurni da zelite da obrisete korisnika?")) {
-        await axios.get('/users/delete/' + this.selectedUser.id).then((response) => {
-          if (response.data === null || response.data.Status === 'error') {
-            // notie.alert({
-            //   type: 'error',
-            //   text: response.data.ErrorMessage,
-            //   position: 'bottom',
-            // })
-          }
-        }, (error) => {
-          // notie.alert({
-          //   type: 'error',
-          //   text: "Greska: " + error,
-          //   position: 'bottom',
-          // })
-        });
-      }
-
-      location.reload();
-    },
     async countUsers() {
-        await axios.get('/users/count').then((response) => {
-          if (response.data === null || response.data.Status === 'error') {
-            // notie.alert({
-            //   type: 'error',
-            //   text: response.data.ErrorMessage,
-            //   position: 'bottom',
-            // })
-            return;
-          }
-            this.totalCount = response.data.Data;
-        }, (error) => {
-          // notie.alert({
-          //   type: 'error',
-          //   text: "Greska: " + error,
-          //   position: 'bottom',
-          // })
-        });
+      await axios.get('/users/count').then((response) => {
+        if (response.data === null || response.data.Status === 'error') {
+          this.toast.error(response.data.ErrorMessage);
+          return;
+        }
+        this.table.totalCount = response.data.Data;
+      }, (error) => {
+        this.toast.error(error);
+        alert(error);
+      });
     }
   },
   async created() {
     await this.countUsers();
     await this.doSearch(0, 10, 'id', 'asc');
   }
-  }
+}
 </script>
 
 <style scoped>
