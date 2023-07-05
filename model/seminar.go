@@ -10,7 +10,7 @@ type Seminar struct {
 	Start           time.Time     `json:"start_date"`
 	LocationID      uint          `json:"location_id"`
 	Location        Location      `json:"location"`
-	Trainees        []Client      `gorm:"many2many:seminar_client;"`
+	Trainees        []Client      `json:"trainees" gorm:"many2many:seminar_client;"`
 	SeminarTypeID   uint          `json:"seminar_type_id"`
 	SeminarType     SeminarType   `json:"seminar_type"`
 	SeminarStatusID uint          `json:"seminar_status_id"`

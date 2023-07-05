@@ -161,7 +161,6 @@ import axios from "axios";
 import router from "@/router";
 import {fileMixin} from "@/mixins/fileMixin";
 import {useToast} from "vue-toastification";
-// import {commonMixin} from "@/mixins/commonMixin";
 
 export default {
   name: 'ClientEdit',
@@ -169,7 +168,7 @@ export default {
   components: {FormTag, TextInput},
   computed: {
     readonly() {
-      if (this.$route.query.action === 'view') {
+      if (this.action === 'view') {
         return true;
       }
       return false;
