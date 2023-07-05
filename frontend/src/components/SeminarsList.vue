@@ -1,16 +1,146 @@
 <template>
   <div class="container">
-
+    <div class="row mt-2">
+      <div class="btn-group">
+        <button class="iconBtn" title="Dodaj" @click="$router.push({name: 'SeminarEdit', query: {id: '', action: 'add' }})">
+          <i class="fa fa-user-plus"></i>
+        </button>
+        <button class="iconBtn" title="Pregledaj" :disabled="table.selectedSeminar == null" @click="$router.push({name: 'SeminarEdit', query: {id: table.selectedSeminar.ID, action: 'view' }})">
+          <i class="fa fa-user"></i>
+        </button>
+        <button class="iconBtn" title="Izmeni" :disabled="table.selectedClient == null" @click="$router.push({name: 'SeminarEdit', query: {id: table.selectedSeminar.ID, action: 'update' }})">
+          <i class="fa fa-user-md">
+          </i></button>
+      </div>
+    </div>
+    <div class="row mt-2">
+      <vue-table-lite
+          ref="localTable"
+          @row-clicked="selectSeminar"
+          :total= "table.totalCount"
+          :columns="table.columns"
+          :messages="table.messages"
+          :rows="table.rows"
+          @do-search="doSearch"
+          :rowClasses=table.rowClasess
+          :is-loading="table.isLoading"
+      ></vue-table-lite>
+    </div>
   </div>
 </template>
 
 <script>
-// import VueTableLite from "vue3-table-lite";
-// import axios from "axios";
+import VueTableLite from "vue3-table-lite";
+import axios from "axios";
+import {reactive} from "vue";
+import {useToast} from "vue-toastification";
 
 export default {
   name: 'SeminarsList',
+  components: { VueTableLite },
+  setup() {
+    // Table config
+    const table = reactive({
+      selectedSeminar: null,
+      isLoading: false,
+      isReSearch: false,
+      rowClasess: (row) => { return ['is-rows-el', 'row_id_' + row.ID]},
+      // filterObject: {},
+      columns: [
+        {
+          label: 'ID',
+          field: 'ID',
+          width: '3%',
+          isKey: true,
+        },
+        {
+          label: 'Početak',
+          field: 'start_date',
+          width: '10%',
+        },
+        {
+          label: 'Lokacija',
+          field: 'location_address',
+          width: '10%',
+        },
+        {
+          label: 'Vrsta',
+          field: 'type',
+          width: '10%',
+        },
+        {
+          label: 'Status',
+          field: 'status',
+          width: '10%',
+        }
+      ],
+      rows: [],
+      totalCount: 0,
+      messages: {
+        pagingInfo: "Prikaz {0} - {1} od {2}",
+        pageSizeChangeLabel: "Broj redova:",
+        gotoPageLabel: "Idi na stranu:",
+        noDataAvailable: "Nema podataka",
+      },
+    });
 
+    const selectSeminar= (rowData) => {
+      // clear all
+      Array.from(document.getElementsByClassName('is-rows-el')).map((el) => {
+        el.style.backgroundColor = 'white';
+      });
+      //style checked row
+      if (document.getElementsByClassName('row_id_' + rowData.ID)[0]) {
+        document.getElementsByClassName('row_id_' + rowData.ID)[0].style.backgroundColor = '#E8E8E8';
+      }
+      table.selectedClient = rowData;
+    }
+
+    const toast = useToast();
+    return {
+      toast,
+      table,
+      selectSeminar,
+    };
+  },
+  methods: {
+    async doSearch(offset, limit, order, sort) {
+      console.log(order, sort)
+      this.isLoading = true;
+      await axios.get('/seminars/list?skip=' + offset + '&take=' + limit).then((response) => {
+        if (response.data === null || response.data.Status === 'error') {
+          this.toast.error(response.data.ErrorMessage);
+          return;
+        }
+        this.table.rows = JSON.parse(response.data.Data);
+        this.table.rows.forEach(s => {
+          s.location_address = s.location.address.place;
+          s.type = s.seminar_type.name;
+          s.status = s.seminar_status.name;
+        });
+      }, (error) => {
+        this.toast.error(error);
+      });
+
+      this.isLoading = false;
+    },
+    async countSeminars() {
+      await axios.get('/seminars/count').then((response) => {
+        if (response.data === null || response.data.Status === 'error') {
+          this.toast.error(response.data.ErrorMessage);
+          return;
+        }
+        this.table.totalCount = response.data.Data;
+      }, (error) => {
+        this.toast.error(error);
+        alert(error);
+      });
+    }
+  },
+  async created() {
+    await this.countSeminars();
+    await this.doSearch(0, 10, 'id', 'asc');
+  }
   }
 </script>
 

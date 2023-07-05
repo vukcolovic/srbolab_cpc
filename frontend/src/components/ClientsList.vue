@@ -81,6 +81,11 @@ export default {
           label: 'JMBG',
           field: 'jmbg',
           width: '10%',
+        },
+        {
+          label: 'Verifikovan',
+          field: 'verified_text',
+          width: '10%',
         }
       ],
       rows: [],
@@ -127,6 +132,7 @@ export default {
           vs.last_name = vs.person.last_name;
           vs.email = vs.person.email;
           vs.phone_number = vs.person.phone_number;
+          vs.verified_text = vs.verified ? "Da" : "Ne";
         });
       }, (error) => {
         this.toast.error(error);

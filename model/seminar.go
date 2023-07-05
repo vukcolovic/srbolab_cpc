@@ -7,27 +7,27 @@ import (
 
 type Seminar struct {
 	gorm.Model
-	Start           time.Time
-	LocationID      uint
-	Location        Location
-	Trainees        []Client `gorm:"many2many:seminar_client;"`
-	SeminarTypeID   uint
-	SeminarType     SeminarType
-	SeminarStatusID uint
-	SeminarStatus   SeminarStatus
-	Days            []SeminarDay
+	Start           time.Time     `json:"start_date"`
+	LocationID      uint          `json:"location_id"`
+	Location        Location      `json:"location"`
+	Trainees        []Client      `gorm:"many2many:seminar_client;"`
+	SeminarTypeID   uint          `json:"seminar_type_id"`
+	SeminarType     SeminarType   `json:"seminar_type"`
+	SeminarStatusID uint          `json:"seminar_status_id"`
+	SeminarStatus   SeminarStatus `json:"seminar_status"`
+	Days            []SeminarDay  `json:"days"`
 }
 
 type SeminarType struct {
 	gorm.Model
-	Code string
-	Name string
+	Code string `json:"code"`
+	Name string `json:"name"`
 }
 
 type SeminarStatus struct {
 	gorm.Model
-	Code string
-	Name string
+	Code string `json:"code"`
+	Name string `json:"name"`
 }
 
 type SeminarDay struct {

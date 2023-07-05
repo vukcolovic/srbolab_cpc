@@ -11,5 +11,5 @@ type Address struct {
 
 type Location struct {
 	gorm.Model
-	Address Address `gorm:"embedded"`
+	Address Address `json:"address" gorm:"embedded"`
 }
