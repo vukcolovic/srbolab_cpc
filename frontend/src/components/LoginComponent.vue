@@ -64,7 +64,7 @@ export default {
         // this.$store.dispatch('setActivities', loginData.activities);
         localStorage.setItem("activities", JSON.stringify(loginData.activities))
         }, (error) => {
-        console.log(error)//fixme notie
+        this.toast.error(error.message);
       });
       await router.push("/");
     },

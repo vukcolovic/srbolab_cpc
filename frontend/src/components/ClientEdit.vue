@@ -168,10 +168,7 @@ export default {
   components: {FormTag, TextInput},
   computed: {
     readonly() {
-      if (this.action === 'view') {
-        return true;
-      }
-      return false;
+      return this.action === 'view';
     },
   },
   data() {
@@ -219,7 +216,7 @@ export default {
     async getClientById() {
       axios.get('/clients/id/' + this.clientId).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
-          this.toast.error(response.data.ErrorMessage);
+          this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;
         }
         this.client = JSON.parse(response.data.Data);
@@ -227,7 +224,7 @@ export default {
           this.client.documents = [];
         }
       }, (error) => {
-        this.toast.error(error);
+        this.toast.error(error.message);
       });
     },
     async submitHandler() {
@@ -240,25 +237,25 @@ export default {
     async createClient() {
       await axios.post('/clients/create', JSON.stringify(this.client)).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
-          this.toast.error(response.data.ErrorMessage);
+          this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;
         }
         this.toast.info("Uspešno kreiran klijent.");
         router.push("/clients");
       }, (error) => {
-        this.toast.error(error);
+        this.toast.error(error.message);
       });
     },
     async updateClient() {
       await axios.post('/clients/update', JSON.stringify(this.client)).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
-          this.toast.error(response.data.ErrorMessage);
+          this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;
         }
         this.toast.info("Uspešno ažuriran klijent.");
         router.push("/clients");
       }, (error) => {
-        this.toast.error(error);
+        this.toast.error(error.message);
       });
     },
   },

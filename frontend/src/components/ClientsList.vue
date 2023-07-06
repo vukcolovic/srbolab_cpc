@@ -8,7 +8,7 @@
       <button class="iconBtn" title="Pregledaj" :disabled="table.selectedClient == null" @click="$router.push({name: 'ClientEdit', query: {id: table.selectedClient.ID, action: 'view' }})">
         <i class="fa fa-user"></i>
       </button>
-      <button class="iconBtn" title="Izmeni" :disabled="table.selectedClient == null" @click="$router.push({name: 'ClientEdit', query: {id: table.selectedClient.ID, action: 'update' }})">
+      <button class="iconBtn" title="Izmeni" :disabled="!table.selectedClient" @click="$router.push({name: 'ClientEdit', query: {id: table.selectedClient.ID, action: 'update' }})">
         <i class="fa fa-user-md">
         </i></button>
       </div>
@@ -123,7 +123,7 @@ export default {
       this.isLoading = true;
       await axios.get('/clients/list?skip=' + offset + '&take=' + limit).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
-          this.toast.error(response.data.ErrorMessage);
+          this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;
         }
         this.table.rows = JSON.parse(response.data.Data);
@@ -135,7 +135,7 @@ export default {
           vs.verified_text = vs.verified ? "Da" : "Ne";
         });
       }, (error) => {
-        this.toast.error(error);
+        this.toast.error(error.message);
       });
 
       this.isLoading = false;
@@ -143,13 +143,12 @@ export default {
     async countClients() {
         await axios.get('/clients/count').then((response) => {
           if (response.data === null || response.data.Status === 'error') {
-            this.toast.error(response.data.ErrorMessage);
+            this.toast.error(response.data != null ? response.data.ErrorMessage : "");
             return;
           }
             this.table.totalCount = response.data.Data;
         }, (error) => {
-          this.toast.error(error);
-          alert(error);
+          this.toast.error(error.message);
         });
     }
   },

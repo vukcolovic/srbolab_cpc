@@ -5,10 +5,10 @@
         <button class="iconBtn" title="Dodaj" @click="$router.push({name: 'UserEdit', query: {id: '', action: 'add' }})">
           <i class="fa fa-user-plus"></i>
         </button>
-        <button class="iconBtn" title="Pregledaj" :disabled="table.selectedUser == null" @click="$router.push({name: 'UserEdit', query: {id: table.selectedUser.ID, action: 'view' }})">
+        <button class="iconBtn" title="Pregledaj" :disabled="!table.selectedUser" @click="$router.push({name: 'UserEdit', query: {id: table.selectedUser.ID, action: 'view' }})">
           <i class="fa fa-user"></i>
         </button>
-        <button class="iconBtn" title="Izmeni" :disabled="table.selectedUser == null" @click="$router.push({name: 'UserEdit', query: {id: table.selectedUser.ID, action: 'update' }})">
+        <button class="iconBtn" title="Izmeni" :disabled="!table.selectedUser" @click="$router.push({name: 'UserEdit', query: {id: table.selectedUser.ID, action: 'update' }})">
           <i class="fa fa-user-md">
           </i></button>
       </div>
@@ -113,7 +113,7 @@ export default {
       this.isLoading = true;
       await axios.get('/users/list?skip=' + offset + '&take=' + limit).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
-          this.toast.error(response.data.ErrorMessage);
+          this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;
         }
         this.table.rows = JSON.parse(response.data.Data);
@@ -124,7 +124,7 @@ export default {
           vs.phone_number = vs.person.phone_number;
         });
       }, (error) => {
-        this.toast.error(error);
+        this.toast.error(error.message);
       });
 
       this.isLoading = false;
@@ -132,13 +132,12 @@ export default {
     async countUsers() {
       await axios.get('/users/count').then((response) => {
         if (response.data === null || response.data.Status === 'error') {
-          this.toast.error(response.data.ErrorMessage);
+          this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;
         }
         this.table.totalCount = response.data.Data;
       }, (error) => {
-        this.toast.error(error);
-        alert(error);
+        this.toast.error(error.message);
       });
     }
   },

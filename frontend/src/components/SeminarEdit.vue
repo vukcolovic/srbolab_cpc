@@ -69,10 +69,7 @@ export default {
   components: {TextInput, FormTag, vSelect},
   computed: {
       readonly() {
-        if (this.action === 'view') {
-          return true;
-        }
-        return false;
+        return this.action === 'view';
     },
     },
   data() {
@@ -86,12 +83,12 @@ export default {
     async getSeminarById() {
         axios.get('/seminars/id/' + this.seminarId).then((response) => {
           if (response.data === null || response.data.Status === 'error') {
-            this.toast.error(response.data.ErrorMessage);
+            this.toast.error(response.data != null ? response.data.ErrorMessage : "");
             return;
           }
           this.seminar = JSON.parse(response.data.Data);
         }, (error) => {
-          this.toast.error(error);
+          this.toast.error(error.message);
         });
     },
     async submitHandler() {
@@ -105,25 +102,25 @@ export default {
       this.seminar.seminar_status = this.seminarStatuses.find(status => status.code === "PENDING");
       await axios.post('/seminars/create', JSON.stringify(this.seminar)).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
-          this.toast.error(response.data.ErrorMessage);
+          this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;
         }
         this.toast.info("Uspešno kreiran seminar!");
         router.push("/seminars");
       }, (error) => {
-        this.toast.error(error);
+        this.toast.error(error.message);
       });
     },
     async updateSeminar() {
       await axios.post('/seminars/update', JSON.stringify(this.seminar)).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
-          this.toast.error(response.data.ErrorMessage);
+          this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;
         }
         this.toast.info("Uspešno ažuriran seminar!");
         router.push("/users");
       }, (error) => {
-        this.toast.error(error);
+        this.toast.error(error.message);
       });
     },
   },

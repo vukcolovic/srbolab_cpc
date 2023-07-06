@@ -93,10 +93,7 @@ export default {
   components: {FormTag, TextInput},
   computed: {
     readonly() {
-      if (this.$route.query.action === 'view') {
-        return true;
-      }
-      return false;
+      return this.$route.query.action === 'view';
     },
   },
   data() {
@@ -112,12 +109,12 @@ export default {
     async getUserById() {
       axios.get('/users/id/' + this.userId).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
-          this.toast.error(response.data.ErrorMessage);
+          this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;
         }
         this.user = JSON.parse(response.data.Data);
       }, (error) => {
-        this.toast.error(error);
+        this.toast.error(error.message);
       });
     },
     async submitHandler() {
@@ -130,25 +127,25 @@ export default {
     async createUser() {
       await axios.post('/users/register', JSON.stringify(this.user)).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
-          this.toast.error(response.data.ErrorMessage);
+          this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;
         }
         this.toast.info("Uspešno kreiran korisnik.");
         router.push("/users");
       }, (error) => {
-        this.toast.error(error);
+        this.toast.error(error.message);
       });
     },
     async updateUser() {
       await axios.post('/users/update', JSON.stringify(this.user)).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
-          this.toast.error(response.data.ErrorMessage);
+          this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;
         }
         this.toast.info("Uspešno ažuriran korisnik.");
         router.push("/users");
       }, (error) => {
-        this.toast.error(error);
+        this.toast.error(error.message);
       });
     },
   },

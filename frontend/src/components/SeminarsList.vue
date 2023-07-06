@@ -109,7 +109,7 @@ export default {
       this.isLoading = true;
       await axios.get('/seminars/list?skip=' + offset + '&take=' + limit).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
-          this.toast.error(response.data.ErrorMessage);
+          this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;
         }
         this.table.rows = JSON.parse(response.data.Data);
@@ -119,7 +119,7 @@ export default {
           s.status = s.seminar_status.name;
         });
       }, (error) => {
-        this.toast.error(error);
+        this.toast.error(error.message);
       });
 
       this.isLoading = false;
@@ -127,13 +127,12 @@ export default {
     async countSeminars() {
       await axios.get('/seminars/count').then((response) => {
         if (response.data === null || response.data.Status === 'error') {
-          this.toast.error(response.data.ErrorMessage);
+          this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;
         }
         this.table.totalCount = response.data.Data;
       }, (error) => {
-        this.toast.error(error);
-        alert(error);
+        this.toast.error(error.message);
       });
     }
   },
