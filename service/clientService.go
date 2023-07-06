@@ -23,7 +23,7 @@ type clientServiceInterface interface {
 
 func (c *clientService) GetAllClients(skip, take int) ([]model.Client, error) {
 	var clients []model.Client
-	if err := db.Client.Limit(take).Offset(skip).Find(&clients).Error; err != nil {
+	if err := db.Client.Order("id desc").Limit(take).Offset(skip).Find(&clients).Error; err != nil {
 		return nil, err
 	}
 	return clients, nil

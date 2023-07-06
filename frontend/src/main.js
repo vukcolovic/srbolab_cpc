@@ -16,7 +16,6 @@ axios.defaults.baseURL = process.env.VUE_APP_API_BASE_URL;
 const app = createApp(App).use(router);
 app.use(router);
 app.use(store);
-app.component('v-select', vSelect);
 app.use(VueAxios, axios);
 const options = {
     timeout: 2000
@@ -24,5 +23,8 @@ const options = {
 
 app.use(Toast, options);
 app.component('VueTable', VueTableLite);
+app.component('v-select', vSelect);
+
+app.config.isCustomElement = (tag) => tag === 'v-select';
 
 createApp(App).use(router).mount('#app')

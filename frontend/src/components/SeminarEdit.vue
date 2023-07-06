@@ -11,23 +11,32 @@
         <form-tag @formEvent="submitHandler" name="myForm" event="formEvent">
           <div class="row">
           <div class="col-sm-5">
+            <text-input
+                v-model="seminar.start"
+                label="Početak seminara (MM/DD/YYYY)"
+                type="date"
+                name="start"
+                :required=true
+                :readonly="readonly">
+            </text-input>
+
             <label class="mb-1 mt-1" :style="styleLabel">Lokacija</label>
             <v-select
                 :disabled=readonly
                 :style="styleInput"
                 v-model="seminar.location"
                 :options="locations"
-                label="place"
+                label="address_place"
                 placeholder="Traži">
             </v-select>
 
-            <label class="mb-1 mt-1" :style="styleLabel">Status</label>
+            <label class="mb-1 mt-1" :style="styleLabel">Tip seminara</label>
             <v-select
                 :disabled=readonly
                 :style="styleInput"
-                v-model="seminar.location"
-                :options="locations"
-                label="place"
+                v-model="seminar.seminar_type"
+                :options="seminarTypes"
+                label="name"
                 placeholder="Traži">
             </v-select>
           </div>
@@ -46,16 +55,18 @@
 
 <script>
 import FormTag from "@/components/forms/FormTag";
+import vSelect from "vue-select";
 import axios from "axios";
 import router from "@/router";
 import {apiMixin} from "@/mixins/apiMixin";
 import {styleMixin} from "@/mixins/styleMixin";
 import {useToast} from "vue-toastification";
+import TextInput from "@/components/forms/TextInput.vue";
 
 export default {
   name: 'SeminarEdit',
   mixins: [apiMixin, styleMixin],
-  components: {FormTag},
+  components: {TextInput, FormTag, vSelect},
   computed: {
       readonly() {
         if (this.action === 'view') {
@@ -91,6 +102,7 @@ export default {
       }
     },
     async createSeminar() {
+      this.seminar.seminar_status = this.seminarStatuses.find(status => status.code === "PENDING");
       await axios.post('/seminars/create', JSON.stringify(this.seminar)).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
           this.toast.error(response.data.ErrorMessage);
@@ -126,6 +138,8 @@ export default {
     }
     this.action = this.$route.query.action;
     this.getAllLocations();
+    this.getAllSeminarTypes();
+    this.getAllSeminarStatuses();
   }
 }
 </script>

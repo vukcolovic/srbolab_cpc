@@ -23,7 +23,7 @@ type seminarServiceInterface interface {
 
 func (c *seminarService) GetAllSeminars(skip, take int) ([]model.Seminar, error) {
 	var seminars []model.Seminar
-	if err := db.Client.Limit(take).Offset(skip).Joins("Location").Joins("SeminarType").Joins("SeminarStatus").Find(&seminars).Error; err != nil {
+	if err := db.Client.Order("id desc").Limit(take).Offset(skip).Joins("Location").Joins("SeminarType").Joins("SeminarStatus").Find(&seminars).Error; err != nil {
 		return nil, err
 	}
 	return seminars, nil
