@@ -83,8 +83,18 @@ export default {
           width: '10%',
         },
         {
+          label: 'Mesto',
+          field: 'place',
+          width: '10%',
+        },
+        {
           label: 'Verifikovan',
           field: 'verified_text',
+          width: '10%',
+        },
+        {
+          label: 'Čeka seminar',
+          field: 'waiting_seminar_text',
           width: '10%',
         }
       ],
@@ -131,8 +141,10 @@ export default {
           vs.first_name = vs.person.first_name;
           vs.last_name = vs.person.last_name;
           vs.email = vs.person.email;
+          vs.place = vs.address.place;
           vs.phone_number = vs.person.phone_number;
           vs.verified_text = vs.verified ? "Da" : "Ne";
+          vs.waiting_seminar_text = vs.wait_seminar ? "Da" : "Ne";
         });
       }, (error) => {
         this.toast.error(error.message);

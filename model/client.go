@@ -13,6 +13,7 @@ type Client struct {
 	CompanyID    *uint   `json:"company-id"`
 	Company      Company `json:"company"`
 	Verified     bool    `json:"verified"`
+	WaitSeminar  bool    `json:"wait_seminar"`
 	Documents    []File  `json:"documents" gorm:"many2many:client_file;"`
 }
 
