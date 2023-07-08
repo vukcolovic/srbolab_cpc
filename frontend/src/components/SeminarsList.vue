@@ -8,7 +8,7 @@
         <button class="iconBtn" title="Pregledaj" :disabled="table.selectedSeminar == null" @click="$router.push({name: 'SeminarEdit', query: {id: table.selectedSeminar.ID, action: 'view' }})">
           <i class="fa fa-user"></i>
         </button>
-        <button class="iconBtn" title="Izmeni" :disabled="table.selectedClient == null" @click="$router.push({name: 'SeminarEdit', query: {id: table.selectedSeminar.ID, action: 'update' }})">
+        <button class="iconBtn" title="Izmeni" :disabled="table.selectedSeminar == null" @click="$router.push({name: 'SeminarEdit', query: {id: table.selectedSeminar.ID, action: 'update' }})">
           <i class="fa fa-user-md">
           </i></button>
       </div>
@@ -34,9 +34,11 @@ import VueTableLite from "vue3-table-lite";
 import axios from "axios";
 import {reactive} from "vue";
 import {useToast} from "vue-toastification";
+import {dateMixin} from "@/mixins/dateMixin";
 
 export default {
   name: 'SeminarsList',
+  mixins: [dateMixin],
   components: { VueTableLite },
   setup() {
     // Table config
@@ -54,7 +56,7 @@ export default {
           isKey: true,
         },
         {
-          label: 'Početak',
+          label: 'Početak(MM-DD-YYYY)',
           field: 'start_date',
           width: '10%',
         },
@@ -93,7 +95,7 @@ export default {
       if (document.getElementsByClassName('row_id_' + rowData.ID)[0]) {
         document.getElementsByClassName('row_id_' + rowData.ID)[0].style.backgroundColor = '#E8E8E8';
       }
-      table.selectedClient = rowData;
+      table.selectedSeminar = rowData;
     }
 
     const toast = useToast();
@@ -117,6 +119,7 @@ export default {
           s.location_address = s.location.address.place;
           s.type = s.seminar_type.name;
           s.status = s.seminar_status.name;
+          s.start_date = this.getDateInMMDDYYYYFormat(s.start_date);
         });
       }, (error) => {
         this.toast.error(error.message);

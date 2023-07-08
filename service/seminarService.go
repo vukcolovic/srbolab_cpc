@@ -31,7 +31,7 @@ func (c *seminarService) GetAllSeminars(skip, take int) ([]model.Seminar, error)
 
 func (c *seminarService) GetSeminarByID(id int) (*model.Seminar, error) {
 	var seminar *model.Seminar
-	if err := db.Client.First(&seminar, id).Error; err != nil {
+	if err := db.Client.Joins("Location").Joins("SeminarType").Joins("SeminarStatus").First(&seminar, id).Error; err != nil {
 		return nil, err
 	}
 

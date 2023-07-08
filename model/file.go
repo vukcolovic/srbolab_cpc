@@ -5,5 +5,5 @@ import "gorm.io/gorm"
 type File struct {
 	gorm.Model
 	Name    string `json:"name"`
-	Content []byte `json:"content"`
+	Content string `gorm:"type:bytea" json:"content"`
 }

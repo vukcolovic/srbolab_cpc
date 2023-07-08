@@ -1,6 +1,7 @@
 package service
 
 import (
+	"gorm.io/gorm"
 	"srbolab_cpc/db"
 	"srbolab_cpc/model"
 )
@@ -31,7 +32,7 @@ func (c *clientService) GetAllClients(skip, take int) ([]model.Client, error) {
 
 func (c *clientService) GetClientByID(id int) (*model.Client, error) {
 	var client *model.Client
-	if err := db.Client.First(&client, id).Error; err != nil {
+	if err := db.Client.Preload("Documents").First(&client, id).Error; err != nil {
 		return nil, err
 	}
 
@@ -61,7 +62,7 @@ func (c *clientService) CreateClient(client model.Client) (*model.Client, error)
 }
 
 func (c *clientService) UpdateClient(client model.Client) (*model.Client, error) {
-	result := db.Client.Save(&client)
+	result := db.Client.Session(&gorm.Session{FullSaveAssociations: true}).Updates(&client)
 	if result.Error != nil {
 		return nil, result.Error
 	}

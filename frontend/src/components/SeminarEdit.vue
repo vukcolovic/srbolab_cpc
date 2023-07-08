@@ -12,7 +12,7 @@
           <div class="row">
           <div class="col-sm-5">
             <text-input
-                v-model="seminar.start"
+                v-model="seminar.start_date"
                 label="Početak seminara (MM/DD/YYYY)"
                 type="date"
                 name="start"
@@ -62,10 +62,11 @@ import {apiMixin} from "@/mixins/apiMixin";
 import {styleMixin} from "@/mixins/styleMixin";
 import {useToast} from "vue-toastification";
 import TextInput from "@/components/forms/TextInput.vue";
+import {dateMixin} from "@/mixins/dateMixin";
 
 export default {
   name: 'SeminarEdit',
-  mixins: [apiMixin, styleMixin],
+  mixins: [apiMixin, styleMixin, dateMixin],
   components: {TextInput, FormTag, vSelect},
   computed: {
       readonly() {
@@ -74,7 +75,7 @@ export default {
     },
   data() {
     return {
-      seminar: {start: null, location: null, seminar_type: null, seminar_status: null},
+      seminar: {start_date: null, location: null, seminar_type: null, seminar_status: null},
       action: "view",
       seminarId: "",
     }
@@ -87,11 +88,15 @@ export default {
             return;
           }
           this.seminar = JSON.parse(response.data.Data);
+          this.seminar.location.address_place = this.seminar.location.address.place;
+          this.seminar.start_date = this.getDateInMMDDYYYYFormat(this.seminar.start_date);
+          console.log(this.seminar);
         }, (error) => {
           this.toast.error(error.message);
         });
     },
     async submitHandler() {
+      this.seminar.start_date = this.getBackendFormat(this.seminar.start_date);
       if (this.seminarId !== '') {
         await this.updateSeminar();
       } else {
@@ -118,7 +123,7 @@ export default {
           return;
         }
         this.toast.info("Uspešno ažuriran seminar!");
-        router.push("/users");
+        router.push("/seminars");
       }, (error) => {
         this.toast.error(error.message);
       });
@@ -128,15 +133,15 @@ export default {
     const toast = useToast();
     return {toast}
   },
-  mounted() {
+  async mounted() {
     if (this.$route.query.id !== '') {
       this.seminarId = this.$route.query.id;
-      this.getSeminarById();
+      await this.getSeminarById();
     }
     this.action = this.$route.query.action;
-    this.getAllLocations();
-    this.getAllSeminarTypes();
-    this.getAllSeminarStatuses();
+    await this.getAllLocations();
+    await this.getAllSeminarTypes();
+    await this.getAllSeminarStatuses();
   }
 }
 </script>
