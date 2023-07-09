@@ -7,7 +7,9 @@ import UsersList from '../components/UsersList.vue'
 import UserEdit from './../components/UserEdit.vue'
 import SupportComponent from './../components/SupportComponent.vue'
 import SeminarsList from '../components/SeminarsList.vue'
- import SeminarEdit from './../components/SeminarEdit.vue'
+import SeminarEdit from './../components/SeminarEdit.vue'
+import CompaniesList from '../components/CompaniesList.vue'
+import CompanyEdit from './../components/CompanyEdit.vue'
 
 const routes = [
   {
@@ -56,6 +58,17 @@ const routes = [
     path: '/user',
     name: 'UserEdit',
     component: UserEdit,
+    props: true,
+  },
+  {
+    path: '/companies',
+    name: 'Companies',
+    component: CompaniesList,
+  },
+  {
+    path: '/company',
+    name: 'CompanyEdit',
+    component: CompanyEdit,
     props: true,
   },
 ]

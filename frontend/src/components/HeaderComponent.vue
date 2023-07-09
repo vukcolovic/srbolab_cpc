@@ -50,7 +50,7 @@
             </a>
             <ul class="dropdown-menu" aria-labelledby="navBarDropDown">
               <li>
-                <router-link class="dropdown-item" to="/irregularity-levels">Firme</router-link>
+                <router-link class="dropdown-item" to="/companies">Firme</router-link>
               </li>
             </ul>
           </li>

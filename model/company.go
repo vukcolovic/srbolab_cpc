@@ -4,6 +4,6 @@ import "gorm.io/gorm"
 
 type Company struct {
 	gorm.Model
-	Name string
-	PIB  string
+	Name string `json:"name"`
+	PIB  string `json:"pib"`
 }
