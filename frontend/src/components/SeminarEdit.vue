@@ -10,7 +10,7 @@
     </div>
         <form-tag @formEvent="submitHandler" name="myForm" event="formEvent">
           <div class="row">
-          <div class="col-sm-5">
+          <div class="col-sm-4">
             <text-input
                 v-model="seminar.start_date"
                 label="Početak seminara (MM/DD/YYYY)"
@@ -41,8 +41,30 @@
             </v-select>
           </div>
 
-          <div class="col-sm-5">
+            <div class="col-sm-2">
+            </div>
 
+          <div v-if="action !== 'add'" class="col-sm-6">
+              <h5>Dodaj dan seminara</h5>
+                <text-input
+                    v-model.number="seminarDay.number"
+                    label="Redni broj"
+                    horizontal="true"
+                    type="number"
+                    name="number"
+                    :required=false
+                    :readonly="readonly">
+                </text-input>
+                <text-input
+                    v-model.trim="seminarDay.name"
+                    label="Naziv"
+                    horizontal="true"
+                    type="text"
+                    name="name"
+                    :required=false
+                    :readonly="readonly">
+                </text-input>
+                <input class="btn btn-primary m-2" value="Dodaj dan" @click.prevent="addSeminarDay()">
           </div>
             <div class="col-sm-5">
           <input type="submit" v-if="this.action === 'add'" class="btn btn-primary m-2" value="Snimi">
@@ -50,6 +72,19 @@
             </div>
             </div>
         </form-tag>
+
+    <div v-if="action !== 'add'">
+      <hr>
+      <h4>Dani seminara</h4>
+      <div class="border border-info bg-light d-inline-flex rounded m-2" style="width: 10%; height: 120px" v-for="day in seminar.days" :key="day.number">
+        <div class="m-1">
+          <h5>Dan: {{day.number}}</h5>
+          <hr>
+          <h5 style="font-size: 0.9em">Tema: {{day.name}}</h5>
+
+        </div>
+      </div>
+    </div>
       </div>
 </template>
 
@@ -75,12 +110,27 @@ export default {
     },
   data() {
     return {
-      seminar: {start_date: null, location: null, seminar_type: null, seminar_status: null},
+      seminar: {start_date: null, location: null, seminar_type: null, seminar_status: null, days: []},
+      seminarDay: {number: 0, name: ""},
       action: "view",
       seminarId: "",
     }
   },
   methods: {
+    addSeminarDay() {
+      this.seminarDay.seminar_id = parseInt(this.seminarId);
+      this.seminarDay.date = new Date();
+      axios.post('/seminar-days/create', JSON.stringify(this.seminarDay)).then((response) => {
+        if (response.data === null || response.data.Status === 'error') {
+          this.toast.error(response.data != null ? response.data.ErrorMessage : "");
+          return;
+        }
+        this.toast.info("Uspešno kreiran dan seminara!");
+        this.getSeminarById();
+      }, (error) => {
+        this.toast.error(error.message);
+      });
+    },
     async getSeminarById() {
         axios.get('/seminars/id/' + this.seminarId).then((response) => {
           if (response.data === null || response.data.Status === 'error') {

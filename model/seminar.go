@@ -32,11 +32,12 @@ type SeminarStatus struct {
 
 type SeminarDay struct {
 	gorm.Model
-	Date      time.Time
-	Name      string
-	Classes   []SeminarClass
-	SeminarID uint
-	Presence  []ClientPresence
+	Date      time.Time        `json:"date"`
+	Number    int              `json:"number"`
+	Name      string           `json:"name"`
+	Classes   []SeminarClass   `json:"classes"`
+	SeminarID uint             `json:"seminar_id"`
+	Presence  []ClientPresence `json:"presence"`
 }
 
 type SeminarClass struct {
