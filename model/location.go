@@ -13,3 +13,11 @@ type Location struct {
 	gorm.Model
 	Address Address `json:"address" gorm:"embedded"`
 }
+
+type ClassRoom struct {
+	gorm.Model
+	Name        string   `json:"name"`
+	MaxStudents int      ` json:"max_students"`
+	LocationID  uint     `json:"location_id"`
+	Location    Location `json:"location"`
+}

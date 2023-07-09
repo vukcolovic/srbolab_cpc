@@ -13,13 +13,22 @@ type seminarTypeService struct {
 }
 
 type seminarTypeServiceInterface interface {
-	GetAllSeminarTypes() ([]model.SeminarType, error)
+	GetAllBaseSeminarTypes() ([]model.BaseSeminarType, error)
+	GetSeminarThemesBypeID(typeID int) ([]model.SeminarTheme, error)
 }
 
-func (c *seminarTypeService) GetAllSeminarTypes() ([]model.SeminarType, error) {
-	var seminarTypes []model.SeminarType
-	if err := db.Client.Find(&seminarTypes).Error; err != nil {
+func (c *seminarTypeService) GetAllBaseSeminarTypes() ([]model.BaseSeminarType, error) {
+	var seminarBaseTypes []model.BaseSeminarType
+	if err := db.Client.Find(&seminarBaseTypes).Error; err != nil {
 		return nil, err
 	}
-	return seminarTypes, nil
+	return seminarBaseTypes, nil
+}
+
+func (c *seminarTypeService) GetSeminarThemesBypeID(typeID int) ([]model.SeminarTheme, error) {
+	var seminarThemes []model.SeminarTheme
+	if err := db.Client.Where("base_seminar_type_id", typeID).Find(&seminarThemes).Error; err != nil {
+		return nil, err
+	}
+	return seminarThemes, nil
 }

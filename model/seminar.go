@@ -7,21 +7,31 @@ import (
 
 type Seminar struct {
 	gorm.Model
-	Start           time.Time     `json:"start_date"`
-	LocationID      uint          `json:"location_id"`
-	Location        Location      `json:"location"`
-	Trainees        []Client      `json:"trainees" gorm:"many2many:seminar_client;"`
-	SeminarTypeID   uint          `json:"seminar_type_id"`
-	SeminarType     SeminarType   `json:"seminar_type"`
-	SeminarStatusID uint          `json:"seminar_status_id"`
-	SeminarStatus   SeminarStatus `json:"seminar_status"`
-	Days            []SeminarDay  `json:"days"`
+	Start             time.Time       `json:"start_date"`
+	ClassRoomID       uint            `json:"class_room_id"`
+	ClassRoom         ClassRoom       `json:"class_room"`
+	Trainees          []Client        `json:"trainees" gorm:"many2many:seminar_client;"`
+	SeminarThemeID    uint            `json:"seminar_theme_id"`
+	SeminarTheme      SeminarTheme    `json:"seminar_theme"`
+	BaseSeminarTypeID uint            `json:"base_seminar_type_id"`
+	BaseSeminarType   BaseSeminarType `json:"base_seminar_type"`
+	SeminarStatusID   uint            `json:"seminar_status_id"`
+	SeminarStatus     SeminarStatus   `json:"seminar_status"`
+	Days              []SeminarDay    `json:"days"`
 }
 
-type SeminarType struct {
+type BaseSeminarType struct {
 	gorm.Model
 	Code string `json:"code"`
 	Name string `json:"name"`
+}
+
+type SeminarTheme struct {
+	gorm.Model
+	BaseSeminarTypeID uint            `json:"base_seminar_type_id"`
+	BaseSeminarType   BaseSeminarType `json:"base_seminar_type"`
+	Code              string          `json:"code"`
+	Name              string          `json:"name"`
 }
 
 type SeminarStatus struct {

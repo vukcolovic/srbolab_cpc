@@ -5,7 +5,7 @@ export const apiMixin = {
     data() {
         return {
             locations: [],
-            seminarTypes: [],
+            seminarBaseTypes: [],
             seminarStatuses: [],
         }
     },
@@ -23,12 +23,12 @@ export const apiMixin = {
                 this.toast.error(error.message);
             });
         },
-        async getAllSeminarTypes() {
+        async getAllBaseSeminarTypes() {
             await axios.get('/seminar-types/list').then((response) => {
                 if (response.data === null || response.data.Status === 'error') {
                     this.toast.error(response.data != null ? response.data.ErrorMessage : "");
                 }
-                this.seminarTypes = JSON.parse(response.data.Data);
+                this.seminarBaseTypes = JSON.parse(response.data.Data);
             }, (error) => {
                 this.toast.error(error.message);
             });

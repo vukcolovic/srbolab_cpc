@@ -8,84 +8,89 @@
         <hr>
       </div>
     </div>
-        <form-tag @formEvent="submitHandler" name="myForm" event="formEvent">
-          <div class="row">
-          <div class="col-sm-4">
-            <text-input
-                v-model="seminar.start_date"
-                label="Početak seminara (MM/DD/YYYY)"
-                type="date"
-                name="start"
-                :required=true
-                :readonly="readonly">
-            </text-input>
+    <form-tag event="formEvent" name="myForm" @formEvent="submitHandler">
+      <div class="row">
+        <div class="col-sm-4">
+          <label :style="styleLabel" class="mb-1 mt-1">Tip seminara</label>
+          <v-select
+              v-model="seminar.base_seminar_type"
+              :disabled=readonly
+              :options="seminarBaseTypes"
+              :style="styleInput"
+              label="name"
+              placeholder="Traži"
+              @option:selected="onSeminarTypeChange">
+          </v-select>
 
-            <label class="mb-1 mt-1" :style="styleLabel">Lokacija</label>
+          <div v-if="seminarThemesByType.length > 0">
+            <label :style="styleLabel" class="mb-1 mt-1">Tema seminara</label>
             <v-select
+                v-model="seminar.seminar_theme"
                 :disabled=readonly
+                :options="seminarThemesByType"
                 :style="styleInput"
-                v-model="seminar.location"
-                :options="locations"
-                label="address_place"
-                placeholder="Traži">
-            </v-select>
-
-            <label class="mb-1 mt-1" :style="styleLabel">Tip seminara</label>
-            <v-select
-                :disabled=readonly
-                :style="styleInput"
-                v-model="seminar.seminar_type"
-                :options="seminarTypes"
                 label="name"
                 placeholder="Traži">
             </v-select>
           </div>
 
-            <div class="col-sm-2">
-            </div>
+          <label :style="styleLabel" class="mb-1 mt-1">Lokacija</label>
+          <v-select
+              @option:selected="onLocationChange"
+              v-model="location"
+              :disabled=readonly
+              :options="locations"
+              :style="styleInput"
+              label="address_place"
+              placeholder="Traži">
+          </v-select>
 
-          <div v-if="action !== 'add'" class="col-sm-6">
-              <h5>Dodaj dan seminara</h5>
-                <text-input
-                    v-model.number="seminarDay.number"
-                    label="Redni broj"
-                    horizontal="true"
-                    type="number"
-                    name="number"
-                    :required=false
-                    :readonly="readonly">
-                </text-input>
-                <text-input
-                    v-model.trim="seminarDay.name"
-                    label="Naziv"
-                    horizontal="true"
-                    type="text"
-                    name="name"
-                    :required=false
-                    :readonly="readonly">
-                </text-input>
-                <input class="btn btn-primary m-2" value="Dodaj dan" @click.prevent="addSeminarDay()">
+          <label :style="styleLabel" class="mb-1 mt-1">Učionica</label>
+          <v-select
+              v-model="seminar.class_room"
+              :disabled=readonly
+              :options="classRoomsByLocationId"
+              :style="styleInput"
+              label="name"
+              placeholder="Traži">
+          </v-select>
+
+          <text-input
+              v-model="seminar.start_date"
+              :readonly="readonly"
+              :required=true
+              label="Početak seminara (MM/DD/YYYY)"
+              name="start"
+              type="date">
+          </text-input>
+        </div>
+
+        <div  class="col-sm-6">
+          <div v-if="action !== 'add'">
+
           </div>
-            <div class="col-sm-5">
-          <input type="submit" v-if="this.action === 'add'" class="btn btn-primary m-2" value="Snimi">
-          <input type="submit" v-if="this.action === 'update'" class="btn btn-primary m-2" value="Snimi">
-            </div>
-            </div>
-        </form-tag>
+        </div>
+        <div class="col-sm-5">
+          <input v-if="this.action === 'add'" class="btn btn-primary m-2" type="submit" value="Snimi">
+          <input v-if="this.action === 'update'" class="btn btn-primary m-2" type="submit" value="Snimi">
+        </div>
+      </div>
+    </form-tag>
 
     <div v-if="action !== 'add'">
       <hr>
       <h4>Dani seminara</h4>
-      <div class="border border-info bg-light d-inline-flex rounded m-2" style="width: 10%; height: 120px" v-for="day in seminar.days" :key="day.number">
+      <div v-for="day in seminar.days" :key="day.number"
+           class="border border-info bg-light d-inline-flex rounded m-2" style="width: 10%; height: 120px">
         <div class="m-1">
-          <h5>Dan: {{day.number}}</h5>
+          <h5>Dan: {{ day.number }}</h5>
           <hr>
-          <h5 style="font-size: 0.9em">Tema: {{day.name}}</h5>
+          <h5 style="font-size: 0.9em">Tema: {{ day.name }}</h5>
 
         </div>
       </div>
     </div>
-      </div>
+  </div>
 </template>
 
 <script>
@@ -104,46 +109,92 @@ export default {
   mixins: [apiMixin, styleMixin, dateMixin],
   components: {TextInput, FormTag, vSelect},
   computed: {
-      readonly() {
-        return this.action === 'view';
+    readonly() {
+      return this.action === 'view';
     },
-    },
+  },
   data() {
     return {
-      seminar: {start_date: null, location: null, seminar_type: null, seminar_status: null, days: []},
-      seminarDay: {number: 0, name: ""},
+      seminar: {
+        start_date: null,
+        class_room: null,
+        base_seminar_type: null,
+        seminar_theme: null,
+        seminar_status: null,
+        days: []
+      },
       action: "view",
       seminarId: "",
+      location: null,
+      seminarThemesByType: [],
+      classRoomsByLocationId: [],
     }
   },
   methods: {
-    addSeminarDay() {
-      this.seminarDay.seminar_id = parseInt(this.seminarId);
-      this.seminarDay.date = new Date();
-      axios.post('/seminar-days/create', JSON.stringify(this.seminarDay)).then((response) => {
+    onSeminarTypeClear() {
+      this.seminar.seminar_theme = null;
+      this.seminarThemesByType = [];
+    },
+    async onSeminarTypeChange() {
+      this.seminar.seminar_theme = null;
+      this.seminarThemesByType = [];
+      await this.getAllSeminarThemesByTypeId(this.seminar.base_seminar_type.ID);
+    },
+    async getAllSeminarThemesByTypeId(seminarBaseTypeId) {
+      await axios.get('/seminar-types/themes/seminar-type/' + seminarBaseTypeId).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;
         }
-        this.toast.info("Uspešno kreiran dan seminara!");
-        this.getSeminarById();
+        this.seminarThemesByType = JSON.parse(response.data.Data);
       }, (error) => {
         this.toast.error(error.message);
       });
     },
+    onLocationChange() {
+      this.classRoomsByLocationId = [];
+      this.seminar.class_room = null;
+      this.getAllClassRoomsLocationId(this.location.ID);
+    },
+    async getAllClassRoomsLocationId(locationId) {
+      await axios.get('/locations/class-rooms/location/' +locationId).then((response) => {
+        if (response.data === null || response.data.Status === 'error') {
+          this.toast.error(response.data != null ? response.data.ErrorMessage : "");
+          return;
+        }
+        this.classRoomsByLocationId = JSON.parse(response.data.Data);
+      }, (error) => {
+        this.toast.error(error.message);
+      });
+    },
+    // addSeminarDay() {
+    //   this.seminarDay.seminar_id = parseInt(this.seminarId);
+    //   this.seminarDay.date = new Date();
+    //   axios.post('/seminar-days/create', JSON.stringify(this.seminarDay)).then((response) => {
+    //     if (response.data === null || response.data.Status === 'error') {
+    //       this.toast.error(response.data != null ? response.data.ErrorMessage : "");
+    //       return;
+    //     }
+    //     this.toast.info("Uspešno kreiran dan seminara!");
+    //     this.getSeminarById();
+    //   }, (error) => {
+    //     this.toast.error(error.message);
+    //   });
+    // },
     async getSeminarById() {
-        axios.get('/seminars/id/' + this.seminarId).then((response) => {
-          if (response.data === null || response.data.Status === 'error') {
-            this.toast.error(response.data != null ? response.data.ErrorMessage : "");
-            return;
-          }
-          this.seminar = JSON.parse(response.data.Data);
-          this.seminar.location.address_place = this.seminar.location.address.place;
-          this.seminar.start_date = this.getDateInMMDDYYYYFormat(this.seminar.start_date);
-          console.log(this.seminar);
-        }, (error) => {
-          this.toast.error(error.message);
-        });
+      axios.get('/seminars/id/' + this.seminarId).then((response) => {
+        if (response.data === null || response.data.Status === 'error') {
+          this.toast.error(response.data != null ? response.data.ErrorMessage : "");
+          return;
+        }
+        this.seminar = JSON.parse(response.data.Data);
+        this.location = this.seminar.class_room.location;
+        this.location.address_place = this.seminar.class_room.location.address.place;
+        this.seminar.start_date = this.getDateInMMDDYYYYFormat(this.seminar.start_date);
+        this.getAllSeminarThemesByTypeId(this.seminar.base_seminar_type.ID);
+      }, (error) => {
+        this.toast.error(error.message);
+      });
     },
     async submitHandler() {
       this.seminar.start_date = this.getBackendFormat(this.seminar.start_date);
@@ -190,7 +241,7 @@ export default {
     }
     this.action = this.$route.query.action;
     await this.getAllLocations();
-    await this.getAllSeminarTypes();
+    await this.getAllBaseSeminarTypes();
     await this.getAllSeminarStatuses();
   }
 }

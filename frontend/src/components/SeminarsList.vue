@@ -66,6 +66,11 @@ export default {
           width: '10%',
         },
         {
+          label: 'Učionica',
+          field: 'class_room_name',
+          width: '10%',
+        },
+        {
           label: 'Vrsta',
           field: 'type',
           width: '10%',
@@ -116,8 +121,9 @@ export default {
         }
         this.table.rows = JSON.parse(response.data.Data);
         this.table.rows.forEach(s => {
-          s.location_address = s.location.address.place;
-          s.type = s.seminar_type.name;
+          s.location_address = s.class_room.location.address.place;
+          s.class_room_name = s.class_room.name;
+          s.type = s.base_seminar_type.name + (s.seminar_theme.ID > 0 ?  "-" + s.seminar_theme.name : "");
           s.status = s.seminar_status.name;
           s.start_date = this.getDateInMMDDYYYYFormat(s.start_date);
         });

@@ -27,6 +27,7 @@ func Connect(conf srbolab_cpc.Config) error {
 		&model.Seminar{},
 		&model.SeminarDay{},
 		&model.SeminarClass{},
+		&model.ClassRoom{},
 	)
 	if err != nil {
 		return err

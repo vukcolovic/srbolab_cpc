@@ -16,9 +16,6 @@
               <li>
                 <router-link class="dropdown-item" to="/clients">Vozači</router-link>
               </li>
-              <li>
-                <router-link class="dropdown-item" to="/clients-notverified">Vozači za verifikaciju</router-link>
-              </li>
             </ul>
           </li>
           <li class="nav-item dropdown">

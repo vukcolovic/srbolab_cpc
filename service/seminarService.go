@@ -23,7 +23,7 @@ type seminarServiceInterface interface {
 
 func (c *seminarService) GetAllSeminars(skip, take int) ([]model.Seminar, error) {
 	var seminars []model.Seminar
-	if err := db.Client.Order("id desc").Limit(take).Offset(skip).Joins("Location").Joins("SeminarType").Joins("SeminarStatus").Find(&seminars).Error; err != nil {
+	if err := db.Client.Order("id desc").Limit(take).Offset(skip).Preload("ClassRoom.Location").Joins("ClassRoom").Joins("BaseSeminarType").Joins("SeminarTheme").Joins("SeminarStatus").Find(&seminars).Error; err != nil {
 		return nil, err
 	}
 	return seminars, nil
@@ -31,7 +31,7 @@ func (c *seminarService) GetAllSeminars(skip, take int) ([]model.Seminar, error)
 
 func (c *seminarService) GetSeminarByID(id int) (*model.Seminar, error) {
 	var seminar *model.Seminar
-	if err := db.Client.Preload("Days").Joins("Location").Joins("SeminarType").Joins("SeminarStatus").First(&seminar, id).Error; err != nil {
+	if err := db.Client.Preload("Days").Preload("ClassRoom.Location").Joins("ClassRoom").Joins("BaseSeminarType").Joins("SeminarTheme").Joins("SeminarStatus").First(&seminar, id).Error; err != nil {
 		return nil, err
 	}
 
