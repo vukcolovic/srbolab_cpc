@@ -40,6 +40,7 @@ export default {
   components: { VueTableLite },
   data() {
     return {
+      filter: {verified: true, wait_seminar: true, jmbg: "", first_name: "", last_name: ""}
     }
   },
   setup() {
@@ -131,7 +132,7 @@ export default {
     async doSearch(offset, limit, order, sort) {
       console.log(order, sort)
       this.isLoading = true;
-      await axios.get('/clients/list?skip=' + offset + '&take=' + limit).then((response) => {
+      await axios.post('/clients/list?skip=' + offset + '&take=' + limit, JSON.stringify(this.filter)).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;

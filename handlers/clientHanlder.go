@@ -32,6 +32,15 @@ func CreateClient(w http.ResponseWriter, r *http.Request) {
 }
 
 func ListClients(w http.ResponseWriter, r *http.Request) {
+	var filter model.ClientFilter
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&filter)
+	if err != nil {
+		logoped.ErrorLog.Println("Error decoding client filter: ", err)
+		SetErrorResponse(w, NewJSONDecodeError("ClientFilter"))
+		return
+	}
+
 	queryParams := r.URL.Query()
 	skipParam, ok := queryParams["skip"]
 	if !ok {
@@ -59,7 +68,7 @@ func ListClients(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	users, err := service.ClientService.GetAllClients(skip, take)
+	users, err := service.ClientService.GetAllClients(skip, take, filter)
 	if err != nil {
 		logoped.ErrorLog.Println(err.Error())
 		SetErrorResponse(w, errors.New("Greška prilikom povlačenja liste klijenata: "+err.Error()))

@@ -2,32 +2,52 @@
   <div class="container">
     <div class="row">
       <div class="col-sm-11 mx-auto">
-        <h3 v-if="action === 'add'" class="mt-2">Dodavanje</h3>
-        <h3 v-if="action === 'view'" class="mt-2">Pregled</h3>
-        <h3 v-if="action === 'update'" class="mt-2">Ažuriranje</h3>
-        <hr>
+        <h3 v-if="action === 'add'" class="mt-1">Dodavanje</h3>
+        <h3 v-if="action === 'view'" class="mt-1">Pregled</h3>
+        <h3 v-if="action === 'update'" class="mt-1">Ažuriranje</h3>
       </div>
     </div>
     <form-tag @formEvent="submitHandler" name="myForm" event="formEvent">
       <div class="row">
-        <div class="col-sm-5">
+        <div class="col-sm-4">
           <text-input
-              v-model.trim="client.person.first_name"
-              label="Ime"
+              v-model.trim="client.jmbg"
+              label="JMBG"
               type="text"
-              name="name"
-              :required=true
-              :readonly="readonly">
+              name="jmbg"
+              :required=false
+              :readonly="readonly"
+              :styleInput=styleInputSmall
+              :styleLabel=styleLabelSmall>
           </text-input>
 
-          <text-input
-              v-model.trim="client.person.middle_name"
-              label="Ime jednog roditelja"
-              type="text"
-              name="middleName"
-              :required=true
-              :readonly="readonly">
-          </text-input>
+          <div class="row">
+            <div class="col-sm-6">
+              <text-input
+                  v-model.trim="client.person.first_name"
+                  label="Ime"
+                  type="text"
+                  name="name"
+                  :required=true
+                  :readonly="readonly"
+                  :styleInput=styleInputSmall
+                  :styleLabel=styleLabelSmall>
+              </text-input>
+            </div>
+
+            <div class="col-sm-6">
+              <text-input
+                  v-model.trim="client.person.middle_name"
+                  label="Ime jednog roditelja"
+                  type="text"
+                  name="middleName"
+                  :required=true
+                  :readonly="readonly"
+                  :styleInput=styleInputSmall
+                  :styleLabel=styleLabelSmall>
+              </text-input>
+            </div>
+          </div>
 
           <text-input
               v-model.trim="client.person.last_name"
@@ -35,34 +55,76 @@
               type="text"
               name="lastName"
               :required=true
-              :readonly="readonly">
+              :readonly="readonly"
+              :styleInput=styleInputSmall
+              :styleLabel=styleLabelSmall>
           </text-input>
 
+          <div class="row">
+            <div class="col-sm-6">
           <text-input
               v-model.trim="client.person.phone_number"
               label="Broj telefona"
               type="text"
               name="phone_number"
               :required=false
-              :readonly="readonly">
+              :readonly="readonly"
+              :styleInput=styleInputSmall
+              :styleLabel=styleLabelSmall>
           </text-input>
+            </div>
 
+            <div class="col-sm-6">
           <text-input
               v-model.trim="client.person.email"
               label="Email"
               type="text"
               name="email"
               :required=true
-              :readonly="readonly">
+              :readonly="readonly"
+              :styleInput=styleInputSmall
+              :styleLabel=styleLabelSmall>
           </text-input>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-sm-6">
+              <text-input
+                  v-model.trim="client.cpc_number"
+                  label="Broj CPC kartice"
+                  type="text"
+                  name="cpc_number"
+                  :required=false
+                  :readonly="readonly"
+                  :styleInput=styleInputSmall
+                  :styleLabel=styleLabelSmall>
+              </text-input>
+            </div>
+
+            <div class="col-sm-6">
+              <text-input
+                  v-model.trim="client.cpc_date"
+                  label="CPC datum izdavanja"
+                  type="date"
+                  name="cpc_date"
+                  :required=false
+                  :readonly="readonly"
+                  :styleInput=styleInputSmall
+                  :styleLabel=styleLabelSmall>
+              </text-input>
+            </div>
+          </div>
 
           <text-input
-              v-model.trim="client.jmbg"
-              label="JMBG"
-              type="text"
-              name="jmbg"
+              v-model.number="client.initial_completed_seminars"
+              label="Broj prethodno odlušanih kurseva"
+              type="number"
+              name="initial_completed_seminars"
               :required=false
-              :readonly="readonly">
+              :readonly="readonly"
+              :styleInput=styleInputSmall
+              :styleLabel=styleLabelSmall>
           </text-input>
 
           <text-input
@@ -71,43 +133,70 @@
               type="text"
               name="drive_licence"
               :required=false
-              :readonly="readonly">
+              :readonly="readonly"
+              :styleInput=styleInputSmall
+              :styleLabel=styleLabelSmall>
           </text-input>
 
+          <text-area-input
+              v-model.trim="client.comment"
+              label="Napomena:"
+              type="text"
+              rows="2"
+              name="comment"
+              :readonly="readonly"
+              :styleInput=styleInputSmall
+              :styleLabel=styleLabelSmall>
+          </text-area-input>
+
           <div class="my-1">
-            <label for="verified">Klijent je verifikovan:</label>
+            <label :style=styleLabelSmall for="verified">Klijent je verifikovan:</label>
             <input id="verified" type="checkbox" :hidden="readonly" v-model="client.verified" />
+          </div>
+          <div class="my-1">
+            <label :style=styleLabelSmall for="wait_seminar">Klijent čeka seminar:</label>
+            <input id="wait_seminar" type="checkbox" :hidden="readonly" v-model="client.wait_seminar" />
           </div>
 
         </div>
-
-        <div class="col-sm-5">
+        <div class="col-sm-4">
           <text-input
               v-model.trim="client.address.place"
               label="Mesto"
               type="text"
               name="place"
               :required=false
-              :readonly="readonly">
+              :readonly="readonly"
+              :styleInput=styleInputSmall
+              :styleLabel=styleLabelSmall>
           </text-input>
 
-          <text-input
-              v-model.trim="client.address.street"
-              label="Ulica"
-              type="text"
-              name="street"
-              :required=false
-              :readonly="readonly">
-          </text-input>
-
-          <text-input
-              v-model.trim="client.address.house_number"
-              label="Broj"
-              type="text"
-              name="house_number"
-              :required=false
-              :readonly="readonly">
-          </text-input>
+          <div class="row">
+            <div class="col-sm-9">
+              <text-input
+                  v-model.trim="client.address.street"
+                  label="Ulica"
+                  type="text"
+                  name="street"
+                  :required=false
+                  :readonly="readonly"
+                  :styleInput=styleInputSmall
+                  :styleLabel=styleLabelSmall>
+              </text-input>
+            </div>
+            <div class="col-sm-3">
+              <text-input
+                v-model.trim="client.address.house_number"
+                label="Broj"
+                type="text"
+                name="house_number"
+                :required=false
+                :readonly="readonly"
+                :styleInput=styleInputSmall
+                :styleLabel=styleLabelSmall>
+              </text-input>
+            </div>
+          </div>
 
           <text-input
               v-model.trim="client.place_birth"
@@ -115,7 +204,9 @@
               type="text"
               name="place_birth"
               :required=false
-              :readonly="readonly">
+              :readonly="readonly"
+              :styleInput=styleInputSmall
+              :styleLabel=styleLabelSmall>
           </text-input>
 
           <text-input
@@ -124,11 +215,39 @@
               type="text"
               name="country_birth"
               :required=false
-              :readonly="readonly">
+              :readonly="readonly"
+              :styleInput=styleInputSmall
+              :styleLabel=styleLabelSmall>
           </text-input>
 
-          <label>Dokumenta: </label>
+          <div class="my-1">
+            <label :style=styleLabelSmall for="resident">Državljanin:</label>
+            <input id="resident" type="checkbox" :hidden="readonly" v-model="client.resident" />
+          </div>
 
+          <text-input
+              v-model.trim="client.second_citizenship"
+              label="Drugo državljanstvo"
+              type="text"
+              name="second_citizenship"
+              :required=false
+              :readonly="readonly"
+              :styleInput=styleInputSmall
+              :styleLabel=styleLabelSmall>
+          </text-input>
+
+          <text-input
+              v-model.trim="client.educational_profile"
+              label="Obrazovni profil"
+              type="text"
+              name="educational_profile"
+              :required=false
+              :readonly="readonly"
+              :styleInput=styleInputSmall
+              :styleLabel=styleLabelSmall>
+          </text-input>
+
+          <label :style=styleLabelSmall>Dokumenta: </label>
           <ul>
             <li v-for="(doc, index) in client.documents" :key="index" style="list-style-type: none;">
               <label for="index">&nbsp; {{ doc.name }}</label>
@@ -145,7 +264,10 @@
           <input id="fileId" type="file" ref="file" @change="uploadFile()"/>
 
         </div>
-        <div class="col-sm-5">
+        <div class="col-sm-4">
+
+        </div>
+        <div>
           <input type="submit" v-if="this.action === 'add'" class="btn btn-primary m-2" value="Snimi">
           <input type="submit" v-if="this.action === 'update'" class="btn btn-primary m-2" value="Snimi">
         </div>
@@ -157,15 +279,17 @@
 <script>
 import TextInput from "@/components/forms/TextInput";
 import FormTag from "@/components/forms/FormTag";
+import TextAreaInput from "@/components/forms/TextAreaInput";
 import axios from "axios";
 import router from "@/router";
 import {fileMixin} from "@/mixins/fileMixin";
 import {useToast} from "vue-toastification";
+import {styleMixin} from "@/mixins/styleMixin";
 
 export default {
   name: 'ClientEdit',
-  mixins: [fileMixin],
-  components: {FormTag, TextInput},
+  mixins: [fileMixin, styleMixin],
+  components: {FormTag, TextInput, TextAreaInput},
   computed: {
     readonly() {
       return this.action === 'view';
@@ -181,7 +305,14 @@ export default {
         place_birth: "",
         country_birth: "",
         documents: [],
-        verified: true
+        comment: "",
+        resident: true,
+        second_citizenship: "",
+        cpc_number: "",
+        cpc_date: null,
+        educational_profile: "",
+        verified: true,
+        wait_seminar: true
       },
       action: "",
     }

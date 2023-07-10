@@ -14,7 +14,7 @@ type clientService struct {
 }
 
 type clientServiceInterface interface {
-	GetAllClients(skip, take int) ([]model.Client, error)
+	GetAllClients(skip, take int, filter model.ClientFilter) ([]model.Client, error)
 	GetClientByID(id int) (*model.Client, error)
 	GetClientsCount() (int64, error)
 	DeleteClient(id int) error
@@ -22,9 +22,9 @@ type clientServiceInterface interface {
 	UpdateClient(client model.Client) (*model.Client, error)
 }
 
-func (c *clientService) GetAllClients(skip, take int) ([]model.Client, error) {
+func (c *clientService) GetAllClients(skip, take int, filter model.ClientFilter) ([]model.Client, error) {
 	var clients []model.Client
-	if err := db.Client.Order("id desc").Limit(take).Offset(skip).Find(&clients).Error; err != nil {
+	if err := db.Client.Where(filter).Order("id desc").Limit(take).Offset(skip).Find(&clients).Error; err != nil {
 		return nil, err
 	}
 	return clients, nil
