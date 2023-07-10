@@ -123,7 +123,7 @@ export default {
         this.table.rows.forEach(s => {
           s.location_address = s.class_room.location.address.place;
           s.class_room_name = s.class_room.name;
-          s.type = s.base_seminar_type.name + (s.seminar_theme.ID > 0 ?  "-" + s.seminar_theme.name : "");
+          s.type = s.seminar_theme.base_seminar_type.name + "-" + s.seminar_theme.name;
           s.status = s.seminar_status.name;
           s.start_date = this.getDateInMMDDYYYYFormat(s.start_date);
         });

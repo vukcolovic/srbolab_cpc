@@ -13,7 +13,7 @@
         <div class="col-sm-4">
           <label :style="styleLabel" class="mb-1 mt-1">Tip seminara</label>
           <v-select
-              v-model="seminar.base_seminar_type"
+              v-model="selectedBaseSeminarType"
               :disabled=readonly
               :options="seminarBaseTypes"
               :style="styleInput"
@@ -118,27 +118,23 @@ export default {
       seminar: {
         start_date: null,
         class_room: null,
-        base_seminar_type: null,
         seminar_theme: null,
         seminar_status: null,
         days: []
       },
       action: "view",
       seminarId: "",
+      selectedBaseSeminarType: null,
       location: null,
       seminarThemesByType: [],
       classRoomsByLocationId: [],
     }
   },
   methods: {
-    onSeminarTypeClear() {
-      this.seminar.seminar_theme = null;
-      this.seminarThemesByType = [];
-    },
     async onSeminarTypeChange() {
       this.seminar.seminar_theme = null;
       this.seminarThemesByType = [];
-      await this.getAllSeminarThemesByTypeId(this.seminar.base_seminar_type.ID);
+      await this.getAllSeminarThemesByTypeId(this.selectedBaseSeminarType.ID);
     },
     async getAllSeminarThemesByTypeId(seminarBaseTypeId) {
       await axios.get('/seminar-types/themes/seminar-type/' + seminarBaseTypeId).then((response) => {
@@ -167,20 +163,6 @@ export default {
         this.toast.error(error.message);
       });
     },
-    // addSeminarDay() {
-    //   this.seminarDay.seminar_id = parseInt(this.seminarId);
-    //   this.seminarDay.date = new Date();
-    //   axios.post('/seminar-days/create', JSON.stringify(this.seminarDay)).then((response) => {
-    //     if (response.data === null || response.data.Status === 'error') {
-    //       this.toast.error(response.data != null ? response.data.ErrorMessage : "");
-    //       return;
-    //     }
-    //     this.toast.info("Uspešno kreiran dan seminara!");
-    //     this.getSeminarById();
-    //   }, (error) => {
-    //     this.toast.error(error.message);
-    //   });
-    // },
     async getSeminarById() {
       axios.get('/seminars/id/' + this.seminarId).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
@@ -191,7 +173,7 @@ export default {
         this.location = this.seminar.class_room.location;
         this.location.address_place = this.seminar.class_room.location.address.place;
         this.seminar.start_date = this.getDateInMMDDYYYYFormat(this.seminar.start_date);
-        this.getAllSeminarThemesByTypeId(this.seminar.base_seminar_type.ID);
+        this.getAllSeminarThemesByTypeId(this.seminar.seminar_theme.base_seminar_type.ID);
       }, (error) => {
         this.toast.error(error.message);
       });
