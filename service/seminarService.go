@@ -14,6 +14,7 @@ type seminarService struct {
 
 type seminarServiceInterface interface {
 	GetAllSeminars(skip, take int) ([]model.Seminar, error)
+	GetAllSeminarsByStatus(statusCode string) ([]model.Seminar, error)
 	GetSeminarByID(id int) (*model.Seminar, error)
 	GetSeminarsCount() (int64, error)
 	DeleteSeminar(id int) error
@@ -29,9 +30,21 @@ func (c *seminarService) GetAllSeminars(skip, take int) ([]model.Seminar, error)
 	return seminars, nil
 }
 
+func (c *seminarService) GetAllSeminarsByStatus(statusCode string) ([]model.Seminar, error) {
+	status, err := SeminarStatusService.GetSeminarStatusByCode(statusCode)
+	if err != nil {
+		return nil, err
+	}
+	var seminars []model.Seminar
+	if err := db.Client.Where("seminar_status_id", status.ID).Order("id desc").Preload("ClassRoom.Location").Joins("ClassRoom").Joins("SeminarTheme").Joins("SeminarTheme.BaseSeminarType").Joins("SeminarStatus").Find(&seminars).Error; err != nil {
+		return nil, err
+	}
+	return seminars, nil
+}
+
 func (c *seminarService) GetSeminarByID(id int) (*model.Seminar, error) {
 	var seminar *model.Seminar
-	if err := db.Client.Preload("Days").Preload("ClassRoom.Location").Joins("ClassRoom").Joins("BaseSeminarType").Joins("SeminarTheme").Joins("SeminarStatus").First(&seminar, id).Error; err != nil {
+	if err := db.Client.Preload("Days").Preload("ClassRoom.Location").Joins("ClassRoom").Joins("SeminarTheme.BaseSeminarType").Joins("SeminarTheme").Joins("SeminarStatus").First(&seminar, id).Error; err != nil {
 		return nil, err
 	}
 

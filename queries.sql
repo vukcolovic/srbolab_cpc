@@ -1,6 +1,8 @@
-INSERT INTO seminar_statuses (name, code, created_at, updated_at) VALUES ('U TOKU', 'IN_PROGRESS', now(), now()) ON CONFLICT DO NOTHING;
-INSERT INTO seminar_statuses (name, code, created_at, updated_at) VALUES ('NA ČEKANJU', 'PENDING', now(), now()) ON CONFLICT DO NOTHING;
-INSERT INTO seminar_statuses (name, code, created_at, updated_at) VALUES ('ZAVRŠEN', 'FINISHED', now(), now()) ON CONFLICT DO NOTHING;
+INSERT INTO seminar_statuses (id, name, code, created_at, updated_at) VALUES (1, 'OTVOREN', 'OPENED', now(), now()) ON CONFLICT DO NOTHING;
+INSERT INTO seminar_statuses (id, name, code, created_at, updated_at) VALUES (2, 'POPUNJEN', 'FILLED', now(), now()) ON CONFLICT DO NOTHING;
+INSERT INTO seminar_statuses (id, name, code, created_at, updated_at) VALUES (3, 'U TOKU', 'IN_PROGRESS', now(), now()) ON CONFLICT DO NOTHING;
+INSERT INTO seminar_statuses (id, name, code, created_at, updated_at) VALUES (4, 'ZATVOREN', 'CLOSED', now(), now()) ON CONFLICT DO NOTHING;
+
 
 INSERT INTO base_seminar_types (name, code, created_at, updated_at) VALUES ('OSNOVNA OBUKA', 'BASIC', now(), now()) ON CONFLICT DO NOTHING;
 INSERT INTO base_seminar_types (name, code, created_at, updated_at) VALUES ('DODATNA OBUKA', 'ADDITIONAL', now(), now()) ON CONFLICT DO NOTHING;

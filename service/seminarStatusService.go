@@ -13,7 +13,17 @@ type seminarStatusService struct {
 }
 
 type seminarStatusServiceInterface interface {
+	GetSeminarStatusByCode(code string) (*model.SeminarStatus, error)
 	GetAllSeminarStatuses() ([]model.SeminarStatus, error)
+}
+
+func (c *seminarStatusService) GetSeminarStatusByCode(code string) (*model.SeminarStatus, error) {
+	var status *model.SeminarStatus
+	if err := db.Client.Where("code", code).First(&status).Error; err != nil {
+		return nil, err
+	}
+
+	return status, nil
 }
 
 func (c *seminarStatusService) GetAllSeminarStatuses() ([]model.SeminarStatus, error) {

@@ -35,6 +35,7 @@ func RunServer(host string) {
 	s = r.PathPrefix("/api/seminars").Subrouter()
 	s.HandleFunc("/create", handlers.CreateSeminar).Methods("POST")
 	s.HandleFunc("/update", handlers.UpdateSeminar).Methods("POST")
+	s.HandleFunc("/list/status/{status}", handlers.ListSeminarsByStatus).Methods("GET")
 	s.HandleFunc("/list", handlers.ListSeminars).Methods("GET")
 	s.HandleFunc("/id/{id}", handlers.GetSeminarByID).Methods("GET")
 	s.HandleFunc("/delete/{id}", handlers.DeleteSeminar).Methods("GET")

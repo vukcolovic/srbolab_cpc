@@ -26,6 +26,7 @@ type Client struct {
 	EducationalProfile       string    `json:"educational_profile"`
 	Comment                  string    `json:"comment"`
 	InitialCompletedSeminars bool      `json:"initial_completed_seminars"`
+	Seminars                 []Seminar `json:"seminars" gorm:"many2many:seminar_client;"`
 }
 
 type ClientFilter struct {

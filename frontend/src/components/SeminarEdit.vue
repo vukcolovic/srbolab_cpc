@@ -103,10 +103,11 @@ import {styleMixin} from "@/mixins/styleMixin";
 import {useToast} from "vue-toastification";
 import TextInput from "@/components/forms/TextInput.vue";
 import {dateMixin} from "@/mixins/dateMixin";
+import {commonMixin} from "@/mixins/commonMixin";
 
 export default {
   name: 'SeminarEdit',
-  mixins: [apiMixin, styleMixin, dateMixin],
+  mixins: [apiMixin, styleMixin, dateMixin, commonMixin],
   components: {TextInput, FormTag, vSelect},
   computed: {
     readonly() {
@@ -173,6 +174,7 @@ export default {
         this.location = this.seminar.class_room.location;
         this.location.address_place = this.seminar.class_room.location.address.place;
         this.seminar.start_date = this.getDateInMMDDYYYYFormat(this.seminar.start_date);
+        this.selectedBaseSeminarType = this.seminar.seminar_theme.base_seminar_type;
         this.getAllSeminarThemesByTypeId(this.seminar.seminar_theme.base_seminar_type.ID);
       }, (error) => {
         this.toast.error(error.message);
@@ -187,7 +189,7 @@ export default {
       }
     },
     async createSeminar() {
-      this.seminar.seminar_status = this.seminarStatuses.find(status => status.code === "PENDING");
+      this.seminar.seminar_status = this.seminarStatuses.find(status => status.ID === this.SEMINAR_STATUSES.OPENED);
       await axios.post('/seminars/create', JSON.stringify(this.seminar)).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");

@@ -11,8 +11,33 @@
       <button class="iconBtn" title="Izmeni" :disabled="!table.selectedClient" @click="$router.push({name: 'ClientEdit', query: {id: table.selectedClient.ID, action: 'update' }})">
         <i class="fa fa-user-md">
         </i></button>
+        <button class="iconBtn ms-auto" title="Filter" type="button" data-bs-toggle="collapse" data-bs-target="#filter" aria-expanded="false" aria-controls="filter">
+          <i class="fa fa-filter" aria-hidden="true">
+          </i>
+        </button>
+        <button class="iconBtn" title="Traži" type="button" @click="doSearch(0, 10)">
+          <i class="fa fa-search">
+          </i>
+        </button>
       </div>
     </div>
+    <div class="collapse multi-collapse border" style="font-size: 0.7em" id="filter">
+      <div class="row">
+          <div class="col-sm-3">
+            <label for="first_name" style="margin-right: 5px">Ime</label>
+            <input type="text" id="first_name" name="Ime" v-model="filter.first_name" />
+          </div>
+        <div class="col-sm-3">
+            <label for="last_name" style="margin-right: 5px">Prezime</label>
+            <input type="text" id="last_name" name="Prezime" v-model="filter.last_name" />
+          </div>
+        <div class="col-sm-3">
+          <label for="jmbg" style="margin-right: 5px">JMBG</label>
+          <input type="text" id="jmbg" name="jmbg" v-model="filter.jmbg" />
+        </div>
+      </div>
+    </div>
+
     <div class="row mt-2">
       <vue-table-lite
           ref="localTable"

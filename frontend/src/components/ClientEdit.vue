@@ -220,21 +220,24 @@
               :styleLabel=styleLabelSmall>
           </text-input>
 
-          <div class="my-1">
-            <label :style=styleLabelSmall for="resident">Državljanin:</label>
-            <input id="resident" type="checkbox" :hidden="readonly" v-model="client.resident" />
+          <div class="row">
+            <div class="my-1 col-sm-4">
+              <label :style=styleLabelSmall for="resident">Državljanin:</label>
+              <input id="resident" type="checkbox" :hidden="readonly" v-model="client.resident" />
+            </div>
+            <div class="my-1 col-sm-8">
+              <text-input
+                  v-model.trim="client.second_citizenship"
+                  label="Drugo državljanstvo"
+                  type="text"
+                  name="second_citizenship"
+                  :required=false
+                  :readonly="readonly"
+                  :styleInput=styleInputSmall
+                  :styleLabel=styleLabelSmall>
+              </text-input>
+            </div>
           </div>
-
-          <text-input
-              v-model.trim="client.second_citizenship"
-              label="Drugo državljanstvo"
-              type="text"
-              name="second_citizenship"
-              :required=false
-              :readonly="readonly"
-              :styleInput=styleInputSmall
-              :styleLabel=styleLabelSmall>
-          </text-input>
 
           <text-input
               v-model.trim="client.educational_profile"
@@ -265,7 +268,34 @@
 
         </div>
         <div class="col-sm-4">
-
+          <div v-if="finishedSeminars.length > 0">
+            <h5>Odslušani seminari</h5>
+            <ul>
+              <li v-for="seminar in finishedSeminars" :key="seminar.ID">
+                {{index}}: {{seminar.ID}} {{seminar.start_date}}
+              </li>
+            </ul>
+          </div>
+          <div v-if="inProgressSeminars.length > 0">
+            <h5>Aktuelni seminari</h5>
+            <ul>
+              <li style="list-style-type: none; font-size: 0.7em" v-for="(seminar, index) in inProgressSeminars" :key="seminar.ID">
+                <button class="iconBtn" title="Obriši" @click.prevent="removeFile(index)">
+                  <i class="fa fa-remove"></i>
+                </button>
+                {{seminar.ID}}: {{seminar.seminar_theme.base_seminar_type.name}} {{seminar.seminar_theme.name}} {{getDateInMMDDYYYYFormat(seminar.start_date)}}
+              </li>
+            </ul>
+          </div>
+          <label :style="styleLabelSmall" class="mb-1 mt-1">Otvoreni seminari</label>
+          <v-select
+              v-model="selectedOpenSeminar"
+              :disabled=readonly
+              :options="openedSeminars"
+              :style="styleInputSmall"
+              label="details"
+              placeholder="Traži">
+          </v-select>
         </div>
         <div>
           <input type="submit" v-if="this.action === 'add'" class="btn btn-primary m-2" value="Snimi">
@@ -285,11 +315,14 @@ import router from "@/router";
 import {fileMixin} from "@/mixins/fileMixin";
 import {useToast} from "vue-toastification";
 import {styleMixin} from "@/mixins/styleMixin";
+import vSelect from "vue-select";
+import {apiMixin} from "@/mixins/apiMixin";
+import {commonMixin} from "@/mixins/commonMixin";
 
 export default {
   name: 'ClientEdit',
-  mixins: [fileMixin, styleMixin],
-  components: {FormTag, TextInput, TextAreaInput},
+  mixins: [fileMixin, styleMixin, apiMixin, commonMixin],
+  components: {vSelect, FormTag, TextInput, TextAreaInput},
   computed: {
     readonly() {
       return this.action === 'view';
@@ -312,8 +345,13 @@ export default {
         cpc_date: null,
         educational_profile: "",
         verified: true,
-        wait_seminar: true
+        wait_seminar: true,
+        seminars: []
       },
+      finishedSeminars: [],
+      inProgressSeminars: [],
+      selectedOpenSeminar: null,
+      openedSeminars: [],
       action: "",
     }
   },
@@ -351,14 +389,24 @@ export default {
           return;
         }
         this.client = JSON.parse(response.data.Data);
+        if (this.client.seminars) {
+          this.finishedSeminars = this.client.seminars.filter(s => s.seminar_status.ID === this.SEMINAR_STATUSES.FINISHED);
+          this.inProgressSeminars = this.client.seminars.filter(s => s.seminar_status.ID !== this.SEMINAR_STATUSES.FINISHED);
+        }
         if (this.client.documents == null) {
           this.client.documents = [];
+        }
+        if (this.client.seminars == null) {
+          this.client.seminars = [];
         }
       }, (error) => {
         this.toast.error(error.message);
       });
     },
     async submitHandler() {
+      if (this.selectedOpenSeminar) {
+        this.client.seminars.push(this.selectedOpenSeminar);
+      }
       if (this.clientId != undefined) {
         await this.updateClient();
       } else {
@@ -400,6 +448,10 @@ export default {
       this.getClientById();
     }
     this.action = this.$route.query.action;
+    this.getSeminarsByStatusCode("OPENED").then(result => this.openedSeminars = result);
   }
 }
 </script>
+
+<style scoped>
+</style>

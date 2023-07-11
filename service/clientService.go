@@ -32,7 +32,7 @@ func (c *clientService) GetAllClients(skip, take int, filter model.ClientFilter)
 
 func (c *clientService) GetClientByID(id int) (*model.Client, error) {
 	var client *model.Client
-	if err := db.Client.Preload("Documents").First(&client, id).Error; err != nil {
+	if err := db.Client.Preload("Documents").Preload("Seminars").Preload("Seminars.SeminarTheme").Preload("Seminars.SeminarTheme.BaseSeminarType").First(&client, id).Error; err != nil {
 		return nil, err
 	}
 

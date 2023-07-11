@@ -1,7 +1,9 @@
 import axios from "axios";
 import {useToast} from "vue-toastification";
+import {dateMixin} from "@/mixins/dateMixin";
 
 export const apiMixin = {
+    mixins: [dateMixin],
     data() {
         return {
             locations: [],
@@ -39,6 +41,21 @@ export const apiMixin = {
                     this.toast.error(response.data != null ? response.data.ErrorMessage : "");
                 }
                 this.seminarStatuses = JSON.parse(response.data.Data);
+            }, (error) => {
+                this.toast.error(error.message);
+            });
+        },
+        async getSeminarsByStatusCode(statusCode) {
+            return await axios.get('/seminars/list/status/' + statusCode).then((response) => {
+                if (response.data === null || response.data.Status === 'error') {
+                    this.toast.error(response.data != null ? response.data.ErrorMessage : "");
+                    return;
+                }
+                var result = JSON.parse(response.data.Data);
+                result.forEach(vs => {
+                    vs.details = vs.seminar_theme.base_seminar_type.name + "-" + vs.seminar_theme.name + " | " + this.getDateInMMDDYYYYFormat(vs.start_date) + " | " + vs.class_room.location.address.place;
+                });
+                return result;
             }, (error) => {
                 this.toast.error(error.message);
             });

@@ -69,6 +69,25 @@ func ListSeminars(w http.ResponseWriter, r *http.Request) {
 	SetSuccessResponse(w, seminars)
 }
 
+func ListSeminarsByStatus(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	status, ok := vars["status"]
+	if !ok {
+		logoped.ErrorLog.Println("missing parameter status")
+		SetErrorResponse(w, NewMissingRequestParamError("status"))
+		return
+	}
+
+	seminars, err := service.SeminarService.GetAllSeminarsByStatus(status)
+	if err != nil {
+		logoped.ErrorLog.Println(err.Error())
+		SetErrorResponse(w, errors.New("Greška prilikom povlačenja liste seminara na osnovu statusa: "+err.Error()))
+		return
+	}
+
+	SetSuccessResponse(w, seminars)
+}
+
 func GetSeminarByID(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	seminarIdParam, ok := vars["id"]
