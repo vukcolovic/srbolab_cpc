@@ -280,27 +280,27 @@
           <div v-if="finishedSeminars.length > 0">
             <h6>Odslušani seminari</h6>
             <ul>
-              <li style="list-style-type: none" v-for="seminar in finishedSeminars" :key="seminar.ID">
-                {{seminar.ID}}: {{seminar.seminar_theme.base_seminar_type.name}} {{seminar.seminar_theme.name}} {{getDateInMMDDYYYYFormat(seminar.start_date)}}
+              <li style="list-style-type: none" v-for="seminarClient in finishedSeminars" :key="seminarClient.ID">
+                {{seminarClient.seminar.ID}}: {{seminarClient.seminar.seminar_theme.base_seminar_type.name}} {{seminarClient.seminar.seminar_theme.name}} {{getDateInMMDDYYYYFormat(seminarClient.seminar.start_date)}}
               </li>
             </ul>
           </div>
           <div v-if="inProgressSeminars.length > 0">
             <h6>Aktuelni seminari</h6>
             <ul>
-              <li style="list-style-type: none;" v-for="seminar in inProgressSeminars" :key="seminar.ID">
-                {{seminar.ID}}: {{seminar.seminar_theme.base_seminar_type.name}} {{seminar.seminar_theme.name}} {{getDateInMMDDYYYYFormat(seminar.start_date)}}
+              <li style="list-style-type: none;" v-for="seminarClient in inProgressSeminars" :key="seminarClient.ID">
+                {{seminarClient.seminar.ID}}: {{seminarClient.seminar.seminar_theme.base_seminar_type.name}} {{seminarClient.seminar.seminar_theme.name}} {{getDateInMMDDYYYYFormat(seminarClient.seminar.start_date)}}
               </li>
             </ul>
           </div>
           <div v-if="waitingSeminars.length > 0">
             <h6>Prijavljeni seminari</h6>
             <ul>
-              <li style="list-style-type: none;" v-for="seminar in waitingSeminars" :key="seminar.ID">
-                <button class="iconBtn" title="Obriši" @click.prevent="removeSeminar(seminar)">
+              <li style="list-style-type: none;" v-for="seminarClient in waitingSeminars" :key="seminarClient.ID">
+                <button class="iconBtn" title="Obriši" @click.prevent="removeSeminar(seminarClient)">
                   <i class="fa fa-remove"></i>
                 </button>
-                {{seminar.ID}}: {{seminar.seminar_theme.base_seminar_type.name}} {{seminar.seminar_theme.name}} {{getDateInMMDDYYYYFormat(seminar.start_date)}}
+                <span v-if="seminarClient.paid" class="bg-success">Plaćeno</span><span v-if="!seminarClient.paid" class="bg-warning">Nije plaćeno</span>{{seminarClient.seminar.ID}}: {{seminarClient.seminar.seminar_theme.base_seminar_type.name}} {{seminarClient.seminar.seminar_theme.name}} {{getDateInMMDDYYYYFormat(seminarClient.seminar.start_date)}}
               </li>
             </ul>
           </div>
@@ -362,6 +362,7 @@ export default {
         cpc_date: null,
         educational_profile: "",
         verified: true,
+        initial_completed_seminars: 0,
         wait_seminar: true,
         seminars: []
       },
@@ -432,11 +433,11 @@ export default {
         }
         this.client = JSON.parse(response.data.Data);
         if (this.client.seminars) {
-          this.finishedSeminars = this.client.seminars.filter(s => s.seminar_status.ID === this.SEMINAR_STATUSES.CLOSED);
-          this.inProgressSeminars = this.client.seminars.filter(s => s.seminar_status.ID === this.SEMINAR_STATUSES.IN_PROGRESS);
-          this.waitingSeminars = this.client.seminars.filter(s => (s.seminar_status.ID === this.SEMINAR_STATUSES.OPENED || s.seminar_status.ID === this.SEMINAR_STATUSES.FILLED));
+          this.finishedSeminars = this.client.seminars.filter(s => s.seminar.seminar_status.ID === this.SEMINAR_STATUSES.CLOSED);
+          this.inProgressSeminars = this.client.seminars.filter(s => s.seminar.seminar_status.ID === this.SEMINAR_STATUSES.IN_PROGRESS);
+          this.waitingSeminars = this.client.seminars.filter(s => (s.seminar.seminar_status.ID === this.SEMINAR_STATUSES.OPENED || s.seminar.seminar_status.ID === this.SEMINAR_STATUSES.FILLED));
 
-          this.openedSeminars = this.openedSeminars.filter( ( el ) => !this.waitingSeminars.find(rm => (rm.ID === el.ID)));
+          this.openedSeminars = this.openedSeminars.filter( ( el ) => !this.waitingSeminars.find(rm => (rm.seminar.ID === el.ID)));
         }
         if (this.client.documents == null) {
           this.client.documents = [];
@@ -450,9 +451,10 @@ export default {
     },
     async submitHandler() {
       if (this.selectedOpenSeminar) {
-        this.client.seminars.push(this.selectedOpenSeminar);
+        this.client.seminars.push({"client_id": this.client.ID, "seminar_id": this.selectedOpenSeminar.ID});
+        this.client.wait_seminar =false;
       }
-      if (this.clientId != undefined) {
+      if (this.clientId) {
         await this.updateClient();
       } else {
         await this.createClient();
