@@ -267,20 +267,28 @@
           <input id="fileId" type="file" ref="file" @change="uploadFile()"/>
 
         </div>
-        <div class="col-sm-4">
+        <div class="col-sm-4" style="font-size: 0.7em">
           <div v-if="finishedSeminars.length > 0">
-            <h5>Odslušani seminari</h5>
+            <h6>Odslušani seminari</h6>
             <ul>
-              <li v-for="seminar in finishedSeminars" :key="seminar.ID">
-                {{index}}: {{seminar.ID}} {{seminar.start_date}}
+              <li style="list-style-type: none" v-for="seminar in finishedSeminars" :key="seminar.ID">
+                {{seminar.ID}}: {{seminar.seminar_theme.base_seminar_type.name}} {{seminar.seminar_theme.name}} {{getDateInMMDDYYYYFormat(seminar.start_date)}}
               </li>
             </ul>
           </div>
           <div v-if="inProgressSeminars.length > 0">
-            <h5>Aktuelni seminari</h5>
+            <h6>Aktuelni seminari</h6>
             <ul>
-              <li style="list-style-type: none; font-size: 0.7em" v-for="(seminar, index) in inProgressSeminars" :key="seminar.ID">
-                <button class="iconBtn" title="Obriši" @click.prevent="removeFile(index)">
+              <li style="list-style-type: none;" v-for="seminar in inProgressSeminars" :key="seminar.ID">
+                {{seminar.ID}}: {{seminar.seminar_theme.base_seminar_type.name}} {{seminar.seminar_theme.name}} {{getDateInMMDDYYYYFormat(seminar.start_date)}}
+              </li>
+            </ul>
+          </div>
+          <div v-if="waitingSeminars.length > 0">
+            <h6>Prijavljeni seminari</h6>
+            <ul>
+              <li style="list-style-type: none;" v-for="seminar in waitingSeminars" :key="seminar.ID">
+                <button class="iconBtn" title="Obriši" @click.prevent="removeSeminar(seminar)">
                   <i class="fa fa-remove"></i>
                 </button>
                 {{seminar.ID}}: {{seminar.seminar_theme.base_seminar_type.name}} {{seminar.seminar_theme.name}} {{getDateInMMDDYYYYFormat(seminar.start_date)}}
@@ -350,6 +358,7 @@ export default {
       },
       finishedSeminars: [],
       inProgressSeminars: [],
+      waitingSeminars: [],
       selectedOpenSeminar: null,
       openedSeminars: [],
       action: "",
@@ -367,6 +376,16 @@ export default {
       link.click()
       URL.revokeObjectURL(link.href)
     },
+    removeSeminar(seminar) {
+      const index = this.client.seminars.indexOf(seminar);
+      if (index > -1) { // only splice array when item is found
+        this.client.seminars.splice(index, 1); // 2nd parameter means remove one item only
+      }
+      const idx = this.waitingSeminars.indexOf(seminar);
+      if (idx > -1) { // only splice array when item is found
+        this.waitingSeminars.splice(idx, 1); // 2nd parameter means remove one item only
+      }
+    },
     uploadFile() {
       const file = this.$refs.file.files[0];
       if (file == null) {
@@ -383,6 +402,7 @@ export default {
       this.client.documents.splice(i, 1);
     },
     async getClientById() {
+      await this.getSeminarsByStatusCode("OPENED").then(result => this.openedSeminars = result);
       axios.get('/clients/id/' + this.clientId).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");
@@ -390,8 +410,11 @@ export default {
         }
         this.client = JSON.parse(response.data.Data);
         if (this.client.seminars) {
-          this.finishedSeminars = this.client.seminars.filter(s => s.seminar_status.ID === this.SEMINAR_STATUSES.FINISHED);
-          this.inProgressSeminars = this.client.seminars.filter(s => s.seminar_status.ID !== this.SEMINAR_STATUSES.FINISHED);
+          this.finishedSeminars = this.client.seminars.filter(s => s.seminar_status.ID === this.SEMINAR_STATUSES.CLOSED);
+          this.inProgressSeminars = this.client.seminars.filter(s => s.seminar_status.ID === this.SEMINAR_STATUSES.IN_PROGRESS);
+          this.waitingSeminars = this.client.seminars.filter(s => (s.seminar_status.ID === this.SEMINAR_STATUSES.OPENED || s.seminar_status.ID === this.SEMINAR_STATUSES.FILLED));
+
+          this.openedSeminars = this.openedSeminars.filter( ( el ) => !this.waitingSeminars.find(rm => (rm.ID === el.ID)));
         }
         if (this.client.documents == null) {
           this.client.documents = [];
@@ -448,7 +471,6 @@ export default {
       this.getClientById();
     }
     this.action = this.$route.query.action;
-    this.getSeminarsByStatusCode("OPENED").then(result => this.openedSeminars = result);
   }
 }
 </script>
