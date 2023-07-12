@@ -11,7 +11,7 @@ export const commonMixin = {
     data() {
         return {
             SEMINAR_STATUSES: SEMINAR_STATUSES,
-            yesNoOptions: [{label: 'ДА', value: 'true'}, {label: 'НЕ', value: 'false'}, {label: '-', value: ''}],
+            yesNoOptions: [{label: 'ДА', value: 'true'}, {label: 'НЕ', value: 'false'}],
         }
     },
     setup() {

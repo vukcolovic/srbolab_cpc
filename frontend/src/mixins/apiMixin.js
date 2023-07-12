@@ -54,12 +54,20 @@ export const apiMixin = {
                 var result = JSON.parse(response.data.Data);
                 result.forEach(vs => {
                     vs.details = vs.seminar_theme.base_seminar_type.name + "-" + vs.seminar_theme.name + " | " + this.getDateInMMDDYYYYFormat(vs.start_date) + " | " + vs.class_room.location.address.place;
+                    vs.base_info = this.getSeminarFullType(vs.seminar_theme.base_seminar_type, vs.seminar_theme) + " | " + this.getDateInMMDDYYYYFormat(vs.start_date) + " | " + vs.class_room.location.address.place;
                 });
                 return result;
             }, (error) => {
                 this.toast.error(error.message);
             });
         },
+        getSeminarFullType(base, theme) {
+            if (base.code === "ADDITIONAL" || base.code === "BASIC") {
+                return base.name;
+            }
+
+            return base.code.name + theme.name;
+        }
     },
     setup() {
         const toast = useToast();
