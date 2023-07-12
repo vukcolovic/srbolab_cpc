@@ -16,6 +16,7 @@ type clientService struct {
 type clientServiceInterface interface {
 	GetAllClients(skip, take int, filter model.ClientFilter) ([]model.Client, error)
 	GetClientByID(id int) (*model.Client, error)
+	GetClientByJMBG(jmbg string) (*model.Client, error)
 	GetClientsCount() (int64, error)
 	DeleteClient(id int) error
 	CreateClient(client model.Client) (*model.Client, error)
@@ -33,6 +34,15 @@ func (c *clientService) GetAllClients(skip, take int, filter model.ClientFilter)
 func (c *clientService) GetClientByID(id int) (*model.Client, error) {
 	var client *model.Client
 	if err := db.Client.Preload("Documents").Preload("Seminars").Preload("Seminars.SeminarTheme").Preload("Seminars.SeminarStatus").Preload("Seminars.SeminarTheme.BaseSeminarType").First(&client, id).Error; err != nil {
+		return nil, err
+	}
+
+	return client, nil
+}
+
+func (c *clientService) GetClientByJMBG(jmbg string) (*model.Client, error) {
+	var client *model.Client
+	if err := db.Client.Where("jmbg", jmbg).First(&client).Error; err != nil {
 		return nil, err
 	}
 

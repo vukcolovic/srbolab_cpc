@@ -10,6 +10,8 @@
     <form-tag @formEvent="submitHandler" name="myForm" event="formEvent">
       <div class="row">
         <div class="col-sm-4">
+          <div class="row">
+            <div :class="[clientId ? 'col-sm-12' : 'col-sm-8']">
           <text-input
               v-model.trim="client.jmbg"
               label="JMBG"
@@ -20,6 +22,13 @@
               :styleInput=styleInputSmall
               :styleLabel=styleLabelSmall>
           </text-input>
+            </div>
+            <div class="col-sm-4 mt-4" v-if="!clientId">
+              <button class="iconBtn" title="Nađi" @click.prevent="getClientByJMBG()">
+                <i class="fa fa-search"></i>
+              </button>
+            </div>
+          </div>
 
           <div class="row">
             <div class="col-sm-6">
@@ -157,8 +166,8 @@
             <label :style=styleLabelSmall for="wait_seminar">Klijent čeka seminar:</label>
             <input id="wait_seminar" type="checkbox" :hidden="readonly" v-model="client.wait_seminar" />
           </div>
-
         </div>
+
         <div class="col-sm-4">
           <text-input
               v-model.trim="client.address.place"
@@ -362,9 +371,22 @@ export default {
       selectedOpenSeminar: null,
       openedSeminars: [],
       action: "",
+      clientId: "",
     }
   },
   methods: {
+    getClientByJMBG() {
+      axios.get('/clients/jmbg/' + this.client.jmbg).then((response) => {
+        if (response.data === null || response.data.Status === 'error') {
+          this.toast.error(response.data != null ? response.data.ErrorMessage : "");
+          return;
+        }
+        var foundClient = JSON.parse(response.data.Data);
+        router.push("/client?action=update&id=" + foundClient.ID.toString());
+      }, (error) => {
+        this.toast.error(error.message);
+      });
+    },
     downloadFile(i) {
       const arr = this.client.documents[i].content.split(',')
       var sampleArr = this.base64ToArrayBuffer(arr[1]);

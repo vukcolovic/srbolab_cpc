@@ -29,6 +29,7 @@ func RunServer(host string) {
 	s.HandleFunc("/update", handlers.UpdateClient).Methods("POST")
 	s.HandleFunc("/list", handlers.ListClients).Methods("POST")
 	s.HandleFunc("/id/{id}", handlers.GetClientByID).Methods("GET")
+	s.HandleFunc("/jmbg/{jmbg}", handlers.GetClientByJMBG).Methods("GET")
 	s.HandleFunc("/delete/{id}", handlers.DeleteClient).Methods("GET")
 	s.HandleFunc("/count", handlers.CountClients).Methods("GET")
 

@@ -103,6 +103,25 @@ func GetClientByID(w http.ResponseWriter, req *http.Request) {
 	SetSuccessResponse(w, client)
 }
 
+func GetClientByJMBG(w http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	jmbg, ok := vars["jmbg"]
+	if !ok {
+		logoped.ErrorLog.Println("missing parameter jmbg")
+		SetErrorResponse(w, NewMissingRequestParamError("jmbg"))
+		return
+	}
+
+	client, err := service.ClientService.GetClientByJMBG(jmbg)
+	if err != nil {
+		logoped.ErrorLog.Println(err.Error())
+		SetErrorResponse(w, errors.New("Greška prilikom povlačenja klijenta: "+err.Error()))
+		return
+	}
+
+	SetSuccessResponse(w, client)
+}
+
 func UpdateClient(w http.ResponseWriter, r *http.Request) {
 	var client model.Client
 	decoder := json.NewDecoder(r.Body)

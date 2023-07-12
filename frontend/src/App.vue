@@ -9,7 +9,7 @@
       </div>
       <div class="d-flex align-items-stretch" style="height: 90%">
         <div class="col-sm-12 overflow-scroll">
-          <router-view></router-view>
+          <router-view :key="$route.fullPath"></router-view>
         </div>
       </div>
       <div>
