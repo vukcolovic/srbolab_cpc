@@ -14,6 +14,9 @@
             </a>
             <ul class="dropdown-menu" aria-labelledby="navBarDropDown">
               <li>
+                <router-link class="dropdown-item" to="/clients-waiting">Čekaonica</router-link>
+              </li>
+              <li>
                 <router-link class="dropdown-item" to="/clients">Vozači</router-link>
               </li>
             </ul>

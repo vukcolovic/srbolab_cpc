@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import BodyComponent from './../components/BodyComponent.vue'
 import LoginComponent from './../components/LoginComponent.vue'
+import ClientWaitingList from '../components/ClientWaitingList.vue'
 import ClientsList from '../components/ClientsList.vue'
 import ClientEdit from './../components/ClientEdit.vue'
 import UsersList from '../components/UsersList.vue'
@@ -28,8 +29,13 @@ const routes = [
     component: SupportComponent,
   },
   {
+    path: '/clients-waiting',
+    name: 'ClientWaitingList',
+    component: ClientWaitingList,
+  },
+  {
     path: '/clients',
-    name: 'Clients',
+    name: 'ClientsList',
     component: ClientsList,
   },
   {

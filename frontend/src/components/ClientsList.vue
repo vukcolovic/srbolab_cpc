@@ -2,15 +2,15 @@
   <div class="container">
     <div class="row mt-2">
       <div class="btn-group">
-      <button class="iconBtn" title="Dodaj" @click="$router.push({name: 'ClientEdit', query: {id: '', action: 'add' }})">
-        <i class="fa fa-user-plus"></i>
-      </button>
-      <button class="iconBtn" title="Pregledaj" :disabled="selectedClient == null" @click="$router.push({name: 'ClientEdit', query: {id: selectedClient.ID, action: 'view' }})">
-        <i class="fa fa-user"></i>
-      </button>
-      <button class="iconBtn" title="Izmeni" :disabled="!selectedClient" @click="$router.push({name: 'ClientEdit', query: {id: selectedClient.ID, action: 'update' }})">
-        <i class="fa fa-user-md">
-        </i></button>
+        <button class="iconBtn" title="Dodaj" @click="$router.push({name: 'ClientEdit', query: {id: '', action: 'add' }})">
+          <i class="fa fa-user-plus"></i>
+        </button>
+        <button class="iconBtn" title="Pregledaj" :disabled="table.selectedClient == null" @click="$router.push({name: 'ClientEdit', query: {id: table.selectedClient.ID, action: 'view' }})">
+          <i class="fa fa-user"></i>
+        </button>
+        <button class="iconBtn" title="Izmeni" :disabled="!table.selectedClient" @click="$router.push({name: 'ClientEdit', query: {id: table.selectedClient.ID, action: 'update' }})">
+          <i class="fa fa-user-md">
+          </i></button>
         <button class="iconBtn ms-auto" title="Filter" type="button" data-bs-toggle="collapse" data-bs-target="#filter" aria-expanded="false" aria-controls="filter">
           <i class="fa fa-filter" aria-hidden="true">
           </i>
@@ -23,14 +23,14 @@
     </div>
     <div class="collapse multi-collapse border" style="font-size: 0.7em" id="filter">
       <div class="row">
-          <div class="col-sm-3">
-            <label for="first_name" style="margin-right: 5px">Ime</label>
-            <input type="text" id="first_name" name="Ime" v-model="filter.first_name" />
-          </div>
         <div class="col-sm-3">
-            <label for="last_name" style="margin-right: 5px">Prezime</label>
-            <input type="text" id="last_name" name="Prezime" v-model="filter.last_name" />
-          </div>
+          <label for="first_name" style="margin-right: 5px">Ime</label>
+          <input type="text" id="first_name" name="Ime" v-model="filter.first_name" />
+        </div>
+        <div class="col-sm-3">
+          <label for="last_name" style="margin-right: 5px">Prezime</label>
+          <input type="text" id="last_name" name="Prezime" v-model="filter.last_name" />
+        </div>
         <div class="col-sm-3">
           <label for="jmbg" style="margin-right: 5px">JMBG</label>
           <input type="text" id="jmbg" name="jmbg" v-model="filter.jmbg" />
@@ -39,90 +39,121 @@
     </div>
 
     <div class="row mt-2">
-      <table>
-        <thead>
-          <tr class="bg-primary text-white">
-            <td style="width: 10%;">Ime i Prezime</td>
-            <td style="width: 10%;">JMBG</td>
-            <td style="width: 10%;">Firma</td>
-            <td style="width: 5%;">Plaćeno</td>
-            <td style="width: 30%;">Seminar</td>
-            <td style="width: 5%;"></td>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="row in rows" :key="row.ID">
-            <td>{{row.first_name}} {{row.last_name}}</td>
-            <td>{{row.jmbg}}</td>
-            <td>TODO</td>
-            <td><v-select
-                v-model="row.payed"
-                :options="yesNoOptions"
-                :style="styleInputSmall"
-                label="label"
-                :reduce="opt => opt.value"
-                placeholder="Traži">
-            </v-select></td>
-            <td>
-              <v-select
-                  v-model="row.selectedSeminar"
-                  :options="openedSeminars"
-                  :style="styleInputSmall"
-                  label="base_info"
-                  placeholder="Traži">
-              </v-select>
-            </td>
-            <td><button @click.prevent="saveClient(row)" class="btn btn-primary">Snimi</button></td>
-          </tr>
-        </tbody>
-      </table>
+      <vue-table-lite
+          ref="localTable"
+          @row-clicked="selectClient"
+          :total= "table.totalCount"
+          :columns="table.columns"
+          :messages="table.messages"
+          :rows="table.rows"
+          @do-search="doSearch"
+          :rowClasses=table.rowClasess
+          :is-loading="table.isLoading"
+      ></vue-table-lite>
     </div>
   </div>
 </template>
 
 <script>
+import VueTableLite from "vue3-table-lite";
 import axios from "axios";
-import vSelect from "vue-select";
-import {styleMixin} from "@/mixins/styleMixin";
-import {apiMixin} from "@/mixins/apiMixin";
-import {commonMixin} from "@/mixins/commonMixin";
-import router from "@/router";
+import {reactive} from "vue";
 import {useToast} from "vue-toastification";
-// import {useToast} from "vue-toastification";
 
 export default {
   name: 'ClientsList',
-  components: {vSelect},
-  mixins:[styleMixin, apiMixin, commonMixin],
+  components: { VueTableLite },
   data() {
     return {
-      rows: [],
-      totalCount: 0,
-      selectedClient: null,
-      filter: {verified: true, wait_seminar: true, jmbg: "", first_name: "", last_name: ""},
-      openedSeminars: [],
+      filter: {verified: false, wait_seminar: false, jmbg: "", first_name: "", last_name: ""}
     }
   },
-  methods: {
-    async saveClient(row) {
-      if (row.selectedSeminar) {
-        const payed = row.payed=== "true" ? true : false;
-        row.seminars.push({"client_id": row.ID, "seminar_id": row.selectedSeminar.ID, "payed": payed});
-        row.wait_seminar = false;
-      }
-      delete row.selectedSeminar;
-      delete row.payed;
-      await axios.post('/clients/update', JSON.stringify(row)).then((response) => {
-        if (response.data === null || response.data.Status === 'error') {
-          this.toast.error(response.data != null ? response.data.ErrorMessage : "");
-          return;
+  setup() {
+    // Table config
+    const table = reactive({
+      selectedClient: null,
+      isLoading: false,
+      isReSearch: false,
+      rowClasess: (row) => { return ['is-rows-el', 'row_id_' + row.ID]},
+      // filterObject: {},
+      columns: [
+        {
+          label: 'ID',
+          field: 'ID',
+          width: '3%',
+          isKey: true,
+        },
+        {
+          label: 'Ime',
+          field: 'first_name',
+          width: '10%',
+        },
+        {
+          label: 'Prezime',
+          field: 'last_name',
+          width: '10%',
+        },
+        {
+          label: 'Broj telefona',
+          field: 'phone_number',
+          width: '10%',
+        },
+        {
+          label: 'Email',
+          field: 'email',
+          width: '10%',
+        },
+        {
+          label: 'JMBG',
+          field: 'jmbg',
+          width: '10%',
+        },
+        {
+          label: 'Mesto',
+          field: 'place',
+          width: '10%',
+        },
+        {
+          label: 'Verifikovan',
+          field: 'verified_text',
+          width: '10%',
+        },
+        {
+          label: 'Čeka seminar',
+          field: 'waiting_seminar_text',
+          width: '10%',
         }
-        this.toast.info("Uspešno ažuriran klijent.");
-        router.push("/clients");
-      }, (error) => {
-        this.toast.error(error.message);
+      ],
+      rows: [],
+      totalCount: 0,
+      messages: {
+        pagingInfo: "Prikaz {0} - {1} od {2}",
+        pageSizeChangeLabel: "Broj redova:",
+        gotoPageLabel: "Idi na stranu:",
+        noDataAvailable: "Nema podataka",
+      },
+    });
+
+    const selectClient= (rowData) => {
+      // clear all
+      Array.from(document.getElementsByClassName('is-rows-el')).map((el) => {
+        el.style.backgroundColor = 'white';
       });
-    },
+      //style checked row
+      if (document.getElementsByClassName('row_id_' + rowData.ID)[0]) {
+        document.getElementsByClassName('row_id_' + rowData.ID)[0].style.backgroundColor = '#E8E8E8';
+      }
+      table.selectedClient = rowData;
+    }
+
+    const toast = useToast();
+    return {
+      toast,
+      table,
+      selectClient,
+    };
+  },
+  methods: {
     async doSearch(offset, limit, order, sort) {
       console.log(order, sort)
       this.isLoading = true;
@@ -131,15 +162,15 @@ export default {
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;
         }
-        this.rows = JSON.parse(response.data.Data);
-        this.rows.forEach(vs => {
+        this.table.rows = JSON.parse(response.data.Data);
+        this.table.rows.forEach(vs => {
           vs.first_name = vs.person.first_name;
           vs.last_name = vs.person.last_name;
+          vs.email = vs.person.email;
+          vs.place = vs.address.place;
+          vs.phone_number = vs.person.phone_number;
           vs.verified_text = vs.verified ? "Da" : "Ne";
           vs.waiting_seminar_text = vs.wait_seminar ? "Da" : "Ne";
-          if (vs.seminars == null) {
-            vs.seminars = [];
-          }
         });
       }, (error) => {
         this.toast.error(error.message);
@@ -148,30 +179,46 @@ export default {
       this.isLoading = false;
     },
     async countClients() {
-        await axios.get('/clients/count').then((response) => {
-          if (response.data === null || response.data.Status === 'error') {
-            this.toast.error(response.data != null ? response.data.ErrorMessage : "");
-            return;
-          }
-            this.totalCount = response.data.Data;
-        }, (error) => {
-          this.toast.error(error.message);
-        });
+      await axios.get('/clients/count').then((response) => {
+        if (response.data === null || response.data.Status === 'error') {
+          this.toast.error(response.data != null ? response.data.ErrorMessage : "");
+          return;
+        }
+        this.table.totalCount = response.data.Data;
+      }, (error) => {
+        this.toast.error(error.message);
+      });
     }
   },
   async created() {
     await this.countClients();
     await this.doSearch(0, 10, 'id', 'asc');
-    await this.getSeminarsByStatusCode("OPENED").then(result => this.openedSeminars = result);
-  }, setup() {
-    const toast = useToast();
-    return {toast}
   }
-  }
+}
 </script>
 
 <style scoped>
-table {
-  table-layout: fixed;
+::v-deep(.vtl-table .vtl-thead .vtl-thead-th) {
+  font-size: 12px;
+}
+::v-deep(.vtl-table td),
+::v-deep(.vtl-table tr) {
+  font-size: 12px;
+  padding: 5px;
+}
+::v-deep(.vtl-paging-info) {
+  font-size: 12px;
+  padding: 5px;
+}
+::v-deep(.vtl-paging-count-label),
+::v-deep(.vtl-paging-page-label),
+::v-deep(.vtl-paging-count-dropdown),
+::v-deep(.vtl-paging-page-dropdown){
+  font-size: 12px;
+  padding: 5px;
+}
+::v-deep(.vtl-paging-pagination-page-link) {
+  font-size: 12px;
+  padding: 5px;
 }
 </style>

@@ -30,6 +30,7 @@ type SeminarTheme struct {
 	BaseSeminarType   BaseSeminarType `json:"base_seminar_type"`
 	Code              string          `json:"code"`
 	Name              string          `json:"name"`
+	NumberOfDays      int             `json:"number_of_days"`
 }
 
 type SeminarStatus struct {

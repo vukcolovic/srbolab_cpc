@@ -54,7 +54,7 @@ func ListSeminarDays(w http.ResponseWriter, r *http.Request) {
 	queryParams := r.URL.Query()
 	seminarIDParam, ok := queryParams["seminar_id"]
 	if !ok {
-		logoped.ErrorLog.Println("missing parameter skip")
+		logoped.ErrorLog.Println("missing parameter seminar_id")
 		SetErrorResponse(w, NewMissingRequestParamError("seminar_id"))
 		return
 	}
@@ -69,6 +69,31 @@ func ListSeminarDays(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logoped.ErrorLog.Println(err.Error())
 		SetErrorResponse(w, errors.New("Greška prilikom povlačenja liste seminar dana: "+err.Error()))
+		return
+	}
+
+	SetSuccessResponse(w, seminarDays)
+}
+
+func CreateAllSeminarDaysForSeminar(w http.ResponseWriter, r *http.Request) {
+	queryParams := r.URL.Query()
+	seminarIDParam, ok := queryParams["seminar_id"]
+	if !ok {
+		logoped.ErrorLog.Println("missing parameter skip")
+		SetErrorResponse(w, NewMissingRequestParamError("seminar_id"))
+		return
+	}
+	seminarID, err := strconv.Atoi(seminarIDParam[0])
+	if err != nil {
+		logoped.ErrorLog.Println(err.Error())
+		SetErrorResponse(w, NewWrongParamFormatErrorError("seminar_id", seminarIDParam[0]))
+		return
+	}
+
+	seminarDays, err := service.SeminarDayService.CreateAllSeminarDaysForSeminar(seminarID)
+	if err != nil {
+		logoped.ErrorLog.Println(err.Error())
+		SetErrorResponse(w, errors.New("Greška prilikom kreiranja svih seminar dana za seminar: "+err.Error()))
 		return
 	}
 

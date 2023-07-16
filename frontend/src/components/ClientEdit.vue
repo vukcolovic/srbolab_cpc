@@ -300,7 +300,7 @@
                 <button class="iconBtn" title="Obriši" @click.prevent="removeSeminar(seminarClient)">
                   <i class="fa fa-remove"></i>
                 </button>
-                <span v-if="seminarClient.paid" class="bg-success">Plaćeno</span><span v-if="!seminarClient.paid" class="bg-warning">Nije plaćeno</span>{{seminarClient.seminar.ID}}: {{seminarClient.seminar.seminar_theme.base_seminar_type.name}} {{seminarClient.seminar.seminar_theme.name}} {{getDateInMMDDYYYYFormat(seminarClient.seminar.start_date)}}
+                <span v-if="seminarClient.payed" class="bg-success">Plaćeno</span><span v-if="!seminarClient.payed" class="bg-warning">Nije plaćeno</span>{{seminarClient.seminar.ID}}: {{seminarClient.seminar.seminar_theme.base_seminar_type.name}} {{seminarClient.seminar.seminar_theme.name}} {{getDateInMMDDYYYYFormat(seminarClient.seminar.start_date)}}
               </li>
             </ul>
           </div>
@@ -425,7 +425,6 @@ export default {
       this.client.documents.splice(i, 1);
     },
     async getClientById() {
-      await this.getSeminarsByStatusCode("OPENED").then(result => this.openedSeminars = result);
       axios.get('/clients/id/' + this.clientId).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");
@@ -449,7 +448,22 @@ export default {
         this.toast.error(error.message);
       });
     },
+    validateClient() {
+      if (!this.client.jmbg) {
+        return "Polje jmbg mora biti popunjeno!";
+      }
+      if (this.client.jmbg.length != 13) {
+        return "Jmbg mora imati 13 cifara!";
+      }
+
+      return "";
+    },
     async submitHandler() {
+      const errMsg = this.validateClient();
+      if (errMsg) {
+        this.toast.warning(errMsg);
+        return;
+      }
       if (this.selectedOpenSeminar) {
         this.client.seminars.push({"client_id": this.client.ID, "seminar_id": this.selectedOpenSeminar.ID});
         this.client.wait_seminar =false;
@@ -462,7 +476,7 @@ export default {
     },
     async createClient() {
       await axios.post('/clients/create', JSON.stringify(this.client)).then((response) => {
-        if (response.data === null || response.data.Status === 'error') {
+        if (response.data == null || response.data.Status === 'error') {
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;
         }
@@ -489,7 +503,8 @@ export default {
     const toast = useToast();
     return {toast}
   },
-  mounted() {
+  async mounted() {
+    await this.getSeminarsByStatusCode("OPENED").then(result => this.openedSeminars = result);
     if (this.$route.query.id !== '') {
       this.clientId = this.$route.query.id;
       this.getClientById();

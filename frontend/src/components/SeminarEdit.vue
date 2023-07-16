@@ -11,6 +11,9 @@
     <form-tag event="formEvent" name="myForm" @formEvent="submitHandler">
       <div class="row">
         <div class="col-sm-4">
+          <div v-if="seminar.seminar_status && action !== 'add'">
+            Status seminara: {{seminar.seminar_status.name}}
+          </div>
           <label :style="styleLabel" class="mb-1 mt-1">Tip seminara</label>
           <v-select
               v-model="selectedBaseSeminarType"
@@ -65,19 +68,47 @@
           </text-input>
         </div>
 
-        <div  class="col-sm-6">
+        <div class="col-sm-3">
+        </div>
+
+        <div class="col-sm-5">
           <div v-if="action !== 'add'">
+            <h5>Spisak polaznika</h5>
+            <table class="styled-table">
+              <thead>
+              <tr class="bg-primary text-white">
+                <td style="width: 20%;">Plaćeno</td>
+                <td style="width: 40%;">Firma</td>
+                <td style="width: 40%;">Ime i prezime</td>
+              </tr>
+              </thead>
+              <tbody>
+              <tr v-for="trainee in seminar.trainees" :key="trainee.client_id">
+                <td :class="[trainee.payed ? 'bg-success' : 'bg-danger']">{{ trainee.payed  ? 'DA' : 'NE' }}</td>
+                <td class="p-1">{{trainee.client.company.name}}</td>
+                <td class="p-1">{{trainee.client.person.first_name}} {{trainee.client.person.last_name}}</td>
+              </tr>
+              </tbody>
+            </table>
 
           </div>
+
+            <div class="shell mt-3">
+              <div class="bar" :style="{ width: percentFilled  + '%' }">
+              </div>
+              Broj polaznika: <span>{{seminar.trainees.length}} / {{seminar.class_room.max_students}}</span>
+            </div>
+
         </div>
         <div class="col-sm-5">
           <input v-if="this.action === 'add'" class="btn btn-primary m-2" type="submit" value="Snimi">
           <input v-if="this.action === 'update'" class="btn btn-primary m-2" type="submit" value="Snimi">
+          <input v-if="this.seminar && this.seminar.seminar_status && (this.seminar.seminar_status.ID === SEMINAR_STATUSES.OPENED || this.seminar.seminar_status.ID === SEMINAR_STATUSES.FILLED)" class="btn btn-primary m-2" @click.prevent="startSeminar()" value="Startuj seminar">
         </div>
       </div>
     </form-tag>
 
-    <div v-if="action !== 'add'">
+    <div v-if="this.seminar && this.seminar.seminar_status && (this.seminar.seminar_status.ID === SEMINAR_STATUSES.IN_PROGRESS || this.seminar.seminar_status.ID === SEMINAR_STATUSES.CLOSED)">
       <hr>
       <h4>Dani seminara</h4>
       <div v-for="day in seminar.days" :key="day.number"
@@ -113,14 +144,18 @@ export default {
     readonly() {
       return this.action === 'view';
     },
+    percentFilled() {
+      return (this.seminar.trainees.length/this.seminar.class_room.max_students) *100;
+    }
   },
   data() {
     return {
       seminar: {
         start_date: null,
-        class_room: null,
+        class_room: {},
         seminar_theme: null,
         seminar_status: null,
+        trainees: [],
         days: []
       },
       action: "view",
@@ -176,19 +211,23 @@ export default {
         this.seminar.start_date = this.getDateInMMDDYYYYFormat(this.seminar.start_date);
         this.selectedBaseSeminarType = this.seminar.seminar_theme.base_seminar_type;
         this.getAllSeminarThemesByTypeId(this.seminar.seminar_theme.base_seminar_type.ID);
+        if (this.seminar.trainees == null) {
+          this.seminar.trainees = [];
+        }
       }, (error) => {
         this.toast.error(error.message);
       });
     },
     async submitHandler() {
-      this.seminar.start_date = this.getBackendFormat(this.seminar.start_date);
       if (this.seminarId !== '') {
         await this.updateSeminar();
       } else {
         await this.createSeminar();
       }
+      router.push("/seminars");
     },
     async createSeminar() {
+      this.seminar.start_date = this.getBackendFormat(this.seminar.start_date);
       this.seminar.seminar_status = this.seminarStatuses.find(status => status.ID === this.SEMINAR_STATUSES.OPENED);
       await axios.post('/seminars/create', JSON.stringify(this.seminar)).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
@@ -196,23 +235,39 @@ export default {
           return;
         }
         this.toast.info("Uspešno kreiran seminar!");
-        router.push("/seminars");
       }, (error) => {
         this.toast.error(error.message);
       });
     },
     async updateSeminar() {
+      this.seminar.start_date = this.getBackendFormat(this.seminar.start_date);
       await axios.post('/seminars/update', JSON.stringify(this.seminar)).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;
         }
         this.toast.info("Uspešno ažuriran seminar!");
-        router.push("/seminars");
       }, (error) => {
         this.toast.error(error.message);
       });
     },
+    async createSeminarDays() {
+      await axios.get('/seminar-days/create-all/' + this.seminarId).then((response) => {
+        if (response.data === null || response.data.Status === 'error') {
+          this.toast.error(response.data != null ? response.data.ErrorMessage : "");
+          return;
+        }
+        this.toast.info("Uspešno kreirani dani seminara!");
+      }, (error) => {
+        this.toast.error(error.message);
+      });
+    },
+    startSeminar() {
+      this.seminar.seminar_status = this.seminarStatuses.find(ss => ss.ID == this.SEMINAR_STATUSES.IN_PROGRESS);
+      this.updateSeminar();
+
+      this.createSeminarDays();
+    }
   },
   setup() {
     const toast = useToast();
@@ -230,3 +285,51 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.shell {
+  height: 20px;
+  width: 250px;
+  border: 1px solid #aaa;
+  border-radius: 13px;
+
+}
+
+.bar {
+  background: linear-gradient(to right, #007bff, #007bff);
+  height: 20px;
+  width: 15px;
+  border-radius: 9px;
+  span {
+    float: right;
+    color: #fff;
+    font-size: 0.7em
+  }
+}
+
+.styled-table {
+  border-collapse: collapse;
+  margin: 0px 0;
+  font-family: sans-serif;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.styled-table thead tr {
+  background-color: #009879;
+  color: #ffffff;
+  text-align: left;
+}
+
+.styled-table th,
+.styled-table td {
+  padding: 1px 1px;
+}
+
+.styled-table tbody tr {
+  border-bottom: 1px solid #dddddd;
+}
+
+.styled-table tbody tr:nth-of-type(even) {
+  background-color: #f3f3f3;
+}
+</style>
