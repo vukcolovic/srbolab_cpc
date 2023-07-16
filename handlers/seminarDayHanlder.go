@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
+	"github.com/gorilla/mux"
 	"net/http"
 	"srbolab_cpc/logoped"
 	"srbolab_cpc/model"
@@ -51,17 +52,17 @@ func UpdateSeminarDay(w http.ResponseWriter, r *http.Request) {
 }
 
 func ListSeminarDays(w http.ResponseWriter, r *http.Request) {
-	queryParams := r.URL.Query()
-	seminarIDParam, ok := queryParams["seminar_id"]
+	vars := mux.Vars(r)
+	seminarIdParam, ok := vars["seminar_id"]
 	if !ok {
 		logoped.ErrorLog.Println("missing parameter seminar_id")
 		SetErrorResponse(w, NewMissingRequestParamError("seminar_id"))
 		return
 	}
-	seminarID, err := strconv.Atoi(seminarIDParam[0])
+	seminarID, err := strconv.Atoi(seminarIdParam)
 	if err != nil {
 		logoped.ErrorLog.Println(err.Error())
-		SetErrorResponse(w, NewWrongParamFormatErrorError("seminar_id", seminarIDParam[0]))
+		SetErrorResponse(w, NewWrongParamFormatErrorError("seminar_id", seminarIdParam))
 		return
 	}
 
@@ -76,17 +77,17 @@ func ListSeminarDays(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateAllSeminarDaysForSeminar(w http.ResponseWriter, r *http.Request) {
-	queryParams := r.URL.Query()
-	seminarIDParam, ok := queryParams["seminar_id"]
+	vars := mux.Vars(r)
+	seminarIdParam, ok := vars["seminar_id"]
 	if !ok {
-		logoped.ErrorLog.Println("missing parameter skip")
+		logoped.ErrorLog.Println("missing parameter seminar_id")
 		SetErrorResponse(w, NewMissingRequestParamError("seminar_id"))
 		return
 	}
-	seminarID, err := strconv.Atoi(seminarIDParam[0])
+	seminarID, err := strconv.Atoi(seminarIdParam)
 	if err != nil {
 		logoped.ErrorLog.Println(err.Error())
-		SetErrorResponse(w, NewWrongParamFormatErrorError("seminar_id", seminarIDParam[0]))
+		SetErrorResponse(w, NewWrongParamFormatErrorError("seminar_id", seminarIdParam))
 		return
 	}
 

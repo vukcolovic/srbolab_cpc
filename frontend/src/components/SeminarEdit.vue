@@ -265,7 +265,6 @@ export default {
     startSeminar() {
       this.seminar.seminar_status = this.seminarStatuses.find(ss => ss.ID == this.SEMINAR_STATUSES.IN_PROGRESS);
       this.updateSeminar();
-
       this.createSeminarDays();
     }
   },
