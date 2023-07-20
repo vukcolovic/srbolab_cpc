@@ -52,6 +52,9 @@
               <li>
                 <router-link class="dropdown-item" to="/companies">Firme</router-link>
               </li>
+              <li>
+                <router-link class="dropdown-item" to="/locations">Lokacije</router-link>
+              </li>
             </ul>
           </li>
           <li class="nav-item">

@@ -60,6 +60,10 @@ func RunServer(host string) {
 
 	s = r.PathPrefix("/api/locations").Subrouter()
 	s.HandleFunc("/list", handlers.ListLocations).Methods("GET")
+	s.HandleFunc("/create", handlers.CreateLocation).Methods("POST")
+	s.HandleFunc("/update", handlers.UpdateLocation).Methods("POST")
+	s.HandleFunc("/id/{id}", handlers.GetLocationByID).Methods("GET")
+	s.HandleFunc("/count", handlers.CountLocations).Methods("GET")
 	s.HandleFunc("/class-rooms/location/{locationId}", handlers.ListClassRoomsByLocation).Methods("GET")
 
 	s = r.PathPrefix("/api/seminar-types").Subrouter()
