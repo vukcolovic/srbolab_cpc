@@ -71,8 +71,8 @@
         <div class="col-sm-3">
         </div>
 
-        <div class="col-sm-5">
-          <div v-if="action !== 'add'">
+        <div class="col-sm-5" v-if="action !== 'add'">
+          <div>
             <h5>Spisak polaznika</h5>
             <table class="styled-table">
               <thead>
@@ -90,7 +90,6 @@
               </tr>
               </tbody>
             </table>
-
           </div>
 
             <div class="shell mt-3">
@@ -100,10 +99,12 @@
             </div>
 
         </div>
+        <div class="row"></div>
         <div class="col-sm-5">
           <input v-if="this.action === 'add'" class="btn btn-primary m-2" type="submit" value="Snimi">
           <input v-if="this.action === 'update'" class="btn btn-primary m-2" type="submit" value="Snimi">
           <input v-if="this.seminar && this.seminar.seminar_status && (this.seminar.seminar_status.ID === SEMINAR_STATUSES.OPENED || this.seminar.seminar_status.ID === SEMINAR_STATUSES.FILLED)" class="btn btn-primary m-2" @click.prevent="startSeminar()" value="Startuj seminar">
+          <input v-if="this.seminar && this.seminar.seminar_status && this.seminar.seminar_status.ID === SEMINAR_STATUSES.IN_PROGRESS" class="btn btn-primary m-2" @click.prevent="finishSeminar()" value="Završi seminar">
         </div>
       </div>
     </form-tag>
@@ -145,6 +146,9 @@ export default {
       return this.action === 'view';
     },
     percentFilled() {
+      if (!this.seminarId) {
+        return ;
+      }
       return (this.seminar.trainees.length/this.seminar.class_room.max_students) *100;
     }
   },
@@ -266,6 +270,10 @@ export default {
       this.seminar.seminar_status = this.seminarStatuses.find(ss => ss.ID == this.SEMINAR_STATUSES.IN_PROGRESS);
       this.updateSeminar();
       this.createSeminarDays();
+    },
+    finishSeminar() {
+      this.seminar.seminar_status = this.seminarStatuses.find(ss => ss.ID == this.SEMINAR_STATUSES.CLOSED);
+      this.updateSeminar();
     }
   },
   setup() {
