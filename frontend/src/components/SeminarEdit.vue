@@ -193,7 +193,7 @@ export default {
       this.getAllClassRoomsLocationId(this.location.ID);
     },
     async getAllClassRoomsLocationId(locationId) {
-      await axios.get('/locations/class-rooms/location/' +locationId).then((response) => {
+      await axios.get('/class-rooms/location/' +locationId).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;

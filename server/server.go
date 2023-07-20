@@ -64,7 +64,13 @@ func RunServer(host string) {
 	s.HandleFunc("/update", handlers.UpdateLocation).Methods("POST")
 	s.HandleFunc("/id/{id}", handlers.GetLocationByID).Methods("GET")
 	s.HandleFunc("/count", handlers.CountLocations).Methods("GET")
-	s.HandleFunc("/class-rooms/location/{locationId}", handlers.ListClassRoomsByLocation).Methods("GET")
+
+	s = r.PathPrefix("/api/class-rooms").Subrouter()
+	s.HandleFunc("/location/{locationId}", handlers.ListClassRoomsByLocation).Methods("GET")
+	s.HandleFunc("/list", handlers.ListClassRooms).Methods("GET")
+	s.HandleFunc("/create", handlers.CreateClassRoom).Methods("POST")
+	s.HandleFunc("/update", handlers.UpdateClassRoom).Methods("POST")
+	s.HandleFunc("/id/{id}", handlers.GetClassRoomByID).Methods("GET")
 
 	s = r.PathPrefix("/api/seminar-types").Subrouter()
 	s.HandleFunc("/list", handlers.ListBaseSeminarTypes).Methods("GET")

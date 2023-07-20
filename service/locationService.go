@@ -19,7 +19,6 @@ type locationServiceInterface interface {
 	GetLocationsCount() (int64, error)
 	CreateLocation(location model.Location) (*model.Location, error)
 	UpdateLocation(location model.Location) (*model.Location, error)
-	GetClassRoomsByLocationID(locationID int) ([]model.ClassRoom, error)
 }
 
 func (c *locationService) GetAllLocations() ([]model.Location, error) {
@@ -64,12 +63,4 @@ func (c *locationService) UpdateLocation(location model.Location) (*model.Locati
 	}
 
 	return &location, nil
-}
-
-func (c *locationService) GetClassRoomsByLocationID(locationID int) ([]model.ClassRoom, error) {
-	var classRooms []model.ClassRoom
-	if err := db.Client.Where("location_id", locationID).Find(&classRooms).Error; err != nil {
-		return nil, err
-	}
-	return classRooms, nil
 }
