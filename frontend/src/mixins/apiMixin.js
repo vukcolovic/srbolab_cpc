@@ -9,6 +9,7 @@ export const apiMixin = {
             locations: [],
             seminarBaseTypes: [],
             seminarStatuses: [],
+            companies: [],
         }
     },
     methods: {
@@ -16,6 +17,7 @@ export const apiMixin = {
             await axios.get('/locations/list').then((response) => {
                 if (response.data === null || response.data.Status === 'error') {
                     this.toast.error(response.data != null ? response.data.ErrorMessage : "");
+                    return;
                 }
                 this.locations = JSON.parse(response.data.Data);
                 this.locations.forEach(s => {
@@ -25,10 +27,22 @@ export const apiMixin = {
                 this.toast.error(error.message);
             });
         },
+        async getAllCompanies() {
+            await axios.get('/companies/list?skip=0&take=10000').then((response) => {
+                if (response.data === null || response.data.Status === 'error') {
+                    this.toast.error(response.data != null ? response.data.ErrorMessage : "");
+                    return;
+                }
+                this.companies = JSON.parse(response.data.Data);
+            }, (error) => {
+                this.toast.error(error.message);
+            });
+        },
         async getAllBaseSeminarTypes() {
             await axios.get('/seminar-types/list').then((response) => {
                 if (response.data === null || response.data.Status === 'error') {
                     this.toast.error(response.data != null ? response.data.ErrorMessage : "");
+                    return;
                 }
                 this.seminarBaseTypes = JSON.parse(response.data.Data);
             }, (error) => {
@@ -39,6 +53,7 @@ export const apiMixin = {
             await axios.get('/seminar-statuses/list').then((response) => {
                 if (response.data === null || response.data.Status === 'error') {
                     this.toast.error(response.data != null ? response.data.ErrorMessage : "");
+                    return;
                 }
                 this.seminarStatuses = JSON.parse(response.data.Data);
             }, (error) => {

@@ -259,6 +259,16 @@
               :styleLabel=styleLabelSmall>
           </text-input>
 
+          <label :style="styleLabelSmall" class="mb-1 mt-1">Firma</label>
+          <v-select
+              v-model="client.company"
+              :disabled=readonly
+              :style="styleInputSmall"
+              :options="companies"
+              label="name"
+              placeholder="Traži">
+          </v-select>
+
           <label :style=styleLabelSmall>Dokumenta: </label>
           <ul>
             <li v-for="(doc, index) in client.documents" :key="index" style="list-style-type: none;">
@@ -355,6 +365,7 @@ export default {
         place_birth: "",
         country_birth: "",
         documents: [],
+        company: null,
         comment: "",
         resident: true,
         second_citizenship: "",
@@ -505,6 +516,7 @@ export default {
   },
   async mounted() {
     await this.getSeminarsByStatusCode("OPENED").then(result => this.openedSeminars = result);
+    await this.getAllCompanies();
     if (this.$route.query.id !== '') {
       this.clientId = this.$route.query.id;
       this.getClientById();
