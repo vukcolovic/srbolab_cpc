@@ -76,9 +76,57 @@ func (c *clientService) CreateClient(client model.Client) (*model.Client, error)
 }
 
 func (c *clientService) UpdateClient(client model.Client) (*model.Client, error) {
+	oldClient, err := c.GetClientByID(int(client.ID))
+	if err != nil {
+		return nil, err
+	}
+	oldSeminars := oldClient.Seminars
+
 	result := db.Client.Session(&gorm.Session{FullSaveAssociations: true}).Updates(&client)
 	if result.Error != nil {
 		return nil, result.Error
+	}
+
+	for _, os := range oldSeminars {
+		if os.Seminar.SeminarStatus.ID != model.SEMINAR_STATUS_OPENED && os.Seminar.SeminarStatus.ID != model.SEMINAR_STATUS_FILLED {
+			continue
+		}
+		found := false
+		for _, ns := range client.Seminars {
+			if ns.Seminar.SeminarStatus.ID != model.SEMINAR_STATUS_OPENED && os.Seminar.SeminarStatus.ID != model.SEMINAR_STATUS_FILLED {
+				continue
+			}
+			if os.ClientID == ns.ClientID && os.SeminarID == ns.SeminarID {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			SeminarService.DeleteSeminarClient(os)
+		}
+
+	}
+
+	if len(client.Seminars) > len(oldSeminars) {
+		updatedClient, err := c.GetClientByID(int(client.ID))
+		if err != nil {
+			return nil, err
+		}
+		for _, ns := range updatedClient.Seminars {
+			found := false
+			for _, os := range oldSeminars {
+				if os.ClientID == ns.ClientID && os.SeminarID == ns.SeminarID {
+					found = true
+					break
+				}
+			}
+
+			if !found {
+				err = SeminarService.UpdateSeminarStatusIfNeed(int(ns.SeminarID))
+
+			}
+		}
 	}
 
 	return &client, nil

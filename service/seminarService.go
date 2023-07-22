@@ -20,6 +20,8 @@ type seminarServiceInterface interface {
 	DeleteSeminar(id int) error
 	CreateSeminar(seminar model.Seminar) (*model.Seminar, error)
 	UpdateSeminar(seminar model.Seminar) (*model.Seminar, error)
+	DeleteSeminarClient(clientSeminar model.ClientSeminar) error
+	UpdateSeminarStatusIfNeed(seminarID int) error
 }
 
 func (c *seminarService) GetAllSeminars(skip, take int) ([]model.Seminar, error) {
@@ -80,4 +82,52 @@ func (c *seminarService) UpdateSeminar(seminar model.Seminar) (*model.Seminar, e
 	}
 
 	return &seminar, nil
+}
+
+func (c *seminarService) DeleteSeminarClient(clientSeminar model.ClientSeminar) error {
+	result := db.Client.Exec("DELETE FROM client_seminars WHERE client_id = ? AND seminar_id = ?", clientSeminar.ClientID, clientSeminar.SeminarID)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return c.UpdateSeminarStatusIfNeed(int(clientSeminar.Seminar.ID))
+}
+
+func (c *seminarService) UpdateSeminarStatusIfNeed(seminarID int) error {
+	seminar, err := c.GetSeminarByID(seminarID)
+	if err != nil {
+		return err
+	}
+
+	if seminar.SeminarStatus.ID == model.SEMINAR_STATUS_FILLED && len(seminar.Trainees) < seminar.ClassRoom.MaxStudents {
+		statusOpened, err := SeminarStatusService.GetSeminarStatusByID(model.SEMINAR_STATUS_OPENED)
+		if err != nil {
+			return err
+		}
+		seminar.SeminarStatus = *statusOpened
+		seminar.SeminarStatusID = model.SEMINAR_STATUS_OPENED
+		_, err = c.UpdateSeminar(*seminar)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}
+
+	if seminar.SeminarStatus.ID == model.SEMINAR_STATUS_OPENED && len(seminar.Trainees) >= seminar.ClassRoom.MaxStudents {
+		statusFilled, err := SeminarStatusService.GetSeminarStatusByID(model.SEMINAR_STATUS_FILLED)
+		if err != nil {
+			return err
+		}
+		seminar.SeminarStatus = *statusFilled
+		seminar.SeminarStatusID = model.SEMINAR_STATUS_FILLED
+		_, err = c.UpdateSeminar(*seminar)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}
+
+	return nil
 }

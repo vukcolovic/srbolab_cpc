@@ -5,6 +5,13 @@ import (
 	"time"
 )
 
+const (
+	SEMINAR_STATUS_OPENED      = 1
+	SEMINAR_STATUS_FILLED      = 2
+	SEMINAR_STATUS_IN_PROGRESS = 3
+	SEMINAR_STATUS_CLOSED      = 4
+)
+
 type Seminar struct {
 	gorm.Model
 	Start           time.Time       `json:"start_date"`
