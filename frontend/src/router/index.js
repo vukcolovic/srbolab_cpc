@@ -13,6 +13,8 @@ import CompaniesList from '../components/CompaniesList.vue'
 import CompanyEdit from './../components/CompanyEdit.vue'
 import LocationsList from '../components/LocationsList.vue'
 import LocationEdit from './../components/LocationEdit.vue'
+import ClassRoomsList from '../components/ClassRoomsList.vue'
+import ClassRoomEdit from './../components/ClassRoomEdit.vue'
 
 const routes = [
   {
@@ -88,6 +90,17 @@ const routes = [
     path: '/location',
     name: 'LocationEdit',
     component: LocationEdit,
+    props: true,
+  },
+  {
+    path: '/class-rooms',
+    name: 'classRooms',
+    component: ClassRoomsList,
+  },
+  {
+    path: '/class-room',
+    name: 'ClassRoomEdit',
+    component: ClassRoomEdit,
     props: true,
   },
 ]

@@ -23,7 +23,7 @@ type classRoomServiceInterface interface {
 
 func (c *classRoomService) GetAllClassRooms() ([]model.ClassRoom, error) {
 	var classRooms []model.ClassRoom
-	if err := db.Client.Find(&classRooms).Error; err != nil {
+	if err := db.Client.Preload("Location").Find(&classRooms).Error; err != nil {
 		return nil, err
 	}
 	return classRooms, nil
@@ -31,7 +31,7 @@ func (c *classRoomService) GetAllClassRooms() ([]model.ClassRoom, error) {
 
 func (c *classRoomService) GetClassRoomByID(id int) (*model.ClassRoom, error) {
 	var classRooms *model.ClassRoom
-	if err := db.Client.First(&classRooms, id).Error; err != nil {
+	if err := db.Client.Preload("Location").First(&classRooms, id).Error; err != nil {
 		return nil, err
 	}
 

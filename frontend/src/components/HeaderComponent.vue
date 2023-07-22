@@ -55,6 +55,9 @@
               <li>
                 <router-link class="dropdown-item" to="/locations">Lokacije</router-link>
               </li>
+              <li>
+                <router-link class="dropdown-item" to="/class-rooms">Učionice</router-link>
+              </li>
             </ul>
           </li>
           <li class="nav-item">
