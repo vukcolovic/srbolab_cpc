@@ -23,9 +23,9 @@
     </div>
     <div class="collapse multi-collapse border" style="font-size: 0.7em" id="filter">
       <div class="row">
-        <div class="col-sm-3">
+        <div class="col-sm-2">
           <label for="first_name" style="margin-right: 5px">Ime</label>
-          <input type="text" id="first_name" name="Ime" v-model="filter.first_name" />
+          <input style="max-width: 130px" type="text" id="first_name" name="Ime" v-model="filter.first_name" />
         </div>
         <div class="col-sm-3">
           <label for="last_name" style="margin-right: 5px">Prezime</label>
@@ -35,6 +35,15 @@
           <label for="jmbg" style="margin-right: 5px">JMBG</label>
           <input type="text" id="jmbg" name="jmbg" v-model="filter.jmbg" />
         </div>
+        <div class="col-sm-2 my-1">
+          <label :style=styleLabelSmall for="verified">Verifikovan:&nbsp;&nbsp;</label>
+          <input id="verified" type="checkbox" v-model="filter.verified" />
+        </div>
+        <div class="col-sm-2 my-1">
+          <label :style=styleLabelSmall for="wait_seminar">Čeka seminar:&nbsp;&nbsp;</label>
+          <input id="wait_seminar" type="checkbox" v-model="filter.wait_seminar" />
+        </div>
+
       </div>
     </div>
 
@@ -59,10 +68,12 @@ import VueTableLite from "vue3-table-lite";
 import axios from "axios";
 import {reactive} from "vue";
 import {useToast} from "vue-toastification";
+import {styleMixin} from "@/mixins/styleMixin";
 
 export default {
   name: 'ClientsList',
-  components: { VueTableLite },
+  mixins: [styleMixin],
+  components: {VueTableLite },
   data() {
     return {
       filter: {verified: false, wait_seminar: false, jmbg: "", first_name: "", last_name: ""}

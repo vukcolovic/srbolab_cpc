@@ -52,7 +52,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr @click="selectRow(item, i)" :id="'id' + i" v-for="(row, i) in rows" :key="row.ID">
+          <tr @click="selectRow(row, i)" :id="'id' + i" v-for="(row, i) in rows" :key="row.ID">
             <td>{{row.ID}}</td>
             <td>{{row.first_name}} {{row.last_name}}</td>
             <td>{{row.jmbg}}</td>

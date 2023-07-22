@@ -25,6 +25,10 @@ type clientServiceInterface interface {
 
 func (c *clientService) GetAllClients(skip, take int, filter model.ClientFilter) ([]model.Client, error) {
 	var clients []model.Client
+	if filter.FirstName != "" || filter.LastName != "" || filter.JMBG != "" {
+		filter.Verified = nil
+		filter.WaitSeminar = nil
+	}
 	if err := db.Client.Where(filter).Order("id desc").Limit(take).Offset(skip).Find(&clients).Error; err != nil {
 		return nil, err
 	}

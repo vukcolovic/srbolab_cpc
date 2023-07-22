@@ -159,11 +159,11 @@
           </text-area-input>
 
           <div class="my-1">
-            <label :style=styleLabelSmall for="verified">Klijent je verifikovan:</label>
+            <label :style=styleLabelSmall for="verified">Klijent je verifikovan:&nbsp;&nbsp;</label>
             <input id="verified" type="checkbox" :hidden="readonly" v-model="client.verified" />
           </div>
           <div class="my-1">
-            <label :style=styleLabelSmall for="wait_seminar">Klijent čeka seminar:</label>
+            <label :style=styleLabelSmall for="wait_seminar">Klijent čeka seminar:&nbsp;&nbsp;</label>
             <input id="wait_seminar" type="checkbox" :hidden="readonly" v-model="client.wait_seminar" />
           </div>
         </div>
