@@ -11,6 +11,31 @@ import (
 	"strconv"
 )
 
+func GetSeminarDayByID(w http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	seminarDayIdParam, ok := vars["id"]
+	if !ok {
+		logoped.ErrorLog.Println("missing parameter id")
+		SetErrorResponse(w, NewMissingRequestParamError("id"))
+		return
+	}
+
+	seminarDayId, err := strconv.Atoi(seminarDayIdParam)
+	if err != nil {
+		logoped.ErrorLog.Println(err.Error())
+		SetErrorResponse(w, NewWrongParamFormatErrorError("seminarDayId", seminarDayIdParam))
+		return
+	}
+	seminarDay, err := service.SeminarDayService.GetSeminarDayByID(seminarDayId)
+	if err != nil {
+		logoped.ErrorLog.Println(err.Error())
+		SetErrorResponse(w, errors.New("Greška prilikom povlačenja seminar dana: "+err.Error()))
+		return
+	}
+
+	SetSuccessResponse(w, seminarDay)
+}
+
 func CreateSeminarDay(w http.ResponseWriter, r *http.Request) {
 	var day model.SeminarDay
 	decoder := json.NewDecoder(r.Body)

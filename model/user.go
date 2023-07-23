@@ -10,6 +10,10 @@ type Person struct {
 	PhoneNumber string `json:"phone_number"`
 }
 
+func (p Person) FullName() string {
+	return p.FirstName + " " + p.LastName
+}
+
 type User struct {
 	gorm.Model
 	Person   Person `json:"person" gorm:"embedded"`

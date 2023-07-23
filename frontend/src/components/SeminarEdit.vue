@@ -111,8 +111,26 @@
 
     <div v-if="this.seminar && this.seminar.seminar_status && (this.seminar.seminar_status.ID === SEMINAR_STATUSES.IN_PROGRESS || this.seminar.seminar_status.ID === SEMINAR_STATUSES.CLOSED)">
       <hr>
+      <div class="row">
+        <div class="col-sm-2">
+          <button class="btn btn-info text-white" @click="printStudentList()">Spisak polaznika</button>
+        </div>
+        <div class="col-sm-2">
+          <button class="btn btn-info text-white">Izjava o pristanku</button>
+        </div>
+        <div class="col-sm-1">
+          <button class="btn btn-info text-white">Prijava</button>
+        </div>
+        <div class="col-sm-1">
+          <button class="btn btn-info text-white">Potvrda</button>
+        </div>
+        <div class="col-sm-1">
+          <button class="btn btn-info text-white">Izjava</button>
+        </div>
+      </div>
+      <hr>
       <h4>Dani seminara</h4>
-      <div v-for="day in seminar.days" :key="day.number"
+      <div v-for="day in seminar.days" :key="day.number" @click="openSeminarDayEdit(day.ID)"
            class="border border-info bg-light d-inline-flex rounded m-2" style="width: 10%; height: 120px">
         <div class="m-1">
           <h5>Dan: {{ day.number }}</h5>
@@ -136,10 +154,11 @@ import {useToast} from "vue-toastification";
 import TextInput from "@/components/forms/TextInput.vue";
 import {dateMixin} from "@/mixins/dateMixin";
 import {commonMixin} from "@/mixins/commonMixin";
+import {fileMixin} from "@/mixins/fileMixin";
 
 export default {
   name: 'SeminarEdit',
-  mixins: [apiMixin, styleMixin, dateMixin, commonMixin],
+  mixins: [apiMixin, styleMixin, dateMixin, commonMixin, fileMixin],
   components: {TextInput, FormTag, vSelect},
   computed: {
     readonly() {
@@ -171,6 +190,30 @@ export default {
     }
   },
   methods: {
+    async printStudentList() {
+      await axios.get('/print/seminar/student-list/' + this.seminarId).then((response) => {
+        if (response.data === null || response.data.Status === 'error') {
+          this.toast.error(response.data != null ? response.data.ErrorMessage : "");
+          return;
+        }
+        var fileContent = JSON.parse(response.data.Data);
+        var sampleArr = this.base64ToArrayBuffer(fileContent);
+        const blob = new Blob([sampleArr], { type: 'application/pdf' });
+
+        var iframe = document.createElement('iframe');
+        iframe.src = URL.createObjectURL(blob);
+        document.body.appendChild(iframe);
+
+        URL.revokeObjectURL(iframe.src);
+        iframe.contentWindow.print();
+        iframe.setAttribute("hidden", "hidden");
+      }, (error) => {
+        this.toast.error(error.message);
+      });
+    },
+    openSeminarDayEdit(dayId) {
+     router.push({name: 'SeminarDayEdit', query: {id: dayId}});
+    },
     async onSeminarTypeChange() {
       this.seminar.seminar_theme = null;
       this.seminarThemesByType = [];

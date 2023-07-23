@@ -47,7 +47,7 @@ func RunServer(host string) {
 	s.HandleFunc("/create", handlers.CreateSeminarDay).Methods("POST")
 	s.HandleFunc("/update", handlers.UpdateSeminarDay).Methods("POST")
 	s.HandleFunc("/list/{seminar_id}", handlers.ListSeminarDays).Methods("GET")
-	//s.HandleFunc("/id/{id}", handlers.GetSeminarDayByID).Methods("GET")
+	s.HandleFunc("/id/{id}", handlers.GetSeminarDayByID).Methods("GET")
 	//s.HandleFunc("/delete/{id}", handlers.DeleteSeminarDay).Methods("GET")
 
 	s = r.PathPrefix("/api/companies").Subrouter()
@@ -78,6 +78,9 @@ func RunServer(host string) {
 
 	s = r.PathPrefix("/api/seminar-statuses").Subrouter()
 	s.HandleFunc("/list", handlers.ListSeminarStatuses).Methods("GET")
+
+	s = r.PathPrefix("/api/print").Subrouter()
+	s.HandleFunc("/seminar/student-list/{seminar_id}", handlers.PrintSeminarStudentList).Methods("GET")
 
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{"*"}, // All origins

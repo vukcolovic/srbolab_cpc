@@ -53,6 +53,7 @@ type SeminarDay struct {
 	Name      string           `json:"name"`
 	Classes   []SeminarClass   `json:"classes"`
 	SeminarID uint             `json:"seminar_id"`
+	Seminar   Seminar          `json:"seminar"`
 	Presence  []ClientPresence `json:"presence"`
 }
 

@@ -32,7 +32,7 @@ func (c *seminarDayService) GetSeminarDaysBySeminarID(seminarID int) ([]model.Se
 
 func (c *seminarDayService) GetSeminarDayByID(seminarDayID int) (*model.SeminarDay, error) {
 	var seminarDay *model.SeminarDay
-	if err := db.Client.Find(&seminarDay, seminarDayID).Error; err != nil {
+	if err := db.Client.Preload("Seminar").Preload("Seminar.SeminarTheme").Preload("Seminar.SeminarTheme.BaseSeminarType").Find(&seminarDay, seminarDayID).Error; err != nil {
 		return nil, err
 	}
 
