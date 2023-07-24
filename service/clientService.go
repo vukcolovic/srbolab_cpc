@@ -87,6 +87,23 @@ func (c *clientService) UpdateClient(client model.Client) (*model.Client, error)
 		return nil, result.Error
 	}
 
+	for _, od := range oldClient.Documents {
+		found := false
+		for _, nd := range client.Documents {
+			if od.ID == nd.ID {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			result := db.Client.Exec("DELETE FROM client_file WHERE client_id = ? AND file_id = ?", client.ID, od.ID)
+			if result.Error != nil {
+				return nil, result.Error
+			}
+		}
+	}
+
 	for _, os := range oldSeminars {
 		if os.Seminar.SeminarStatus.ID != model.SEMINAR_STATUS_OPENED && os.Seminar.SeminarStatus.ID != model.SEMINAR_STATUS_FILLED {
 			continue
@@ -105,7 +122,6 @@ func (c *clientService) UpdateClient(client model.Client) (*model.Client, error)
 		if !found {
 			SeminarService.DeleteSeminarClient(os)
 		}
-
 	}
 
 	if len(client.Seminars) > len(oldSeminars) {
