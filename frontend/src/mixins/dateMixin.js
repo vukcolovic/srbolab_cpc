@@ -7,6 +7,9 @@ export const dateMixin = {
     methods: {
         //2006-01-02T15:04:05Z07:00  (2023-07-04T23:57:50)
         getBackendFormat(date) {
+            if (this.isDateEmpty(date)) {
+                return null;
+            }
             return date + "T12:05:05.576147+02:00"
         },
         getDateInMMDDYYYYFormat(date) {
@@ -64,17 +67,20 @@ export const dateMixin = {
         //
         //     return [day, month, year].join('.');
         // },
-        // isDateEmpty(inputDate) {
-        //     if (inputDate === null) {
-        //         return true;
-        //     }
-        //     if (typeof(inputDate) === 'object') {
-        //         return false;
-        //     }
-        //     let date = inputDate.split('T')[0];
-        //     const year = date.split('-')[0];
-        //
-        //     return year === '0001';
-        // }
+        isDateEmpty(inputDate) {
+            if (inputDate === "") {
+                return true;
+            }
+            if (inputDate === null) {
+                return true;
+            }
+            if (typeof(inputDate) === 'object') {
+                return false;
+            }
+            let date = inputDate.split('T')[0];
+            const year = date.split('-')[0];
+
+            return year === '0001';
+        }
     },
 }

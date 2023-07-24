@@ -17,7 +17,7 @@
               label="JMBG"
               type="text"
               name="jmbg"
-              :required=false
+              :required=true
               :readonly="readonly"
               :styleInput=styleInputSmall
               :styleLabel=styleLabelSmall>
@@ -76,7 +76,7 @@
               label="Broj telefona"
               type="text"
               name="phone_number"
-              :required=false
+              :required=true
               :readonly="readonly"
               :styleInput=styleInputSmall
               :styleLabel=styleLabelSmall>
@@ -89,7 +89,7 @@
               label="Email"
               type="text"
               name="email"
-              :required=true
+              :required=false
               :readonly="readonly"
               :styleInput=styleInputSmall
               :styleLabel=styleLabelSmall>
@@ -141,7 +141,7 @@
               label="Broj vozačke"
               type="text"
               name="drive_licence"
-              :required=false
+              :required=true
               :readonly="readonly"
               :styleInput=styleInputSmall
               :styleLabel=styleLabelSmall>
@@ -174,7 +174,7 @@
               label="Mesto"
               type="text"
               name="place"
-              :required=false
+              :required=true
               :readonly="readonly"
               :styleInput=styleInputSmall
               :styleLabel=styleLabelSmall>
@@ -187,7 +187,7 @@
                   label="Ulica"
                   type="text"
                   name="street"
-                  :required=false
+                  :required=true
                   :readonly="readonly"
                   :styleInput=styleInputSmall
                   :styleLabel=styleLabelSmall>
@@ -199,7 +199,7 @@
                 label="Broj"
                 type="text"
                 name="house_number"
-                :required=false
+                :required=true
                 :readonly="readonly"
                 :styleInput=styleInputSmall
                 :styleLabel=styleLabelSmall>
@@ -212,7 +212,7 @@
               label="Mesto rođenja"
               type="text"
               name="place_birth"
-              :required=false
+              :required=true
               :readonly="readonly"
               :styleInput=styleInputSmall
               :styleLabel=styleLabelSmall>
@@ -223,7 +223,7 @@
               label="Država rođenja"
               type="text"
               name="country_birth"
-              :required=false
+              :required=true
               :readonly="readonly"
               :styleInput=styleInputSmall
               :styleLabel=styleLabelSmall>
@@ -442,6 +442,7 @@ export default {
           return;
         }
         this.client = JSON.parse(response.data.Data);
+        this.client.cpc_date = this.getDateInMMDDYYYYFormat(this.client.cpc_date);
         if (this.client.seminars) {
           this.finishedSeminars = this.client.seminars.filter(s => s.seminar.seminar_status.ID === this.SEMINAR_STATUSES.CLOSED);
           this.inProgressSeminars = this.client.seminars.filter(s => s.seminar.seminar_status.ID === this.SEMINAR_STATUSES.IN_PROGRESS);
@@ -466,6 +467,9 @@ export default {
       if (this.client.jmbg.length != 13) {
         return "Jmbg mora imati 13 cifara!";
       }
+      if (!this.client.educational_profile && !(this.client.cpc_number && this.isDateEmpty(this.client.cpc_date))) {
+        return "Obrazovni profil ili podaci o cpc kartici moraju biti popunjeni";
+      }
 
       return "";
     },
@@ -486,6 +490,7 @@ export default {
       }
     },
     async createClient() {
+      this.client.cpc_date = this.getBackendFormat(this.client.cpc_date);
       await axios.post('/clients/create', JSON.stringify(this.client)).then((response) => {
         if (response.data == null || response.data.Status === 'error') {
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");
@@ -498,6 +503,7 @@ export default {
       });
     },
     async updateClient() {
+      this.client.cpc_date = this.getBackendFormat(this.client.cpc_date);
       await axios.post('/clients/update', JSON.stringify(this.client)).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");

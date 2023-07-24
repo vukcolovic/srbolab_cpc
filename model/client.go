@@ -22,7 +22,7 @@ type Client struct {
 	SecondCitizenship        *string         `json:"second_citizenship"`
 	IDCardNumber             *string         `json:"id_card_number"`
 	CPCNumber                *string         `json:"cpc_number"`
-	CPCDate                  time.Time       `json:"cpc_date"`
+	CPCDate                  *time.Time      `json:"cpc_date"`
 	EducationalProfile       *string         `json:"educational_profile"`
 	Comment                  *string         `json:"comment"`
 	InitialCompletedSeminars *int            `json:"initial_completed_seminars"`
