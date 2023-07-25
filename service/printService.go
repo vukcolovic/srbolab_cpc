@@ -37,7 +37,7 @@ func (p *printService) PrintSeminarStudentList(seminar *model.Seminar) ([]byte, 
 	}
 	pdf := fpdf.New("L", "mm", "A4", filepath.Join(pwd, "font"))
 	pdf.AddFont("Arimo-Regular", "", "Arimo-Regular.json")
-	pdf.AddFont("Arimo-Bold", "", "Arimo-Bold.json")
+	//pdf.AddFont("Arimo-Bold", "", "Arimo-Bold.json")
 	latTr := pdf.UnicodeTranslatorFromDescriptor("iso-8859-16")
 
 	pdf.SetMargins(marginLeft, marginTop, marginRight)
@@ -108,7 +108,7 @@ func (p *printService) PrintConfirmationStatements(seminar *model.Seminar) ([]by
 		pdf.Ln(5)
 		pdf.Text(15, pdf.GetY(), latTr("15. Zakona o zaštiti podataka o ličnosti (Sl. Glasnik RS“, br. 87/2018 od 13/11/2018) dajem pristanak za"))
 		pdf.Ln(5)
-		pdf.Text(15, pdf.GetY(), "davanje i obradu podataka o ličnosti, gde je rukovalac obrade Srbolab.")
+		pdf.Text(15, pdf.GetY(), latTr("davanje i obradu podataka o ličnosti, gde je rukovalac obrade Srbolab."))
 		pdf.Ln(20)
 
 		pdf.SetFont("Arimo-Bold", "", 11)
@@ -129,22 +129,22 @@ func (p *printService) PrintConfirmationStatements(seminar *model.Seminar) ([]by
 		pdf.Text(172, pdf.GetY(), "(JMBG),")
 
 		pdf.Ln(5)
-		pdf.Text(15, pdf.GetY(), "pristajem na davanje i obradu sledećih svojih podataka o ličnosti: podaci iz lične karte/pasoša, podaci iz")
+		pdf.Text(15, pdf.GetY(), latTr("pristajem na davanje i obradu sledećih svojih podataka o ličnosti: podaci iz lične karte/pasoša, podaci iz"))
 		pdf.Ln(5)
-		pdf.Text(15, pdf.GetY(), "nacionalne vozačke dozvole, podaci iz kvalifikacione kartice vozača, elektronsku adresu, kontakt telefon")
+		pdf.Text(15, pdf.GetY(), latTr("nacionalne vozačke dozvole, podaci iz kvalifikacione kartice vozača, elektronsku adresu, kontakt telefon"))
 		pdf.Ln(5)
-		pdf.Text(15, pdf.GetY(), "vozača, podaci o stručnoj spremi, za potrebe slanja obaveštenja i informacija.")
+		pdf.Text(15, pdf.GetY(), latTr("vozača, podaci o stručnoj spremi, za potrebe slanja obaveštenja i informacija."))
 		pdf.Ln(15)
 
-		pdf.Text(15, pdf.GetY(), "Takođe izjavljujem da sam od AMSS-CMV primio/la sva neophodna obaveštenja, predviđena članom 23")
+		pdf.Text(15, pdf.GetY(), latTr("Takođe izjavljujem da sam od AMSS-CMV primio/la sva neophodna obaveštenja, predviđena članom 23"))
 		pdf.Ln(5)
-		pdf.Text(15, pdf.GetY(), "Zakona o zaštiti podataka o ličnosti, kao i obaveštenje da u svakom trenutku mogu opozvati dat")
+		pdf.Text(15, pdf.GetY(), latTr("Zakona o zaštiti podataka o ličnosti, kao i obaveštenje da u svakom trenutku mogu opozvati dat"))
 		pdf.Ln(5)
-		pdf.Text(15, pdf.GetY(), "pristanak, s tim da opoziv pristanka ne utiče na dopuštenost obrade koja je vršena na osnovu pristanka")
+		pdf.Text(15, pdf.GetY(), latTr("pristanak, s tim da opoziv pristanka ne utiče na dopuštenost obrade koja je vršena na osnovu pristanka"))
 		pdf.Ln(5)
-		pdf.Text(15, pdf.GetY(), "pre opoziva, kao i da nisam u obavezi da dam podatke o ličnosti koji nisu predviđeni kao obavezni")
+		pdf.Text(15, pdf.GetY(), latTr("pre opoziva, kao i da nisam u obavezi da dam podatke o ličnosti koji nisu predviđeni kao obavezni"))
 		pdf.Ln(5)
-		pdf.Text(15, pdf.GetY(), "zakonskim i podzakonskim aktima i da isto neće biti od uticaja na pružanje usluga od strane rukovaoca.")
+		pdf.Text(15, pdf.GetY(), latTr("zakonskim i podzakonskim aktima i da isto neće biti od uticaja na pružanje usluga od strane rukovaoca."))
 		pdf.Ln(25)
 
 		pdf.Text(15, pdf.GetY(), "Datum: ")
@@ -173,7 +173,6 @@ func createSimpleHeader(pdf *fpdf.Fpdf, tr func(string) string) {
 	pdf.Image("./images/srbolab_logo.png", 15, 10, 30, 10, false, "png", 0, "")
 	pdf.CellFormat(35, 10, "", "0", 0, "C", false, 0, "")
 	pdf.Text(100, 14, "SRBOLAB D.O.O.")
-	pdf.SetFont("Arial", "", 10)
 	pdf.Text(60, 18, tr("SEKTOR ZA STRUČNO USAVRŠAVANJE, RAZVOJ I BEZBEDNOST SAOBRAĆAJA"))
 	pdf.Ln(15)
 }
