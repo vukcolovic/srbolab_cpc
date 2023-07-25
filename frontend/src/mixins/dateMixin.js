@@ -13,6 +13,9 @@ export const dateMixin = {
             return date + "T12:05:05.576147+02:00"
         },
         getDateInMMDDYYYYFormat(date) {
+            if (this.isDateEmpty(date)) {
+                return null;
+            }
             return date.split('T')[0];
         },
         // formatDate(inputDate) {
