@@ -48,7 +48,9 @@ type ClientSeminar struct {
 }
 
 type ClientPresence struct {
-	ClientID     uint
-	Presence     bool
-	SeminarDayID uint
+	gorm.Model
+	ClientID     uint   `json:"client_id"`
+	Client       Client `json:"client"`
+	Presence     *bool  `json:"presence"`
+	SeminarDayID uint   `json:"seminar_day_id"`
 }

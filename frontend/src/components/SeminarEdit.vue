@@ -133,9 +133,10 @@
       <div v-for="day in seminar.days" :key="day.number" @click="openSeminarDayEdit(day.ID)"
            class="border border-info bg-light d-inline-flex rounded m-2" style="width: 10%; height: 120px">
         <div class="m-1">
-          <h5>Dan: {{ day.number }}</h5>
+          <h6>Dan: {{ day.number }}</h6>
+          <p style="font-size: 0.8em">{{getDateInMMDDYYYYFormat(day.date)}}</p>
           <hr>
-          <h5 style="font-size: 0.9em">Tema: {{ day.name }}</h5>
+          <p style="font-size: 0.7em; overflow: hidden">Tema: {{ day.name }}</p>
 
         </div>
       </div>
@@ -253,6 +254,9 @@ export default {
           return;
         }
         this.seminar = JSON.parse(response.data.Data);
+        this.seminar.days.sort((a, b) => {
+          return a.number - b.number;
+        });
         this.location = this.seminar.class_room.location;
         this.location.address_place = this.seminar.class_room.location.address.place;
         this.seminar.start_date = this.getDateInMMDDYYYYFormat(this.seminar.start_date);

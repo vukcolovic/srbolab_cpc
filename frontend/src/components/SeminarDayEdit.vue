@@ -26,9 +26,21 @@
               :required=true
               :readonly="readonly">
           </text-input>
-
-
           <input type="submit" class="btn btn-primary m-2" value="Snimi">
+        </div>
+
+        <div class="col-sm-1">
+        </div>
+
+        <div class="col-sm-5">
+          <h6>Evidencija prisustva</h6>
+          <ul>
+            <li v-for="pres in seminarDay.presence" :key="pres.client_id" style="list-style-type: none;">
+              <input id="verified" type="checkbox" :hidden="readonly" v-model="pres.presence" />
+              {{pres.client.person.first_name}} {{pres.client.person.last_name}}
+            </li>
+          </ul>
+
         </div>
 
       </div>
@@ -44,10 +56,12 @@ import router from "@/router";
 import {fileMixin} from "@/mixins/fileMixin";
 import {useToast} from "vue-toastification";
 import {apiMixin} from "@/mixins/apiMixin";
+import {dateMixin} from "@/mixins/dateMixin";
+import {styleMixin} from "@/mixins/styleMixin";
 
 export default {
   name: 'SeminarDayEdit',
-  mixins: [fileMixin, apiMixin],
+  mixins: [fileMixin, apiMixin, dateMixin, styleMixin],
   components: {FormTag, TextInput},
   computed: {
     readonly() {
@@ -56,7 +70,7 @@ export default {
   },
   data() {
     return {
-      seminarDay: {ID: 0, date: null, number: 0, name: "", seminar_id: 0, seminar: null, seminar_theme: ""},
+      seminarDay: {ID: 0, date: null, number: 0, name: "", seminar_id: 0, seminar: null, seminar_theme: "", presence: []},
       seminarDayId: 0,
     }
   },
@@ -78,11 +92,13 @@ export default {
       });
     },
     async submitHandler() {
+      this.seminarDay.date = this.getBackendFormat(this.seminarDay.date);
       await axios.post('/seminar-days/update', JSON.stringify(this.seminarDay)).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;
         }
+        this.seminarDay.date = this.getDateInMMDDYYYYFormat(this.seminarDay.date );
         this.toast.info("Uspešno ažuriran seminar dan.");
       }, (error) => {
         this.toast.error(error.message);
