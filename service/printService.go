@@ -27,6 +27,7 @@ type printService struct {
 type printServiceInterface interface {
 	PrintSeminarStudentList(seminar *model.Seminar) ([]byte, error)
 	PrintConfirmationStatements(seminar *model.Seminar) ([]byte, error)
+	PrintConfirmations(seminar *model.Seminar) ([]byte, error)
 }
 
 func (p *printService) PrintSeminarStudentList(seminar *model.Seminar) ([]byte, error) {
@@ -157,6 +158,137 @@ func (p *printService) PrintConfirmationStatements(seminar *model.Seminar) ([]by
 
 		pdf.Text(15, pdf.GetY(), "Potpis: ")
 		pdf.Line(30, pdf.GetY(), 70, pdf.GetY())
+	}
+
+	var buf bytes.Buffer
+	err = pdf.Output(&buf)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return buf.Bytes(), nil
+}
+
+func (p *printService) PrintConfirmations(seminar *model.Seminar) ([]byte, error) {
+	pwd, err := os.Getwd()
+	if err != nil {
+		logoped.ErrorLog.Println("Error getting pwd: ", err)
+		return []byte{}, err
+	}
+	pdf := fpdf.New("P", "mm", "A4", filepath.Join(pwd, "font"))
+	pdf.AddFont("Arimo-Regular", "", "Arimo-Regular.json")
+	pdf.AddFont("Arimo-Bold", "", "Arimo-Bold.json")
+	latTr := pdf.UnicodeTranslatorFromDescriptor("iso-8859-16")
+
+	pdf.SetMargins(15, 40, marginRight)
+
+	startSeminar := seminar.Start
+	endSeminar := seminar.Start
+	for _, day := range seminar.Days {
+		if day.Date.After(endSeminar) {
+			endSeminar = day.Date
+		}
+	}
+
+	for _, client := range seminar.Trainees {
+		pdf.AddPage()
+
+		pdf.SetFont("Arimo-Regular", "", 11)
+
+		pdf.Ln(5)
+		pdf.Text(15, pdf.GetY(), "Broj:")
+		pdf.Ln(5)
+		pdf.SetFont("Arimo-Regular", "", 11)
+		pdf.Text(15, pdf.GetY(), "Dana:")
+		pdf.SetFont("Arimo-Bold", "", 11)
+		pdf.Text(30, pdf.GetY(), time.Now().Format("02.01.2006."))
+		pdf.Ln(5)
+		pdf.SetFont("Arimo-Regular", "", 11)
+		pdf.Text(15, pdf.GetY(), "Mesto:")
+		pdf.SetFont("Arimo-Bold", "", 11)
+		pdf.Text(30, pdf.GetY(), latTr(seminar.ClassRoom.Location.Address.Place))
+		pdf.Ln(15)
+
+		pdf.Text(80, pdf.GetY(), "POTVRDA")
+		pdf.Ln(10)
+
+		pdf.SetFont("Arimo-Regular", "", 11)
+		pdf.Text(25, pdf.GetY(), latTr("o završenoj periodičnoj obuci na obaveynim seminarima unapređenja znanja"))
+		pdf.Ln(10)
+
+		ch := 9.0
+		wl := 80.0
+		wr := 100.0
+
+		pdf.CellFormat(wl, ch-1, "Ime, ime jednog", "LRT", 0, "L", false, 0, "")
+		pdf.SetFont("Arimo-Bold", "", 11)
+		pdf.CellFormat(wr, ch-1, latTr(client.Client.Person.FirstName+" ("+client.Client.Person.MiddleName+") "+client.Client.Person.LastName), "LRT", 0, "L", false, 0, "")
+		pdf.Ln(ch - 1)
+		pdf.SetFont("Arimo-Regular", "", 11)
+		pdf.CellFormat(wl, ch-1, "roditelja, prezime", "LRB", 0, "L", false, 0, "")
+		pdf.CellFormat(wr, ch-1, "", "LRB", 0, "L", false, 0, "")
+		pdf.Ln(ch - 1)
+		pdf.CellFormat(wl, ch, "JMBG", "1", 0, "L", false, 0, "")
+		pdf.SetFont("Arimo-Bold", "", 11)
+		for _, l := range *client.Client.JMBG {
+			pdf.CellFormat(wr/13, ch, string(l), "1", 0, "C", false, 0, "")
+		}
+		pdf.Ln(ch)
+		pdf.SetFont("Arimo-Regular", "", 11)
+		pdf.CellFormat(wl, ch, latTr("Mesto prebivališta"), "1", 0, "L", false, 0, "")
+		pdf.SetFont("Arimo-Bold", "", 11)
+		pdf.CellFormat(wr, ch, latTr(client.Client.Address.Place), "1", 0, "L", false, 0, "")
+		pdf.Ln(ch)
+		pdf.SetFont("Arimo-Regular", "", 11)
+		pdf.CellFormat(wl, ch, latTr("Adresa prebivališta"), "1", 0, "L", false, 0, "")
+		pdf.SetFont("Arimo-Bold", "", 11)
+		pdf.CellFormat(wr, ch, latTr(client.Client.Address.Street+" "+client.Client.Address.HouseNumber), "1", 0, "L", false, 0, "")
+		pdf.Ln(ch)
+		pdf.SetFont("Arimo-Regular", "", 11)
+		pdf.CellFormat(wl, ch, "Redni broj seminara", "1", 0, "L", false, 0, "")
+		pdf.SetFont("Arimo-Bold", "", 11)
+		//fixme just closed seminars and passed
+		completedSeminars := 0
+		if client.Client.InitialCompletedSeminars != nil {
+			completedSeminars = *client.Client.InitialCompletedSeminars
+		}
+		seminarNumber := completedSeminars + len(client.Client.Seminars)
+		cx := 87 + float64(seminarNumber*8)
+		pdf.Circle(cx, 137, 3, "")
+		pdf.CellFormat(wr, ch, " I    II    III    IV    V", "1", 0, "L", false, 0, "")
+		pdf.Ln(ch)
+		pdf.SetFont("Arimo-Regular", "", 11)
+		pdf.CellFormat(wl, ch-1, latTr("Datum pohađanja"), "LRT", 0, "L", false, 0, "")
+		pdf.SetFont("Arimo-Bold", "", 11)
+		pdf.CellFormat(wr, ch-1, "od "+startSeminar.Format("02.01.2006"), "LRT", 0, "L", false, 0, "")
+		pdf.Ln(ch - 1)
+		pdf.SetFont("Arimo-Regular", "", 11)
+		pdf.CellFormat(wl, ch-1, latTr("periodične obuke"), "LRB", 0, "L", false, 0, "")
+		pdf.SetFont("Arimo-Bold", "", 11)
+		pdf.CellFormat(wr, ch-1, "do "+endSeminar.Format("02.01.2006"), "LRB", 0, "L", false, 0, "")
+		pdf.Ln(ch - 1)
+		pdf.SetFont("Arimo-Regular", "", 11)
+		pdf.CellFormat(wl, ch-1, latTr("Mesto pohađanja"), "LRT", 0, "L", false, 0, "")
+		pdf.SetFont("Arimo-Bold", "", 11)
+		pdf.CellFormat(wr, ch-1, latTr(client.Client.Address.Place+", "+client.Client.Address.Street+" "+client.Client.Address.HouseNumber), "LRT", 0, "L", false, 0, "")
+		pdf.Ln(ch - 1)
+		pdf.SetFont("Arimo-Regular", "", 11)
+		pdf.CellFormat(wl, ch-1, latTr("periodične obuke"), "LRB", 0, "L", false, 0, "")
+		pdf.CellFormat(wr, ch-1, "", "LRB", 0, "L", false, 0, "")
+		pdf.Ln(ch - 1)
+		pdf.SetFont("Arimo-Regular", "", 11)
+		pdf.CellFormat(wl, ch, "Vrsta CPC", "1", 0, "L", false, 0, "")
+		pdf.SetFont("Arimo-Bold", "", 11)
+		pdf.Circle(97.5, 178.5, 2.5, "")
+		pdf.CellFormat(wr, ch, "1. prevoz tereta  2. prevoz putnika", "1", 0, "L", false, 0, "")
+		pdf.Ln(20)
+
+		pdf.SetFont("Arimo-Bold", "", 11)
+		pdf.Text(15, pdf.GetY(), "NAPOMENA:")
+		pdf.SetFont("Arimo-Regular", "", 11)
+		pdf.Text(50, pdf.GetY(), latTr("Ova potvrda se izdaje na osnovu odslušane obavezne periodične obuke"))
+		pdf.Ln(5)
+		pdf.Text(15, pdf.GetY(), latTr("za potrebe sticanja periodičnog CPC i ne može se koristiti u druge svrhe."))
 	}
 
 	var buf bytes.Buffer

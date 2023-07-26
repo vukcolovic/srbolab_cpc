@@ -82,6 +82,7 @@ func RunServer(host string) {
 	s = r.PathPrefix("/api/print").Subrouter()
 	s.HandleFunc("/seminar/student-list/{seminar_id}", handlers.PrintSeminarStudentList).Methods("GET")
 	s.HandleFunc("/seminar/confirmation-statement/{seminar_id}", handlers.PrintConfirmationStatements).Methods("GET")
+	s.HandleFunc("/seminar/confirmation/{seminar_id}", handlers.PrintConfirmations).Methods("GET")
 
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{"*"}, // All origins
