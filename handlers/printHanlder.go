@@ -104,3 +104,67 @@ func PrintConfirmations(w http.ResponseWriter, req *http.Request) {
 
 	SetSuccessResponse(w, report)
 }
+
+func PrintConfirmationReceives(w http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	seminarIdParam, ok := vars["seminar_id"]
+	if !ok {
+		logoped.ErrorLog.Println("missing parameter seminar_id")
+		SetErrorResponse(w, NewMissingRequestParamError("seminar_id"))
+		return
+	}
+
+	seminarId, err := strconv.Atoi(seminarIdParam)
+	if err != nil {
+		logoped.ErrorLog.Println(err.Error())
+		SetErrorResponse(w, NewWrongParamFormatErrorError("seminarId", seminarIdParam))
+		return
+	}
+	seminar, err := service.SeminarService.GetSeminarByID(seminarId)
+	if err != nil {
+		logoped.ErrorLog.Println(err.Error())
+		SetErrorResponse(w, errors.New("Greška štampanja, greška prilikom povlačenja seminara: "+err.Error()))
+		return
+	}
+
+	report, err := service.PrintService.PrintConfirmationReceives(seminar)
+	if err != nil {
+		logoped.ErrorLog.Println(err.Error())
+		SetErrorResponse(w, errors.New("Greška štampanja: "+err.Error()))
+		return
+	}
+
+	SetSuccessResponse(w, report)
+}
+
+func PrintMuster(w http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	seminarDayIdParam, ok := vars["seminar_day_id"]
+	if !ok {
+		logoped.ErrorLog.Println("missing parameter seminar_day_id")
+		SetErrorResponse(w, NewMissingRequestParamError("seminar_day_id"))
+		return
+	}
+
+	seminarDayId, err := strconv.Atoi(seminarDayIdParam)
+	if err != nil {
+		logoped.ErrorLog.Println(err.Error())
+		SetErrorResponse(w, NewWrongParamFormatErrorError("seminarDayId", seminarDayIdParam))
+		return
+	}
+	seminarDay, err := service.SeminarDayService.GetSeminarDayByID(seminarDayId)
+	if err != nil {
+		logoped.ErrorLog.Println(err.Error())
+		SetErrorResponse(w, errors.New("Greška štampanja, greška prilikom povlačenja seminar dana: "+err.Error()))
+		return
+	}
+
+	report, err := service.PrintService.PrintMuster(seminarDay)
+	if err != nil {
+		logoped.ErrorLog.Println(err.Error())
+		SetErrorResponse(w, errors.New("Greška štampanja: "+err.Error()))
+		return
+	}
+
+	SetSuccessResponse(w, report)
+}

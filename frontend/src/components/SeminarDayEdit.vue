@@ -45,6 +45,14 @@
 
       </div>
     </form-tag>
+
+    <hr>
+    <div class="row">
+      <div class="col-sm-1">
+        <button class="btn btn-info text-white" @click="printMuster()">Prozivka</button>
+      </div>
+    </div>
+    <hr>
   </div>
 </template>
 
@@ -75,6 +83,27 @@ export default {
     }
   },
   methods: {
+    async printMuster() {
+      await axios.get('/print/seminar/muster/' + this.seminarDayId).then((response) => {
+        if (response.data === null || response.data.Status === 'error') {
+          this.toast.error(response.data != null ? response.data.ErrorMessage : "");
+          return;
+        }
+        var fileContent = JSON.parse(response.data.Data);
+        var sampleArr = this.base64ToArrayBuffer(fileContent);
+        const blob = new Blob([sampleArr], { type: 'application/pdf' });
+
+        var iframe = document.createElement('iframe');
+        iframe.src = URL.createObjectURL(blob);
+        document.body.appendChild(iframe);
+
+        URL.revokeObjectURL(iframe.src);
+        iframe.contentWindow.print();
+        iframe.setAttribute("hidden", "hidden");
+      }, (error) => {
+        this.toast.error(error.message);
+      });
+    },
     backToSeminar(){
       router.push({name: 'SeminarEdit', query: {id: this.seminarDay.seminar_id, action: "update"}});
     },

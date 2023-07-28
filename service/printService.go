@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"srbolab_cpc/logoped"
 	"srbolab_cpc/model"
+	"srbolab_cpc/util"
 	"strconv"
 	"time"
 )
@@ -28,6 +29,8 @@ type printServiceInterface interface {
 	PrintSeminarStudentList(seminar *model.Seminar) ([]byte, error)
 	PrintConfirmationStatements(seminar *model.Seminar) ([]byte, error)
 	PrintConfirmations(seminar *model.Seminar) ([]byte, error)
+	PrintConfirmationReceives(seminar *model.Seminar) ([]byte, error)
+	PrintMuster(day *model.SeminarDay) ([]byte, error)
 }
 
 func (p *printService) PrintSeminarStudentList(seminar *model.Seminar) ([]byte, error) {
@@ -289,6 +292,142 @@ func (p *printService) PrintConfirmations(seminar *model.Seminar) ([]byte, error
 		pdf.Text(50, pdf.GetY(), latTr("Ova potvrda se izdaje na osnovu odslušane obavezne periodične obuke"))
 		pdf.Ln(5)
 		pdf.Text(15, pdf.GetY(), latTr("za potrebe sticanja periodičnog CPC i ne može se koristiti u druge svrhe."))
+	}
+
+	var buf bytes.Buffer
+	err = pdf.Output(&buf)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return buf.Bytes(), nil
+}
+
+func (p *printService) PrintConfirmationReceives(seminar *model.Seminar) ([]byte, error) {
+	pwd, err := os.Getwd()
+	if err != nil {
+		logoped.ErrorLog.Println("Error getting pwd: ", err)
+		return []byte{}, err
+	}
+	pdf := fpdf.New("P", "mm", "A4", filepath.Join(pwd, "font"))
+	pdf.AddFont("Arimo-Regular", "", "Arimo-Regular.json")
+	pdf.AddFont("Arimo-Bold", "", "Arimo-Bold.json")
+	latTr := pdf.UnicodeTranslatorFromDescriptor("iso-8859-16")
+
+	pdf.SetMargins(marginLeft, 20, marginRight)
+
+	for _, client := range seminar.Trainees {
+		pdf.AddPage()
+
+		createSimpleHeader(pdf, latTr)
+
+		pdf.SetFont("Arimo-Bold", "", 12)
+		pdf.Text(40, pdf.GetY(), latTr("Izjava o preuzimanju potvrde i završenoj periodičnoj obuci"))
+		pdf.Ln(5)
+		pdf.Text(60, pdf.GetY(), latTr("na obaveznim seminarima unapređenja znanja"))
+		pdf.Ln(20)
+
+		pdf.SetFont("Arimo-Regular", "", 11)
+		pdf.Text(15, pdf.GetY(), "Dana")
+		pdf.Line(27, pdf.GetY(), 57, pdf.GetY())
+		pdf.SetFont("Arimo-Bold", "", 11)
+		pdf.Text(30, pdf.GetY()-1, latTr(time.Now().Format("02.01.2006.")))
+		pdf.SetFont("Arimo-Regular", "", 11)
+		pdf.Text(60, pdf.GetY(), "godine, ")
+		pdf.Line(75, pdf.GetY(), 135, pdf.GetY())
+		pdf.SetFont("Arimo-Bold", "", 11)
+		pdf.Text(80, pdf.GetY()-1, latTr(client.Client.Person.FullName()))
+		pdf.SetFont("Arimo-Regular", "", 11)
+		pdf.Text(135, pdf.GetY(), "(ime i prezime), JMBG")
+		pdf.Ln(6)
+		pdf.Line(15, pdf.GetY(), 50, pdf.GetY())
+		pdf.SetFont("Arimo-Bold", "", 11)
+		pdf.Text(20, pdf.GetY()-1, *client.Client.JMBG)
+		pdf.SetFont("Arimo-Regular", "", 11)
+		pdf.Text(55, pdf.GetY(), latTr("je preuzeo potvrdu o završenoj periodičnoj obuci na"))
+		pdf.Ln(6)
+		pdf.Text(15, pdf.GetY(), latTr("obaveznim seminarima unapređenja znanja."))
+
+		pdf.Ln(80)
+
+		pdf.Text(15, pdf.GetY(), "Potvrdu preuzeo: ")
+		pdf.Ln(10)
+		pdf.Line(15, pdf.GetY(), 60, pdf.GetY())
+		pdf.Ln(8)
+		pdf.Text(15, pdf.GetY(), "Dana: ")
+		pdf.SetFont("Arimo-Bold", "", 11)
+		pdf.Line(26, pdf.GetY(), 48, pdf.GetY())
+		pdf.Text(27, pdf.GetY()-1, time.Now().Format("02.01.2006"))
+		pdf.SetFont("Arimo-Regular", "", 11)
+		pdf.Text(50, pdf.GetY(), "godine.")
+	}
+
+	var buf bytes.Buffer
+	err = pdf.Output(&buf)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return buf.Bytes(), nil
+}
+
+func (p *printService) PrintMuster(day *model.SeminarDay) ([]byte, error) {
+	pwd, err := os.Getwd()
+	if err != nil {
+		logoped.ErrorLog.Println("Error getting pwd: ", err)
+		return []byte{}, err
+	}
+	pdf := fpdf.New("L", "mm", "A4", filepath.Join(pwd, "font"))
+	pdf.AddFont("Arimo-Regular", "", "Arimo-Regular.json")
+	//pdf.AddFont("Arimo-Bold", "", "Arimo-Bold.json")
+	latTr := pdf.UnicodeTranslatorFromDescriptor("iso-8859-16")
+
+	pdf.SetMargins(marginLeft, marginTop, marginRight)
+	pdf.AddPage()
+
+	pdf.SetFont("Arimo-Regular", "", 8)
+	createSimpleHeader(pdf, latTr)
+
+	pdf.Ln(5)
+	pdf.Text(15, pdf.GetY(), "Mesto: ")
+	pdf.Text(27, pdf.GetY(), day.Seminar.ClassRoom.Location.Address.Place)
+	pdf.Ln(5)
+	pdf.Text(15, pdf.GetY(), latTr("Šifra obuke: "))
+	pdf.Text(30, pdf.GetY(), "")
+	pdf.Ln(5)
+	pdf.Text(15, pdf.GetY(), "Datum: ")
+	dayInWeek := util.GetDaySerbian(day.Date)
+	pdf.Text(27, pdf.GetY(), dayInWeek+" "+day.Date.Format("02.01.2006."))
+	pdf.Ln(5)
+	pdf.Text(15, pdf.GetY(), latTr("Prozivnik polaznika seminara unapređenja znanja na periodičnoj obuci profesionalnih vozača"))
+
+	ch := 14.0
+	pdf.Ln(2)
+	pdf.CellFormat(10, ch, "R.B.", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(45, ch, "Ime i prezime / JMBG", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(27, ch, latTr("1. čas"), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(27, ch, latTr("2. čas"), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(27, ch, latTr("3. čas"), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(27, ch, latTr("4. čas"), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(27, ch, latTr("5. čas"), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(27, ch, latTr("6. čas"), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(27, ch, latTr("7. čas"), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(31, ch, "Napomena", "1", 0, "C", false, 0, "")
+
+	for i, cs := range day.Presence {
+		pdf.Ln(ch)
+		pdf.CellFormat(10, ch, strconv.Itoa(i+1), "1", 0, "C", false, 0, "")
+		pdf.CellFormat(45, ch, "", "1", 0, "C", false, 0, "")
+		pdf.Text(25, 71+float64(i*14), cs.Client.Person.FullName())
+		pdf.Text(25, 76+float64(i*14), *cs.Client.JMBG)
+		pdf.CellFormat(27, ch, "", "1", 0, "C", false, 0, "")
+		pdf.CellFormat(27, ch, "", "1", 0, "C", false, 0, "")
+		pdf.CellFormat(27, ch, "", "1", 0, "C", false, 0, "")
+		pdf.CellFormat(27, ch, "", "1", 0, "C", false, 0, "")
+		pdf.CellFormat(27, ch, "", "1", 0, "C", false, 0, "")
+		pdf.CellFormat(27, ch, "", "1", 0, "C", false, 0, "")
+		pdf.CellFormat(27, ch, "", "1", 0, "C", false, 0, "")
+		pdf.CellFormat(31, ch, "", "1", 0, "C", false, 0, "")
 	}
 
 	var buf bytes.Buffer
