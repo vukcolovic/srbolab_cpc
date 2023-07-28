@@ -127,19 +127,19 @@
       <hr>
       <div class="row">
         <div class="col-sm-2">
-          <button class="btn btn-info text-white" @click="printStudentList()">Spisak polaznika</button>
+          <button class="btn btn-secondary text-white" @click="printStudentList()">Spisak polaznika</button>
         </div>
         <div class="col-sm-2">
-          <button class="btn btn-info text-white" @click="printConfirmationStatement()">Izjava o pristanku</button>
+          <button class="btn btn-secondary text-white" @click="printConfirmationStatement()">Izjava o pristanku</button>
         </div>
         <div class="col-sm-1">
-          <button class="btn btn-info text-white">Prijava</button>
+          <button class="btn btn-secondary text-white">Prijava</button>
         </div>
         <div class="col-sm-1">
-          <button class="btn btn-info text-white" @click="printConfirmations()">Potvrda</button>
+          <button class="btn btn-secondary text-white" @click="printConfirmations()">Potvrda</button>
         </div>
         <div class="col-sm-3">
-          <button class="btn btn-info text-white" @click="printStatementOfReceving()">Izjava o preuzimanju</button>
+          <button class="btn btn-secondary text-white" @click="printStatementOfReceving()">Izjava o preuzimanju</button>
         </div>
       </div>
       <hr>

@@ -8,7 +8,7 @@
     <div class="row">
       <div class="col-sm-4">
     <form-tag @formEvent="submitHandler" name="myForm" event="formEvent">
-          <label style="font-size: 2em">{{seminarDay.seminar_theme}} - Dan {{seminarDay.number}}</label>
+          <label style="font-size: 1.2em">{{seminarDay.seminar_theme}} - Dan {{seminarDay.number}}</label>
           <text-input
               v-model.trim="seminarDay.name"
               label="Naziv"
@@ -64,7 +64,7 @@
     <hr>
     <div class="row">
       <div class="col-sm-1">
-        <button class="btn btn-info text-white" @click="printMuster()">Prozivka</button>
+        <button class="btn btn-secondary text-white" @click="printMuster()">Prozivka</button>
       </div>
     </div>
     <hr>
@@ -156,7 +156,7 @@ export default {
         }
         this.seminarDay = JSON.parse(response.data.Data);
         this.seminarDay.date = this.getDateInMMDDYYYYFormat(this.seminarDay.date);
-        this.seminarDay.seminar_theme = this.getSeminarFullType(this.seminarDay.seminar.seminar_theme.base_seminar_type, this.seminarDay.seminar.seminar_theme.name);
+        this.seminarDay.seminar_theme = this.getSeminarFullType(this.seminarDay.seminar.seminar_theme.base_seminar_type, this.seminarDay.seminar.seminar_theme);
         if (this.seminarDay.documents == null) {
           this.seminarDay.documents = [];
         }

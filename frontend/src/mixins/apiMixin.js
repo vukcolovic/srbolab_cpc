@@ -81,7 +81,7 @@ export const apiMixin = {
                 return base.name;
             }
 
-            return base.code.name + theme.name;
+            return base.name + " " + theme.name;
         }
     },
     setup() {
