@@ -68,9 +68,6 @@
           </text-input>
         </div>
 
-        <div class="col-sm-3">
-        </div>
-
         <div class="col-sm-5" v-if="action !== 'add'">
           <div>
             <h5>Spisak polaznika</h5>
@@ -99,6 +96,23 @@
             </div>
 
         </div>
+        <div class="col-sm-3">
+          <label :style=styleLabel>Dokumenta: </label>
+          <input id="fileId" type="file" ref="file" @change="uploadFile()"/>
+          <ul>
+            <li v-for="(doc, index) in seminar.documents" :key="index" style="list-style-type: none;">
+              <label for="index">&nbsp; {{ doc.name }}</label>
+              <button class="iconBtn" title="Obriši" @click.prevent="removeFile(index)">
+                <i class="fa fa-remove"></i>
+              </button>
+
+              <button class="iconBtn" title="Preuzmi" @click.prevent="downloadFile(index)">
+                <i class="fa fa-download"></i>
+              </button>
+            </li>
+          </ul>
+        </div>
+
         <div class="row"></div>
         <div class="col-sm-5">
           <input v-if="this.action === 'add'" class="btn btn-primary m-2" type="submit" value="Snimi">
@@ -180,6 +194,7 @@ export default {
         seminar_theme: null,
         seminar_status: null,
         trainees: [],
+        documents: [],
         days: []
       },
       action: "view",
@@ -191,6 +206,32 @@ export default {
     }
   },
   methods: {
+    downloadFile(i) {
+      const arr = this.seminar.documents[i].content.split(',')
+      var sampleArr = this.base64ToArrayBuffer(arr[1]);
+      const blob = new Blob([sampleArr])
+
+      const link = document.createElement('a')
+      link.href = URL.createObjectURL(blob)
+      link.download = this.seminar.documents[i].name
+      link.click()
+      URL.revokeObjectURL(link.href)
+    },
+    uploadFile() {
+      const file = this.$refs.file.files[0];
+      if (file == null) {
+        return;
+      }
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        const fileString = reader.result;
+        this.seminar.documents.push({content: fileString, name: file.name});
+      }
+      reader.readAsDataURL(file);
+    },
+    removeFile(i) {
+      this.seminar.documents.splice(i, 1);
+    },
     async printStudentList() {
       await axios.get('/print/seminar/student-list/' + this.seminarId).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
@@ -327,6 +368,9 @@ export default {
         this.getAllSeminarThemesByTypeId(this.seminar.seminar_theme.base_seminar_type.ID);
         if (this.seminar.trainees == null) {
           this.seminar.trainees = [];
+        }
+        if (this.seminar.documents == null) {
+          this.seminar.documents = [];
         }
       }, (error) => {
         this.toast.error(error.message);

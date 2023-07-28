@@ -23,6 +23,7 @@ type Seminar struct {
 	SeminarStatusID uint            `json:"seminar_status_id"`
 	SeminarStatus   SeminarStatus   `json:"seminar_status"`
 	Days            []SeminarDay    `json:"days"`
+	Documents       []*File         `json:"documents" gorm:"many2many:seminar_file;"`
 }
 
 type BaseSeminarType struct {
@@ -55,6 +56,7 @@ type SeminarDay struct {
 	SeminarID uint             `json:"seminar_id"`
 	Seminar   Seminar          `json:"seminar"`
 	Presence  []ClientPresence `json:"presence"`
+	Documents []*File          `json:"documents" gorm:"many2many:seminarday_file;"`
 }
 
 type SeminarClass struct {

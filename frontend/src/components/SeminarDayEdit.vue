@@ -5,9 +5,9 @@
         <button class="btn btn-primary" @click="backToSeminar()"><i class="fa fa-arrow-left"></i>Vrati se na seminar</button>
       </div>
     </div>
+    <div class="row">
+      <div class="col-sm-4">
     <form-tag @formEvent="submitHandler" name="myForm" event="formEvent">
-      <div class="row">
-        <div class="col-sm-5">
           <label style="font-size: 2em">{{seminarDay.seminar_theme}} - Dan {{seminarDay.number}}</label>
           <text-input
               v-model.trim="seminarDay.name"
@@ -27,24 +27,39 @@
               :readonly="readonly">
           </text-input>
           <input type="submit" class="btn btn-primary m-2" value="Snimi">
-        </div>
 
-        <div class="col-sm-1">
-        </div>
-
-        <div class="col-sm-5">
-          <h6>Evidencija prisustva</h6>
-          <ul>
-            <li v-for="pres in seminarDay.presence" :key="pres.client_id" style="list-style-type: none;">
-              <input id="verified" type="checkbox" :hidden="readonly" v-model="pres.presence" />
-              {{pres.client.person.first_name}} {{pres.client.person.last_name}}
-            </li>
-          </ul>
-
-        </div>
-
-      </div>
     </form-tag>
+
+    </div>
+
+    <div class="col-sm-5">
+      <h6>Evidencija prisustva</h6>
+      <ul>
+        <li v-for="pres in seminarDay.presence" :key="pres.client_id" style="list-style-type: none;">
+          <input id="verified" type="checkbox" :hidden="readonly" v-model="pres.presence" />
+          {{pres.client.person.first_name}} {{pres.client.person.last_name}}
+        </li>
+      </ul>
+
+    </div>
+
+      <div class="col-sm-3">
+        <label :style=styleLabel>Dokumenta: </label>
+        <input id="fileId" type="file" ref="file" @change="uploadFile()"/>
+        <ul>
+          <li v-for="(doc, index) in seminarDay.documents" :key="index" style="list-style-type: none;">
+            <label for="index">&nbsp; {{ doc.name }}</label>
+            <button class="iconBtn" title="Obriši" @click.prevent="removeFile(index)">
+              <i class="fa fa-remove"></i>
+            </button>
+
+            <button class="iconBtn" title="Preuzmi" @click.prevent="downloadFile(index)">
+              <i class="fa fa-download"></i>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
 
     <hr>
     <div class="row">
@@ -78,11 +93,37 @@ export default {
   },
   data() {
     return {
-      seminarDay: {ID: 0, date: null, number: 0, name: "", seminar_id: 0, seminar: null, seminar_theme: "", presence: []},
+      seminarDay: {ID: 0, date: null, number: 0, name: "", seminar_id: 0, seminar: null, seminar_theme: "", presence: [], documents: []},
       seminarDayId: 0,
     }
   },
   methods: {
+    downloadFile(i) {
+      const arr = this.seminarDay.documents[i].content.split(',')
+      var sampleArr = this.base64ToArrayBuffer(arr[1]);
+      const blob = new Blob([sampleArr])
+
+      const link = document.createElement('a')
+      link.href = URL.createObjectURL(blob)
+      link.download = this.seminarDay.documents[i].name
+      link.click()
+      URL.revokeObjectURL(link.href)
+    },
+    uploadFile() {
+      const file = this.$refs.file.files[0];
+      if (file == null) {
+        return;
+      }
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        const fileString = reader.result;
+        this.seminarDay.documents.push({content: fileString, name: file.name});
+      }
+      reader.readAsDataURL(file);
+    },
+    removeFile(i) {
+      this.seminarDay.documents.splice(i, 1);
+    },
     async printMuster() {
       await axios.get('/print/seminar/muster/' + this.seminarDayId).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
@@ -116,7 +157,10 @@ export default {
         this.seminarDay = JSON.parse(response.data.Data);
         this.seminarDay.date = this.getDateInMMDDYYYYFormat(this.seminarDay.date);
         this.seminarDay.seminar_theme = this.getSeminarFullType(this.seminarDay.seminar.seminar_theme.base_seminar_type, this.seminarDay.seminar.seminar_theme.name);
-      }, (error) => {
+        if (this.seminarDay.documents == null) {
+          this.seminarDay.documents = [];
+        }
+        }, (error) => {
         this.toast.error(error.message);
       });
     },

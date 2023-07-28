@@ -46,7 +46,7 @@ func (c *seminarService) GetAllSeminarsByStatus(statusCode string) ([]model.Semi
 
 func (c *seminarService) GetSeminarByID(id int) (*model.Seminar, error) {
 	var seminar *model.Seminar
-	if err := db.Client.Preload("Trainees").Preload("Trainees.Client").Preload("Trainees.Client.Company").Preload("Trainees.Client.Seminars").Preload("Days").Preload("ClassRoom.Location").Joins("ClassRoom").Joins("SeminarTheme.BaseSeminarType").Joins("SeminarTheme").Joins("SeminarStatus").First(&seminar, id).Error; err != nil {
+	if err := db.Client.Preload("Trainees").Preload("Trainees.Client").Preload("Trainees.Client.Company").Preload("Trainees.Client.Seminars").Preload("Days").Preload("Documents").Preload("ClassRoom.Location").Joins("ClassRoom").Joins("SeminarTheme.BaseSeminarType").Joins("SeminarTheme").Joins("SeminarStatus").First(&seminar, id).Error; err != nil {
 		return nil, err
 	}
 
@@ -76,9 +76,31 @@ func (c *seminarService) CreateSeminar(seminar model.Seminar) (*model.Seminar, e
 }
 
 func (c *seminarService) UpdateSeminar(seminar model.Seminar) (*model.Seminar, error) {
+	oldSeminar, err := c.GetSeminarByID(int(seminar.ID))
+	if err != nil {
+		return nil, err
+	}
+
 	result := db.Client.Save(&seminar)
 	if result.Error != nil {
 		return nil, result.Error
+	}
+
+	for _, od := range oldSeminar.Documents {
+		found := false
+		for _, nd := range seminar.Documents {
+			if od.ID == nd.ID {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			result := db.Client.Exec("DELETE FROM seminar_file WHERE seminar_id = ? AND file_id = ?", seminar.ID, od.ID)
+			if result.Error != nil {
+				return nil, result.Error
+			}
+		}
 	}
 
 	return &seminar, nil

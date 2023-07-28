@@ -33,7 +33,7 @@ func (c *seminarDayService) GetSeminarDaysBySeminarID(seminarID int) ([]model.Se
 
 func (c *seminarDayService) GetSeminarDayByID(seminarDayID int) (*model.SeminarDay, error) {
 	var seminarDay *model.SeminarDay
-	if err := db.Client.Preload("Seminar").Preload("Seminar.SeminarTheme").Preload("Seminar.SeminarTheme.BaseSeminarType").Preload("Presence").Preload("Presence.Client").Find(&seminarDay, seminarDayID).Error; err != nil {
+	if err := db.Client.Preload("Seminar").Preload("Documents").Preload("Seminar.SeminarTheme").Preload("Seminar.SeminarTheme.BaseSeminarType").Preload("Presence").Preload("Presence.Client").Find(&seminarDay, seminarDayID).Error; err != nil {
 		return nil, err
 	}
 
@@ -50,9 +50,31 @@ func (c *seminarDayService) CreateSeminarDay(seminarDay model.SeminarDay) (*mode
 }
 
 func (c *seminarDayService) UpdateSeminarDay(seminarDay model.SeminarDay) (*model.SeminarDay, error) {
+	oldSeminarDay, err := c.GetSeminarDayByID(int(seminarDay.ID))
+	if err != nil {
+		return nil, err
+	}
+
 	result := db.Client.Session(&gorm.Session{FullSaveAssociations: true}).Updates(&seminarDay)
 	if result.Error != nil {
 		return nil, result.Error
+	}
+
+	for _, od := range oldSeminarDay.Documents {
+		found := false
+		for _, nd := range seminarDay.Documents {
+			if od.ID == nd.ID {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			result := db.Client.Exec("DELETE FROM seminarday_file WHERE seminar_day_id = ? AND file_id = ?", seminarDay.ID, od.ID)
+			if result.Error != nil {
+				return nil, result.Error
+			}
+		}
 	}
 
 	return &seminarDay, nil
