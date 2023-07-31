@@ -8,10 +8,7 @@ export default {
     setLastNameAction({commit}, lastName) {
         commit('setLastName', lastName);
     },
-    setExaminationPlaceIdAction({commit}, examinationPlaceId) {
-        commit('setExaminationPlaceId', examinationPlaceId);
-    },
-    setActivities({commit}, activities) {
-        commit('activities', activities);
+    setRoless({commit}, roles) {
+        commit('roles', roles);
     }
 };

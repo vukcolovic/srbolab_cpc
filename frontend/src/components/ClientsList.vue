@@ -11,6 +11,7 @@
         <button class="iconBtn" title="Izmeni" :disabled="!table.selectedClient" @click="$router.push({name: 'ClientEdit', query: {id: table.selectedClient.ID, action: 'update' }})">
           <i class="fa fa-user-md">
           </i></button>
+        <label class="m-1" style="font-size: 1.2em; font-style: italic">Lista vozača</label>
         <button class="iconBtn ms-auto" title="Filter" type="button" data-bs-toggle="collapse" data-bs-target="#filter" aria-expanded="false" aria-controls="filter">
           <i class="fa fa-filter" aria-hidden="true">
           </i>
@@ -36,12 +37,26 @@
           <input type="text" id="jmbg" name="jmbg" v-model="filter.jmbg" />
         </div>
         <div class="col-sm-2 my-1">
-          <label :style=styleLabelSmall for="verified">Verifikovan:&nbsp;&nbsp;</label>
-          <input id="verified" type="checkbox" v-model="filter.verified" />
+          <label for="verified" style="margin-right: 5px">Verifikovan:</label>
+          <v-select
+              v-model="filter.verified"
+              :options="yesNoOptions"
+              :style="styleInputSmall"
+              :reduce="opt => opt.value"
+              label="label"
+              placeholder="Traži">
+          </v-select>
         </div>
         <div class="col-sm-2 my-1">
           <label :style=styleLabelSmall for="wait_seminar">Čeka seminar:&nbsp;&nbsp;</label>
-          <input id="wait_seminar" type="checkbox" v-model="filter.wait_seminar" />
+          <v-select
+              v-model="filter.wait_seminar"
+              :options="yesNoOptions"
+              :style="styleInputSmall"
+              :reduce="opt => opt.value"
+              label="label"
+              placeholder="Traži">
+          </v-select>
         </div>
 
       </div>
@@ -69,14 +84,16 @@ import axios from "axios";
 import {reactive} from "vue";
 import {useToast} from "vue-toastification";
 import {styleMixin} from "@/mixins/styleMixin";
+import vSelect from "vue-select";
+import {commonMixin} from "@/mixins/commonMixin";
 
 export default {
   name: 'ClientsList',
-  mixins: [styleMixin],
-  components: {VueTableLite },
+  mixins: [styleMixin, commonMixin],
+  components: {vSelect, VueTableLite },
   data() {
     return {
-      filter: {verified: false, wait_seminar: false, jmbg: "", first_name: "", last_name: ""}
+      filter: {verified: "", wait_seminar: "", jmbg: "", first_name: "", last_name: ""}
     }
   },
   setup() {

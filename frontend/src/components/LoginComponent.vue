@@ -1,38 +1,38 @@
 <template>
   <div class="container">
-    <div class="row">
-      <div class="col-5 mx-auto">
-        <h1 class="mt-5">Prijava</h1>
+    <img src="../assets/srbolab_logo.png" href="">
+      <div class="col-sm-5 mx-auto mt-5">
         <hr>
         <form-tag @formEvent="submitHandler" name="myForm" event="formEvent">
           <text-input
-              v-model.trim="email"
+            v-model.trim="email"
             label="Email"
             type="email"
+            style="color: #007bff; font-size: 1.4em"
             name="email"
             :required=true>
           </text-input>
-
+          <br>
           <text-input
               v-model.trim="password"
               label="Šifra"
               type="password"
+              style="color: #007bff; font-size: 1.4em"
               name="password"
               :required=true>
           </text-input>
-          <hr>
-          <input type="submit" class="btn btn-primary m-2" value="Prijava">
+          <input type="submit" class="btn btn-primary mt-3" value="Prijava">
         </form-tag>
       </div>
     </div>
-  </div>
 </template>
 
 <script>
 import TextInput from "@/components/forms/TextInput";
 import FormTag from "@/components/forms/FormTag";
 import axios from "axios";
-import router from './../router/index.js';
+import router from "@/router";
+import {useToast} from "vue-toastification";
 
 export default {
   name: 'LoginComponent',
@@ -50,24 +50,26 @@ export default {
         email: this.email,
         password: this.password,
       }
-
-      await axios.post('/users/login', JSON.stringify(payload)).then((response) => {
-        if (response.data === null || response.data.Status === 'error') {
-          // console.log(error)//fixme notie
+      await axios.post('/login', JSON.stringify(payload)).then((response) => {
+        if (response.data == null || response.data.Status === 'error') {
+          this.toast.error(response.data != null ? response.data.ErrorMessage : "");
+          return;
         }
         const loginData = JSON.parse(response.data.Data);
 
         this.$store.dispatch('setTokenAction', loginData.token);
         this.$store.dispatch('setLastNameAction', loginData.last_name);
         this.$store.dispatch('setFirstNameAction', loginData.first_name);
-        this.$store.dispatch('setExaminationPlaceIdAction', loginData.examination_place_id);
-        // this.$store.dispatch('setActivities', loginData.activities);
-        localStorage.setItem("activities", JSON.stringify(loginData.activities))
+        localStorage.setItem("roles", JSON.stringify(loginData.roles))
         }, (error) => {
-        this.toast.error(error.message);
+        this.toast.error(error);
       });
       await router.push("/");
     },
-    }
+    },
+  setup() {
+    const toast = useToast();
+    return {toast}
+  },
   }
 </script>

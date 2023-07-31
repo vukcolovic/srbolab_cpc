@@ -9,8 +9,9 @@
 <!--        <i class="fa fa-user"></i>-->
 <!--      </button>-->
       <button class="iconBtn" title="Izmeni" :disabled="!selectedClient" @click="$router.push({name: 'ClientEdit', query: {id: selectedClient.ID, action: 'update' }})">
-        <i class="fa fa-user-md">
+        <i class="fa fa-pencil">
         </i></button>
+        <label class="m-1" style="font-size: 1.2em; font-style: italic">Čekaonica</label>
         <button class="iconBtn ms-auto" title="Filter" type="button" data-bs-toggle="collapse" data-bs-target="#filter" aria-expanded="false" aria-controls="filter">
           <i class="fa fa-filter" aria-hidden="true">
           </i>
@@ -45,6 +46,7 @@
             <td style="width: 4%;">ID</td>
             <td style="width: 10%;">Ime i Prezime</td>
             <td style="width: 10%;">JMBG</td>
+            <td style="width: 10%;">Verifikovan</td>
             <td style="width: 10%;">Firma</td>
             <td style="width: 10%;">Plaćeno</td>
             <td style="width: 30%;">Seminar</td>
@@ -56,10 +58,12 @@
             <td>{{row.ID}}</td>
             <td>{{row.first_name}} {{row.last_name}}</td>
             <td>{{row.jmbg}}</td>
+            <td>{{row.verified_text}}</td>
             <td>TODO</td>
             <td><v-select
                 v-model="row.payed"
                 :options="yesNoOptions"
+                :disabled="!row.verified"
                 :style="styleInputSmall"
                 label="label"
                 :reduce="opt => opt.value"
@@ -70,6 +74,7 @@
                   v-model="row.selectedSeminar"
                   :options="openedSeminars"
                   :style="styleInputSmall"
+                  :disabled="!row.verified"
                   label="base_info"
                   placeholder="Traži">
               </v-select>
@@ -101,7 +106,7 @@ export default {
       rows: [],
       totalCount: 0,
       selectedClient: null,
-      filter: {verified: true, wait_seminar: true, jmbg: "", first_name: "", last_name: ""},
+      filter: {verified: "", wait_seminar: "", jmbg: "", first_name: "", last_name: "", waiting_room: true},
       openedSeminars: [],
     }
   },

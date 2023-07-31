@@ -8,11 +8,8 @@ export default {
   setLastName(state, lastName) {
     state.lastName = lastName;
   },
-  setExaminationPlaceId(state, examinationPlaceId) {
-    state.examinationPlaceId = examinationPlaceId;
-  },
-  setActivities(state, activities) {
-    state.activities = activities;
+  setRoles(state, roles) {
+    state.roles = roles;
   },
   initialiseStore(state) {
     // Check if the token exists

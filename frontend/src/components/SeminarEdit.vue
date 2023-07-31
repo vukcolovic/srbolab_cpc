@@ -1,18 +1,25 @@
 <template>
   <div class="container">
     <div class="row">
-      <div class="col-sm-11 mx-auto">
-        <h3 v-if="action === 'add'" class="mt-2">Dodavanje</h3>
-        <h3 v-if="action === 'view'" class="mt-2">Pregled</h3>
-        <h3 v-if="action === 'update'" class="mt-2">Ažuriranje</h3>
-        <hr>
+      <div class="col-sm-3">
+        <h4 v-if="action === 'add'" class="mt-2">Dodavanje</h4>
+        <h4 v-if="action === 'update'" class="mt-2">Seminar</h4>
       </div>
+      <div class="col-sm-7">
+        <div class="shell mt-1">
+          <div :style="{ width: percentFilled  + '%' }" class="bar">
+          </div>
+          Polaznika: <span>{{ seminar.trainees.length }} / {{ seminar.class_room.max_students }}</span>
+        </div>
+      </div>
+      <hr>
     </div>
-    <form-tag event="formEvent" name="myForm" @formEvent="submitHandler">
+
       <div class="row">
         <div class="col-sm-4">
+          <form-tag event="formEvent" name="myForm" @formEvent="submitHandler">
           <div v-if="seminar.seminar_status && action !== 'add'">
-            Status seminara: {{seminar.seminar_status.name}}
+            Status seminara: {{ seminar.seminar_status.name }}
           </div>
           <label :style="styleLabel" class="mb-1 mt-1">Tip seminara</label>
           <v-select
@@ -39,13 +46,13 @@
 
           <label :style="styleLabel" class="mb-1 mt-1">Lokacija</label>
           <v-select
-              @option:selected="onLocationChange"
               v-model="location"
               :disabled=readonly
               :options="locations"
               :style="styleInput"
               label="address_place"
-              placeholder="Traži">
+              placeholder="Traži"
+              @option:selected="onLocationChange">
           </v-select>
 
           <label :style="styleLabel" class="mb-1 mt-1">Učionica</label>
@@ -66,64 +73,49 @@
               name="start"
               type="date">
           </text-input>
+    </form-tag>
         </div>
 
-        <div class="col-sm-5" v-if="action !== 'add'">
+        <div v-if="action !== 'add'" class="col-sm-8" style="font-size: 0.8em">
           <div>
             <h5>Spisak polaznika</h5>
             <table class="styled-table">
               <thead>
               <tr class="bg-primary text-white">
-                <td style="width: 20%;">Plaćeno</td>
-                <td style="width: 40%;">Firma</td>
-                <td style="width: 40%;">Ime i prezime</td>
+                <td style="width: 35%;">Ime i prezime</td>
+                <td style="width: 20%;">JMBG</td>
+                <td style="width: 35%;">Firma</td>
+                <td style="width: 10%;">Plaćeno</td>
               </tr>
               </thead>
               <tbody>
               <tr v-for="trainee in seminar.trainees" :key="trainee.client_id">
-                <td :class="[trainee.payed ? 'bg-success' : 'bg-danger']">{{ trainee.payed  ? 'DA' : 'NE' }}</td>
-                <td class="p-1">{{trainee.client.company.name}}</td>
-                <td class="p-1">{{trainee.client.person.first_name}} {{trainee.client.person.last_name}}</td>
+                <td class="p-1">{{ trainee.client.person.first_name }} {{ trainee.client.person.last_name }}</td>
+                <td class="p-1">{{ trainee.client.company.name }}</td>
+                <td class="p-1">{{ trainee.client.jmbg }}</td>
+                <td :class="[trainee.payed ? 'bg-success' : 'bg-danger']">{{ trainee.payed ? 'DA' : 'NE' }}</td>
               </tr>
               </tbody>
             </table>
           </div>
 
-            <div class="shell mt-3">
-              <div class="bar" :style="{ width: percentFilled  + '%' }">
-              </div>
-              Broj polaznika: <span>{{seminar.trainees.length}} / {{seminar.class_room.max_students}}</span>
-            </div>
-
-        </div>
-        <div class="col-sm-3">
-          <label :style=styleLabel>Dokumenta: </label>
-          <input id="fileId" type="file" ref="file" @change="uploadFile()"/>
-          <ul>
-            <li v-for="(doc, index) in seminar.documents" :key="index" style="list-style-type: none;">
-              <label for="index">&nbsp; {{ doc.name }}</label>
-              <button class="iconBtn" title="Obriši" @click.prevent="removeFile(index)">
-                <i class="fa fa-remove"></i>
-              </button>
-
-              <button class="iconBtn" title="Preuzmi" @click.prevent="downloadFile(index)">
-                <i class="fa fa-download"></i>
-              </button>
-            </li>
-          </ul>
         </div>
 
         <div class="row"></div>
         <div class="col-sm-5">
           <input v-if="this.action === 'add'" class="btn btn-primary m-2" type="submit" value="Snimi">
           <input v-if="this.action === 'update'" class="btn btn-primary m-2" type="submit" value="Snimi">
-          <input v-if="this.seminar && this.seminar.seminar_status && (this.seminar.seminar_status.ID === SEMINAR_STATUSES.OPENED || this.seminar.seminar_status.ID === SEMINAR_STATUSES.FILLED)" class="btn btn-primary m-2" @click.prevent="startSeminar()" value="Startuj seminar">
-          <input v-if="this.seminar && this.seminar.seminar_status && this.seminar.seminar_status.ID === SEMINAR_STATUSES.IN_PROGRESS" class="btn btn-primary m-2" @click.prevent="finishSeminar()" value="Završi seminar">
+          <input
+              v-if="this.seminar && this.seminar.seminar_status && (this.seminar.seminar_status.ID === SEMINAR_STATUSES.OPENED || this.seminar.seminar_status.ID === SEMINAR_STATUSES.FILLED)"
+              class="btn btn-primary m-2" value="Startuj seminar" @click.prevent="startSeminar()">
+          <input
+              v-if="this.seminar && this.seminar.seminar_status && this.seminar.seminar_status.ID === SEMINAR_STATUSES.IN_PROGRESS"
+              class="btn btn-primary m-2" value="Završi seminar" @click.prevent="finishSeminar()">
         </div>
       </div>
-    </form-tag>
 
-    <div v-if="this.seminar && this.seminar.seminar_status && (this.seminar.seminar_status.ID === SEMINAR_STATUSES.IN_PROGRESS || this.seminar.seminar_status.ID === SEMINAR_STATUSES.CLOSED)">
+    <div
+        v-if="this.seminar && this.seminar.seminar_status && (this.seminar.seminar_status.ID === SEMINAR_STATUSES.IN_PROGRESS || this.seminar.seminar_status.ID === SEMINAR_STATUSES.CLOSED)">
       <hr>
       <div class="row">
         <div class="col-sm-2">
@@ -143,12 +135,29 @@
         </div>
       </div>
       <hr>
+      <div class="col-sm-3">
+        <label :style=styleLabel>Dokumenta: </label>
+        <input id="fileId" ref="file" type="file" @change="uploadFile()"/>
+        <ul>
+          <li v-for="(doc, index) in seminar.documents" :key="index" style="list-style-type: none;">
+            <label for="index">&nbsp; {{ doc.name }}</label>
+            <button class="iconBtn" title="Obriši" @click.prevent="removeFile(index)">
+              <i class="fa fa-remove"></i>
+            </button>
+
+            <button class="iconBtn" title="Preuzmi" @click.prevent="downloadFile(index)">
+              <i class="fa fa-download"></i>
+            </button>
+          </li>
+        </ul>
+      </div>
+      <hr>
       <h4>Dani seminara</h4>
-      <div v-for="day in seminar.days" :key="day.number" @click="openSeminarDayEdit(day.ID)"
-           class="border border-info bg-light d-inline-flex rounded m-2" style="width: 10%; height: 120px">
+      <div v-for="day in seminar.days" :key="day.number" class="border border-info bg-light d-inline-flex rounded m-2"
+           style="width: 10%; height: 120px" @click="openSeminarDayEdit(day.ID)">
         <div class="m-1">
           <h6>Dan: {{ day.number }}</h6>
-          <p style="font-size: 0.8em">{{getDateInMMDDYYYYFormat(day.date)}}</p>
+          <p style="font-size: 0.8em">{{ getDateInMMDDYYYYFormat(day.date) }}</p>
           <hr>
           <p style="font-size: 0.7em; overflow: hidden">Tema: {{ day.name }}</p>
 
@@ -181,9 +190,9 @@ export default {
     },
     percentFilled() {
       if (!this.seminarId) {
-        return ;
+        return;
       }
-      return (this.seminar.trainees.length/this.seminar.class_room.max_students) *100;
+      return (this.seminar.trainees.length / this.seminar.class_room.max_students) * 100;
     }
   },
   data() {
@@ -240,7 +249,7 @@ export default {
         }
         var fileContent = JSON.parse(response.data.Data);
         var sampleArr = this.base64ToArrayBuffer(fileContent);
-        const blob = new Blob([sampleArr], { type: 'application/pdf' });
+        const blob = new Blob([sampleArr], {type: 'application/pdf'});
 
         var iframe = document.createElement('iframe');
         iframe.src = URL.createObjectURL(blob);
@@ -261,7 +270,7 @@ export default {
         }
         var fileContent = JSON.parse(response.data.Data);
         var sampleArr = this.base64ToArrayBuffer(fileContent);
-        const blob = new Blob([sampleArr], { type: 'application/pdf' });
+        const blob = new Blob([sampleArr], {type: 'application/pdf'});
 
         var iframe = document.createElement('iframe');
         iframe.src = URL.createObjectURL(blob);
@@ -282,7 +291,7 @@ export default {
         }
         var fileContent = JSON.parse(response.data.Data);
         var sampleArr = this.base64ToArrayBuffer(fileContent);
-        const blob = new Blob([sampleArr], { type: 'application/pdf' });
+        const blob = new Blob([sampleArr], {type: 'application/pdf'});
 
         var iframe = document.createElement('iframe');
         iframe.src = URL.createObjectURL(blob);
@@ -303,7 +312,7 @@ export default {
         }
         var fileContent = JSON.parse(response.data.Data);
         var sampleArr = this.base64ToArrayBuffer(fileContent);
-        const blob = new Blob([sampleArr], { type: 'application/pdf' });
+        const blob = new Blob([sampleArr], {type: 'application/pdf'});
 
         var iframe = document.createElement('iframe');
         iframe.src = URL.createObjectURL(blob);
@@ -317,7 +326,7 @@ export default {
       });
     },
     openSeminarDayEdit(dayId) {
-     router.push({name: 'SeminarDayEdit', query: {id: dayId}});
+      router.push({name: 'SeminarDayEdit', query: {id: dayId}});
     },
     async onSeminarTypeChange() {
       this.seminar.seminar_theme = null;
@@ -341,7 +350,7 @@ export default {
       this.getAllClassRoomsLocationId(this.location.ID);
     },
     async getAllClassRoomsLocationId(locationId) {
-      await axios.get('/class-rooms/location/' +locationId).then((response) => {
+      await axios.get('/class-rooms/location/' + locationId).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;
@@ -450,10 +459,9 @@ export default {
 <style scoped>
 .shell {
   height: 20px;
-  width: 250px;
+  width: 500px;
   border: 1px solid #aaa;
   border-radius: 13px;
-
 }
 
 .bar {
@@ -461,6 +469,7 @@ export default {
   height: 20px;
   width: 15px;
   border-radius: 9px;
+
   span {
     float: right;
     color: #fff;

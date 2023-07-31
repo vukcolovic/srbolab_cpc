@@ -8,8 +8,7 @@ export default {
       token: "",
       firstName: "",
       lastName: "",
-      examinationPlaceId: 0,
-      activities: [],
+      roles: [],
     };
   },
   mutations,

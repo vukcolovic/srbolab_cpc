@@ -82,18 +82,16 @@ export default {
   },
   computed : {
     firstName: function () {
-      // return this.$store.getters.firstName;
-      return "Vuk";
+      return this.$store.getters.firstName;
     },
     lastName: function () {
-      // return this.$store.getters.lastName;
-      return "Colovic";
+      return this.$store.getters.lastName;
     }
   },
   methods: {
     logout() {
       this.$store.dispatch('setTokenAction', "");
-      localStorage.removeItem('activities');
+      localStorage.removeItem('roles');
     }
   },
 }

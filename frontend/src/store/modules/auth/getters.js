@@ -11,10 +11,7 @@ export default {
   lastName(state) {
     return state.lastName;
   },
-  examinationPlaceId(state) {
-    return state.examinationPlaceId;
-  },
-  activities(state) {
-    return state.activities;
+  roles(state) {
+    return state.roles;
   },
 };

@@ -23,15 +23,53 @@ type clientServiceInterface interface {
 	UpdateClient(client model.Client) (*model.Client, error)
 }
 
+func makeFilterMap(filter model.ClientFilter) map[string]interface{} {
+	filterMap := make(map[string]interface{})
+	if len(filter.FirstName) > 0 {
+		filterMap["first_name"] = filter.FirstName
+	}
+	if len(filter.LastName) > 0 {
+		filterMap["last_name"] = filter.LastName
+	}
+	if len(filter.JMBG) > 0 {
+		filterMap["jmbg"] = filter.JMBG
+	}
+
+	if len(filter.Verified) > 0 {
+		if filter.Verified == "true" {
+			filterMap["verified"] = true
+		} else {
+			filterMap["verified"] = false
+		}
+	}
+
+	if len(filter.WaitSeminar) > 0 {
+		if filter.WaitSeminar == "true" {
+			filterMap["wait_seminar"] = true
+		} else {
+			filterMap["wait_seminar"] = false
+		}
+	}
+
+	return filterMap
+}
+
 func (c *clientService) GetAllClients(skip, take int, filter model.ClientFilter) ([]model.Client, error) {
 	var clients []model.Client
-	if filter.FirstName != "" || filter.LastName != "" || filter.JMBG != "" {
-		filter.Verified = nil
-		filter.WaitSeminar = nil
+
+	if filter.WaitingRoom {
+		if err := db.Client.Where("verified = ?", false).Or("wait_seminar = ?", true).Limit(take).Offset(skip).Find(&clients).Error; err != nil {
+			return nil, err
+		}
+
+		return clients, nil
 	}
-	if err := db.Client.Where(filter).Order("id desc").Limit(take).Offset(skip).Find(&clients).Error; err != nil {
+
+	filterMap := makeFilterMap(filter)
+	if err := db.Client.Where(filterMap).Order("id desc").Limit(take).Offset(skip).Find(&clients).Error; err != nil {
 		return nil, err
 	}
+
 	return clients, nil
 }
 

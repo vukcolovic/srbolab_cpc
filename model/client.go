@@ -33,8 +33,9 @@ type ClientFilter struct {
 	FirstName   string `json:"first_name"`
 	LastName    string `json:"last_name"`
 	JMBG        string `json:"jmbg"`
-	WaitSeminar *bool  `json:"wait_seminar"`
-	Verified    *bool  `json:"verified"`
+	WaitSeminar string `json:"wait_seminar"`
+	Verified    string `json:"verified"`
+	WaitingRoom bool   `json:"waiting_room"`
 }
 
 type ClientSeminar struct {

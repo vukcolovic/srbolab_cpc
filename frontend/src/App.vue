@@ -1,5 +1,5 @@
 <template>
-  <template v-if="!true">
+  <template v-if="!isLoggedIn">
     <LoginComponent></LoginComponent>
   </template>
   <template v-else>
@@ -30,12 +30,12 @@ export default {
     HeaderComponent,
   },
   computed : {
-    // isLoggedIn : function(){
-    //   return this.$store.getters.isAuthenticated;
-    // }
+    isLoggedIn : function(){
+      return this.$store.getters.isAuthenticated;
+    }
   },
   beforeCreate() {
-    // this.$store.commit('initialiseStore');
+    this.$store.commit('initialiseStore');
   }
 }
 </script>

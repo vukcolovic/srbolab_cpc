@@ -14,7 +14,7 @@ func RunServer(host string) {
 		w.Write([]byte("pong"))
 	})
 
-	r.HandleFunc("/login", handlers.Login).Methods("POST")
+	r.HandleFunc("/api/login", handlers.Login).Methods("POST")
 
 	s := r.PathPrefix("/api/users").Subrouter()
 	s.HandleFunc("/register", handlers.Register).Methods("POST")
