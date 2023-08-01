@@ -1,6 +1,7 @@
 package service
 
 import (
+	"gorm.io/gorm"
 	"srbolab_cpc/db"
 	"srbolab_cpc/model"
 )
@@ -32,7 +33,7 @@ func (s *userService) GetAllUsers(skip, take int) ([]model.User, error) {
 
 func (s *userService) GetUserByID(id int) (*model.User, error) {
 	var user *model.User
-	if err := db.Client.First(&user, id).Error; err != nil {
+	if err := db.Client.Preload("Roles").First(&user, id).Error; err != nil {
 		return nil, err
 	}
 
@@ -41,7 +42,7 @@ func (s *userService) GetUserByID(id int) (*model.User, error) {
 
 func (s *userService) GetUserByEmail(email string) (*model.User, error) {
 	var user *model.User
-	if err := db.Client.Where("email = ?", email).First(&user).Error; err != nil {
+	if err := db.Client.Where("email = ?", email).Preload("Roles").First(&user).Error; err != nil {
 		return nil, err
 	}
 
@@ -71,9 +72,32 @@ func (s *userService) CreateUser(user model.User) (*model.User, error) {
 }
 
 func (s *userService) UpdateUser(user model.User) (*model.User, error) {
-	result := db.Client.Save(&user)
+	oldUser, err := s.GetUserByID(int(user.ID))
+	if err != nil {
+		return nil, err
+	}
+
+	result := db.Client.Session(&gorm.Session{FullSaveAssociations: true}).Updates(&user)
+
 	if result.Error != nil {
 		return nil, result.Error
+	}
+
+	for _, or := range oldUser.Roles {
+		found := false
+		for _, nr := range user.Roles {
+			if or.ID == nr.ID {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			result := db.Client.Exec("DELETE FROM user_role WHERE user_id = ? AND role_id = ?", user.ID, or.ID)
+			if result.Error != nil {
+				return nil, result.Error
+			}
+		}
 	}
 
 	return &user, nil

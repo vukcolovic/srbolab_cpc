@@ -15,3 +15,6 @@ INSERT INTO seminar_themes (base_seminar_type_id, name, code, number_of_days) VA
 INSERT INTO seminar_themes (base_seminar_type_id, name, code, number_of_days) VALUES ((SELECT id FROM base_seminar_types WHERE code = 'CYCLE'), '5', '5', 1);
 INSERT INTO seminar_themes (base_seminar_type_id, name, code, number_of_days) VALUES ((SELECT id FROM base_seminar_types WHERE code = 'BASIC'), 'OSNOVNA OBUKA', 'BASIC', 21);
 INSERT INTO seminar_themes (base_seminar_type_id, name, code, number_of_days) VALUES ((SELECT id FROM base_seminar_types WHERE code = 'ADDITIONAL'), 'DODATNA OBUKA', 'ADDITIONAL', 5);
+
+INSERT INTO roles (id, name, code, created_at, updated_at) VALUES (1, 'Administrator', 'ADMINISTRATOR', now(), now()) ON CONFLICT DO NOTHING;
+INSERT INTO roles (id, name, code, created_at, updated_at) VALUES (2, 'Predavač', 'PREDAVAC', now(), now()) ON CONFLICT DO NOTHING;

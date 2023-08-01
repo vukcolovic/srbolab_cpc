@@ -24,6 +24,10 @@ func RunServer(host string) {
 	s.HandleFunc("/delete/{id}", handlers.DeleteUser).Methods("GET")
 	s.HandleFunc("/count", handlers.CountUsers).Methods("GET")
 
+	s = r.PathPrefix("/api/roles").Subrouter()
+	s.HandleFunc("/list", handlers.ListRoles).Methods("GET")
+	s.HandleFunc("/id/{id}", handlers.GetRoleByID).Methods("GET")
+
 	s = r.PathPrefix("/api/clients").Subrouter()
 	s.HandleFunc("/create", handlers.CreateClient).Methods("POST")
 	s.HandleFunc("/update", handlers.UpdateClient).Methods("POST")

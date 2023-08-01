@@ -62,9 +62,21 @@
               label="Šifra"
               type="password"
               name="password"
-              :required="true"
+              :required="requiredPassword"
               :readonly="readonly">
           </text-input>
+        </div>
+
+        <div class="col-sm-1"></div>
+
+        <div class="col-sm-5">
+          <h5 class="mt-2">Role</h5>
+          <div class="col-sm-10 mb-2">
+            <li v-for="(role, index) in roles" :key="role.ID" style="list-style-type: none;">
+              <input :id="index" :value="role" :disabled="readonly" type="checkbox" v-model="user.roles" />
+              <label for="index">&nbsp; {{role.name}}</label>
+            </li>
+          </div>
         </div>
 
         <div class="row"></div>
@@ -95,13 +107,18 @@ export default {
     readonly() {
       return this.$route.query.action === 'view';
     },
+    requiredPassword() {
+      return this.action === 'add';
+    },
   },
   data() {
     return {
       user: {
         person: {first_name: "", middle_name: "", last_name: "", email: "", phone_number: ""},
         password: "",
+        roles: [],
       },
+      roles: [],
       action: "",
     }
   },
@@ -113,6 +130,9 @@ export default {
           return;
         }
         this.user = JSON.parse(response.data.Data);
+        if (this.user.roles == null) {
+          this.user.roles = [];
+        }
       }, (error) => {
         this.toast.error(error.message);
       });
@@ -148,12 +168,24 @@ export default {
         this.toast.error(error.message);
       });
     },
+    async getAllRoles() {
+      await axios.get('/roles/list').then((response) => {
+        if (response.data === null || response.data.Status === 'error') {
+          this.toast.error(response.data != null ? response.data.ErrorMessage : "");
+          return;
+        }
+        this.roles = JSON.parse(response.data.Data);
+      }, (error) => {
+        this.toast.error(error.message);
+      });
+    },
   },
   setup() {
     const toast = useToast();
     return {toast}
   },
   mounted() {
+    this.getAllRoles();
     if (this.$route.query.id !== '') {
       this.userId = this.$route.query.id;
       this.getUserById();

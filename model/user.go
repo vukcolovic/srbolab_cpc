@@ -29,4 +29,5 @@ func (u *User) AfterFind(tx *gorm.DB) (err error) {
 type Role struct {
 	gorm.Model
 	Code string `json:"code"`
+	Name string `json:"name"`
 }
