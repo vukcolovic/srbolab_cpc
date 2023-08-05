@@ -15,9 +15,9 @@
       <hr>
     </div>
 
-      <div class="row">
-        <div class="col-sm-4">
-          <form-tag event="formEvent" name="myForm" @formEvent="submitHandler">
+    <div class="row">
+      <div class="col-sm-4">
+        <form-tag event="formEvent" name="myForm" @formEvent="submitHandler">
           <div v-if="seminar.seminar_status && action !== 'add'">
             Status seminara: {{ seminar.seminar_status.name }}
           </div>
@@ -73,53 +73,56 @@
               name="start"
               type="date">
           </text-input>
-    </form-tag>
-        </div>
+        </form-tag>
+      </div>
 
-        <div v-if="action !== 'add'" class="col-sm-8" style="font-size: 0.8em">
-          <div>
-            <h5>Spisak polaznika</h5>
-            <div class="mb-1">
-              <input placeholder="JMBG" style="max-width: 80px; font-size: 0.8em; margin-right: 5px" type="text" id="jmbg" name="jmbg" v-model="filter.jmbg" />
-              <input placeholder="FIRMA" style="max-width: 80px; font-size: 0.8em;" type="text" id="company" name="company" v-model="filter.company" />
-            </div>
-
-            <table class="styled-table">
-              <thead>
-              <tr class="bg-primary text-white">
-                <td style="width: 35%;">Ime i prezime</td>
-                <td style="width: 20%;">JMBG</td>
-                <td style="width: 35%;">Firma</td>
-                <td style="width: 10%;">Plaćeno</td>
-              </tr>
-              </thead>
-              <tbody>
-              <tr v-for="trainee in filteredClients" :key="trainee.client_id">
-                <td class="p-1">{{ trainee.client.person.first_name }} {{ trainee.client.person.last_name }}</td>
-                <td class="p-1">{{ trainee.client.jmbg }}</td>
-                <td class="p-1">{{ trainee.client.company.name }}</td>
-                <td :class="[trainee.payed ? 'bg-success' : 'bg-danger']" style="text-align: center">
-                  <input id="payed" type="checkbox" :hidden="readonly" @change="updateClientSeminar(trainee)" v-model="trainee.payed" />
-                </td>
-              </tr>
-              </tbody>
-            </table>
+      <div v-if="action !== 'add'" class="col-sm-8" style="font-size: 0.8em">
+        <div>
+          <h5>Spisak polaznika</h5>
+          <div class="mb-1">
+            <input id="jmbg" v-model="filter.jmbg" name="jmbg" placeholder="JMBG"
+                   style="max-width: 80px; font-size: 0.8em; margin-right: 5px" type="text"/>
+            <input id="company" v-model="filter.company" name="company" placeholder="FIRMA"
+                   style="max-width: 80px; font-size: 0.8em;" type="text"/>
           </div>
 
+          <table class="styled-table">
+            <thead>
+            <tr class="bg-primary text-white">
+              <td style="width: 35%;">Ime i prezime</td>
+              <td style="width: 20%;">JMBG</td>
+              <td style="width: 35%;">Firma</td>
+              <td style="width: 10%;">Plaćeno</td>
+            </tr>
+            </thead>
+            <tbody>
+            <tr v-for="trainee in filteredClients" :key="trainee.client_id">
+              <td class="p-1">{{ trainee.client.person.first_name }} {{ trainee.client.person.last_name }}</td>
+              <td class="p-1">{{ trainee.client.jmbg }}</td>
+              <td class="p-1">{{ trainee.client.company.name }}</td>
+              <td :class="[trainee.payed ? 'bg-success' : 'bg-danger']" style="text-align: center">
+                <input id="payed" v-model="trainee.payed" :hidden="readonly" type="checkbox"
+                       @change="updateClientSeminar(trainee)"/>
+              </td>
+            </tr>
+            </tbody>
+          </table>
         </div>
 
-        <div class="row"></div>
-        <div class="col-sm-5">
-          <input v-if="this.action === 'add'" class="btn btn-primary m-2" type="submit" value="Snimi">
-          <input v-if="this.action === 'update'" class="btn btn-primary m-2" type="submit" value="Snimi">
-          <input
-              v-if="this.seminar && this.seminar.seminar_status && (this.seminar.seminar_status.ID === SEMINAR_STATUSES.OPENED || this.seminar.seminar_status.ID === SEMINAR_STATUSES.FILLED)"
-              class="btn btn-primary m-2" value="Startuj seminar" @click.prevent="startSeminar()">
-          <input
-              v-if="this.seminar && this.seminar.seminar_status && this.seminar.seminar_status.ID === SEMINAR_STATUSES.IN_PROGRESS"
-              class="btn btn-primary m-2" value="Završi seminar" @click.prevent="finishSeminar()">
-        </div>
       </div>
+
+      <div class="row"></div>
+      <div class="col-sm-5">
+        <input v-if="this.action === 'add'" class="btn btn-primary m-2" type="submit" value="Snimi">
+        <input v-if="this.action === 'update'" class="btn btn-primary m-2" type="submit" value="Snimi">
+        <input
+            v-if="this.seminar && this.seminar.seminar_status && (this.seminar.seminar_status.ID === SEMINAR_STATUSES.OPENED || this.seminar.seminar_status.ID === SEMINAR_STATUSES.FILLED)"
+            class="btn btn-primary m-2" value="Startuj seminar" @click.prevent="startSeminar()">
+        <input
+            v-if="this.seminar && this.seminar.seminar_status && this.seminar.seminar_status.ID === SEMINAR_STATUSES.IN_PROGRESS"
+            class="btn btn-primary m-2" value="Završi seminar" @click.prevent="finishSeminar()">
+      </div>
+    </div>
 
     <div
         v-if="this.seminar && this.seminar.seminar_status && (this.seminar.seminar_status.ID === SEMINAR_STATUSES.IN_PROGRESS || this.seminar.seminar_status.ID === SEMINAR_STATUSES.CLOSED)">
@@ -142,34 +145,39 @@
         </div>
       </div>
       <hr>
-      <div class="col-sm-3">
-        <label :style=styleLabel>Dokumenta: </label>
-        <input id="fileId" ref="file" type="file" @change="uploadFile()"/>
-        <ul>
-          <li v-for="(doc, index) in seminar.documents" :key="index" style="list-style-type: none;">
-            <label for="index">&nbsp; {{ doc.name }}</label>
-            <button class="iconBtn" title="Obriši" @click.prevent="removeFile(index)">
-              <i class="fa fa-remove"></i>
-            </button>
+      <div class="row">
+        <div class="col-sm-9">
+          <h4>Dani seminara</h4>
+          <div v-for="day in seminar.days" :key="day.number"
+               class="border border-info bg-light d-inline-flex rounded m-2"
+               style="width: 15%; height: 120px" @click="openSeminarDayEdit(day.ID)">
+            <div class="m-1">
+              <h6>Dan: {{ day.number }}</h6>
+              <p style="font-size: 0.8em">{{ getDateInMMDDYYYYFormat(day.date) }}</p>
+              <hr>
+              <p style="font-size: 0.7em; overflow: hidden">Tema: {{ day.name }}</p>
+            </div>
+          </div>
+        </div>
 
-            <button class="iconBtn" title="Preuzmi" @click.prevent="downloadFile(index)">
-              <i class="fa fa-download"></i>
-            </button>
-          </li>
-        </ul>
-      </div>
-      <hr>
-      <h4>Dani seminara</h4>
-      <div v-for="day in seminar.days" :key="day.number" class="border border-info bg-light d-inline-flex rounded m-2"
-           style="width: 10%; height: 120px" @click="openSeminarDayEdit(day.ID)">
-        <div class="m-1">
-          <h6>Dan: {{ day.number }}</h6>
-          <p style="font-size: 0.8em">{{ getDateInMMDDYYYYFormat(day.date) }}</p>
-          <hr>
-          <p style="font-size: 0.7em; overflow: hidden">Tema: {{ day.name }}</p>
+        <div class="col-sm-3">
+          <label :style=styleLabel>Dokumenta: </label>
+          <input id="fileId" ref="file" type="file" @change="uploadFile()"/>
+          <ul>
+            <li v-for="(doc, index) in seminar.documents" :key="index" style="list-style-type: none;">
+              <label for="index">&nbsp; {{ doc.name }}</label>
+              <button class="iconBtn" title="Obriši" @click.prevent="removeFile(index)">
+                <i class="fa fa-remove"></i>
+              </button>
 
+              <button class="iconBtn" title="Preuzmi" @click.prevent="downloadFile(index)">
+                <i class="fa fa-download"></i>
+              </button>
+            </li>
+          </ul>
         </div>
       </div>
+
     </div>
   </div>
 </template>
@@ -203,7 +211,7 @@ export default {
     },
     filteredClients() {
       return this.seminar.trainees.filter((obj) => {
-        var companyName =  obj.client.company ? obj.client.company.name : "";
+        var companyName = obj.client.company ? obj.client.company.name : "";
         return companyName.includes(this.filter.company) && obj.client.jmbg.includes(this.filter.jmbg);
       });
     }
@@ -383,7 +391,7 @@ export default {
       }, (error) => {
         this.toast.error(error.message);
       });
-    } ,
+    },
     async getSeminarById() {
       axios.get('/seminars/id/' + this.seminarId).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
