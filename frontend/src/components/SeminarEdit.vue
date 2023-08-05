@@ -79,6 +79,11 @@
         <div v-if="action !== 'add'" class="col-sm-8" style="font-size: 0.8em">
           <div>
             <h5>Spisak polaznika</h5>
+            <div class="mb-1">
+              <input placeholder="JMBG" style="max-width: 80px; font-size: 0.8em" type="text" id="jmbg" name="jmbg" v-model="filter.jmbg" /> 
+              <input placeholder="FIRMA" style="max-width: 80px; font-size: 0.8em; margin-right: 5px" type="text" id="company" name="company" v-model="filter.company" />
+            </div>
+
             <table class="styled-table">
               <thead>
               <tr class="bg-primary text-white">
@@ -89,10 +94,10 @@
               </tr>
               </thead>
               <tbody>
-              <tr v-for="trainee in seminar.trainees" :key="trainee.client_id">
+              <tr v-for="trainee in filteredClients" :key="trainee.client_id">
                 <td class="p-1">{{ trainee.client.person.first_name }} {{ trainee.client.person.last_name }}</td>
-                <td class="p-1">{{ trainee.client.company.name }}</td>
                 <td class="p-1">{{ trainee.client.jmbg }}</td>
+                <td class="p-1">{{ trainee.client.company.name }}</td>
                 <td :class="[trainee.payed ? 'bg-success' : 'bg-danger']">{{ trainee.payed ? 'DA' : 'NE' }}</td>
               </tr>
               </tbody>
@@ -193,6 +198,12 @@ export default {
         return;
       }
       return (this.seminar.trainees.length / this.seminar.class_room.max_students) * 100;
+    },
+    filteredClients() {
+      return this.seminar.trainees.filter((obj) => {
+        var companyName =  obj.client.company ? obj.client.company.name : "";
+        return companyName.includes(this.filter.company) && obj.client.jmbg.includes(this.filter.jmbg);
+      });
     }
   },
   data() {
@@ -212,6 +223,7 @@ export default {
       location: null,
       seminarThemesByType: [],
       classRoomsByLocationId: [],
+      filter: {jmbg: "", company: ""}
     }
   },
   methods: {
