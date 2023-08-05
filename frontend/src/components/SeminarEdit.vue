@@ -80,8 +80,8 @@
           <div>
             <h5>Spisak polaznika</h5>
             <div class="mb-1">
-              <input placeholder="JMBG" style="max-width: 80px; font-size: 0.8em" type="text" id="jmbg" name="jmbg" v-model="filter.jmbg" /> 
-              <input placeholder="FIRMA" style="max-width: 80px; font-size: 0.8em; margin-right: 5px" type="text" id="company" name="company" v-model="filter.company" />
+              <input placeholder="JMBG" style="max-width: 80px; font-size: 0.8em; margin-right: 5px" type="text" id="jmbg" name="jmbg" v-model="filter.jmbg" />
+              <input placeholder="FIRMA" style="max-width: 80px; font-size: 0.8em;" type="text" id="company" name="company" v-model="filter.company" />
             </div>
 
             <table class="styled-table">
@@ -98,7 +98,9 @@
                 <td class="p-1">{{ trainee.client.person.first_name }} {{ trainee.client.person.last_name }}</td>
                 <td class="p-1">{{ trainee.client.jmbg }}</td>
                 <td class="p-1">{{ trainee.client.company.name }}</td>
-                <td :class="[trainee.payed ? 'bg-success' : 'bg-danger']">{{ trainee.payed ? 'DA' : 'NE' }}</td>
+                <td :class="[trainee.payed ? 'bg-success' : 'bg-danger']" style="text-align: center">
+                  <input id="payed" type="checkbox" :hidden="readonly" @change="updateClientSeminar(trainee)" v-model="trainee.payed" />
+                </td>
               </tr>
               </tbody>
             </table>
@@ -372,6 +374,16 @@ export default {
         this.toast.error(error.message);
       });
     },
+    async updateClientSeminar(trainee) {
+      await axios.post('/client-seminar/update', JSON.stringify(trainee)).then((response) => {
+        if (response.data === null || response.data.Status === 'error') {
+          this.toast.error(response.data != null ? response.data.ErrorMessage : "");
+          return;
+        }
+      }, (error) => {
+        this.toast.error(error.message);
+      });
+    } ,
     async getSeminarById() {
       axios.get('/seminars/id/' + this.seminarId).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
@@ -420,7 +432,7 @@ export default {
     },
     async updateSeminar() {
       this.seminar.start_date = this.getBackendFormat(this.seminar.start_date);
-      await axios.post('/seminars/update', JSON.stringify(this.seminar)).then((response) => {
+      await axios.post('/seminar/update', JSON.stringify(this.seminar)).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;
