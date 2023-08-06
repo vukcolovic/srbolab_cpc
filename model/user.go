@@ -1,6 +1,9 @@
 package model
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+	"strconv"
+)
 
 type Person struct {
 	FirstName   string `json:"first_name"`
@@ -12,6 +15,23 @@ type Person struct {
 
 func (p Person) FullName() string {
 	return p.FirstName + " " + p.LastName
+}
+
+func (p Person) FullNameWithMiddleName() string {
+	return p.FirstName + " (" + p.MiddleName + ") " + p.LastName
+}
+
+func (c Client) GetBirthDate() string {
+	if len(*c.JMBG) < 13 {
+		return "Nevalidan jmbg"
+	}
+	str := *c.JMBG
+	year, _ := strconv.Atoi(str[4:7])
+	yearPrefix := 1
+	if year < 100 {
+		yearPrefix++
+	}
+	return str[0:2] + "." + str[2:4] + "." + strconv.Itoa(yearPrefix) + str[4:7] + "."
 }
 
 type User struct {

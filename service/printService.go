@@ -2,6 +2,7 @@ package service
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/go-pdf/fpdf"
 	"os"
 	"path/filepath"
@@ -31,6 +32,7 @@ type printServiceInterface interface {
 	PrintConfirmations(seminar *model.Seminar) ([]byte, error)
 	PrintConfirmationReceives(seminar *model.Seminar) ([]byte, error)
 	PrintMuster(day *model.SeminarDay) ([]byte, error)
+	PrintCheckIn(seminar *model.Seminar) ([]byte, error)
 }
 
 func (p *printService) PrintSeminarStudentList(seminar *model.Seminar) ([]byte, error) {
@@ -428,6 +430,158 @@ func (p *printService) PrintMuster(day *model.SeminarDay) ([]byte, error) {
 		pdf.CellFormat(27, ch, "", "1", 0, "C", false, 0, "")
 		pdf.CellFormat(27, ch, "", "1", 0, "C", false, 0, "")
 		pdf.CellFormat(31, ch, "", "1", 0, "C", false, 0, "")
+	}
+
+	var buf bytes.Buffer
+	err = pdf.Output(&buf)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return buf.Bytes(), nil
+}
+
+func (p *printService) PrintCheckIn(seminar *model.Seminar) ([]byte, error) {
+	pwd, err := os.Getwd()
+	if err != nil {
+		logoped.ErrorLog.Println("Error getting pwd: ", err)
+		return []byte{}, err
+	}
+	pdf := fpdf.New("P", "mm", "A4", filepath.Join(pwd, "font"))
+	pdf.AddFont("Arimo-Regular", "", "Arimo-Regular.json")
+	pdf.AddFont("Arimo-Bold", "", "Arimo-Bold.json")
+	latTr := pdf.UnicodeTranslatorFromDescriptor("iso-8859-16")
+
+	pdf.SetMargins(15, 20, marginRight)
+	fontSize := 11.0
+	ch := 6.0
+
+	for _, client := range seminar.Trainees {
+		fmt.Println(client.ClientID)
+		pdf.AddPage()
+
+		pdf.SetFont("Arimo-Bold", "", 15)
+		pdf.Text(85, pdf.GetY(), latTr("P R I J A V A*"))
+
+		pdf.SetFont("Arimo-Regular", "", fontSize)
+		pdf.Ln(10)
+		pdf.Text(70, pdf.GetY(), latTr("za pohađanje obaveznog seminara"))
+		pdf.Ln(5)
+		pdf.Text(87, pdf.GetY(), latTr("unapređenje znanja"))
+		pdf.Ln(10)
+
+		pdf.SetFont("Arimo-Bold", "", fontSize)
+		pdf.Text(15, pdf.GetY(), latTr("LIČNI PODACI"))
+		pdf.Ln(1)
+		pdf.SetFont("Arimo-Regular", "", fontSize)
+		pdf.CellFormat(70, ch, latTr("Ime (ime jednog roditelja) prezime:"), "1", 0, "L", false, 0, "")
+		pdf.SetFont("Arimo-Bold", "", fontSize)
+		pdf.CellFormat(110, ch, client.Client.Person.FullNameWithMiddleName(), "1", 0, "L", false, 0, "")
+		pdf.Ln(ch)
+		pdf.SetFont("Arimo-Regular", "", fontSize)
+		pdf.CellFormat(70, ch, "JMBG:", "1", 0, "L", false, 0, "")
+		pdf.SetFont("Arimo-Bold", "", fontSize)
+		pdf.CellFormat(110, ch, *client.Client.JMBG, "1", 0, "L", false, 0, "")
+		pdf.Ln(ch)
+		pdf.SetFont("Arimo-Regular", "", fontSize)
+		pdf.CellFormat(70, ch, latTr("Datum rođenja:"), "1", 0, "L", false, 0, "")
+		pdf.SetFont("Arimo-Bold", "", fontSize)
+		pdf.CellFormat(110, ch, client.Client.GetBirthDate(), "1", 0, "L", false, 0, "")
+		pdf.Ln(ch)
+		pdf.SetFont("Arimo-Regular", "", fontSize)
+		pdf.CellFormat(70, ch, latTr("Mesto rođenja, država:"), "1", 0, "L", false, 0, "")
+		pdf.SetFont("Arimo-Bold", "", fontSize)
+		pdf.CellFormat(110, ch, latTr(*client.Client.PlaceBirth+", "+*client.Client.CountryBirth), "1", 0, "L", false, 0, "")
+
+		pdf.Ln(17)
+		pdf.SetFont("Arimo-Bold", "", fontSize)
+		pdf.Text(15, pdf.GetY(), latTr("PODACI O PREBIVALIŠTU/BORAVIŠTU"))
+		pdf.Ln(1)
+		pdf.SetFont("Arimo-Regular", "", fontSize)
+		pdf.CellFormat(70, ch, latTr("Mesto:"), "1", 0, "L", false, 0, "")
+		pdf.SetFont("Arimo-Bold", "", fontSize)
+		pdf.CellFormat(110, ch, client.Client.Address.Place, "1", 0, "L", false, 0, "")
+		pdf.Ln(ch)
+		pdf.SetFont("Arimo-Regular", "", fontSize)
+		pdf.CellFormat(70, ch, latTr("Poštanski broj:"), "1", 0, "L", false, 0, "")
+		pdf.SetFont("Arimo-Bold", "", fontSize)
+		pdf.CellFormat(110, ch, client.Client.Address.PostCode, "1", 0, "L", false, 0, "")
+		pdf.Ln(ch)
+		pdf.SetFont("Arimo-Regular", "", fontSize)
+		pdf.CellFormat(70, ch, latTr("Ulica i kućni broj:"), "1", 0, "L", false, 0, "")
+		pdf.SetFont("Arimo-Bold", "", fontSize)
+		pdf.CellFormat(110, ch, client.Client.Address.GetStreetWithNumber(), "1", 0, "L", false, 0, "")
+		pdf.Ln(ch)
+		pdf.SetFont("Arimo-Regular", "", fontSize)
+		pdf.CellFormat(70, ch, latTr("Telefon/Mobilni:"), "1", 0, "L", false, 0, "")
+		pdf.SetFont("Arimo-Bold", "", fontSize)
+		pdf.CellFormat(110, ch, client.Client.Person.PhoneNumber, "1", 0, "L", false, 0, "")
+		pdf.Ln(ch)
+		pdf.SetFont("Arimo-Regular", "", fontSize)
+		pdf.CellFormat(70, ch, latTr("e-mail:"), "1", 0, "L", false, 0, "")
+		pdf.SetFont("Arimo-Bold", "", fontSize)
+		pdf.CellFormat(110, ch, client.Client.Person.Email, "1", 0, "L", false, 0, "")
+
+		pdf.Ln(17)
+		pdf.SetFont("Arimo-Bold", "", fontSize)
+		pdf.Text(15, pdf.GetY(), latTr("PODACI O KVALIFIKACIONOJ KARTICI VOZAČA"))
+		pdf.Ln(1)
+		pdf.SetFont("Arimo-Regular", "", fontSize)
+		pdf.CellFormat(70, ch, latTr("Broj kartice(SRB broj)*:"), "1", 0, "L", false, 0, "")
+		pdf.SetFont("Arimo-Bold", "", fontSize)
+		pdf.CellFormat(110, ch, *client.Client.CPCNumber, "1", 0, "L", false, 0, "")
+		pdf.Ln(ch)
+		pdf.SetFont("Arimo-Regular", "", fontSize)
+		pdf.CellFormat(70, ch, latTr("Serijski broj kartice(SRB broj):"), "1", 0, "L", false, 0, "")
+		pdf.SetFont("Arimo-Bold", "", fontSize)
+		pdf.CellFormat(110, ch, "", "1", 0, "L", false, 0, "")
+		pdf.Ln(ch)
+		pdf.SetFont("Arimo-Regular", "", fontSize)
+		pdf.CellFormat(70, ch, latTr("Rok važenja kartice:"), "1", 0, "L", false, 0, "")
+		pdf.SetFont("Arimo-Bold", "", fontSize)
+		pdf.CellFormat(110, ch, client.Client.CPCDate.Format("02.01.2006."), "1", 0, "L", false, 0, "")
+
+		pdf.Ln(17)
+		pdf.SetFont("Arimo-Bold", "", fontSize)
+		pdf.Text(15, pdf.GetY(), latTr("VRSTA PREVOZA (zaokruženi broj ispred vrste prevoza)"))
+		pdf.Ln(1)
+		pdf.SetFont("Arimo-Regular", "", fontSize)
+		pdf.Circle(18, 157, 2.5, "")
+		pdf.CellFormat(90, ch, latTr("1. Prevoz tereta"), "1", 0, "L", false, 0, "")
+		pdf.CellFormat(90, ch, latTr("2. Prevoz putnika"), "1", 0, "L", false, 0, "")
+
+		pdf.Ln(15)
+		pdf.Text(10, pdf.GetY(), latTr("Uz popunjen obrazac Prijave za pohađanje seminara, prilaže se:"))
+		pdf.Ln(5)
+		pdf.Text(20, pdf.GetY(), latTr("- dokaz o uplati troškova za pohađanje seminara, po važećoj tarifi"))
+
+		pdf.Ln(20)
+		pdf.Text(18, pdf.GetY(), "U ")
+		pdf.SetFont("Arimo-Bold", "", fontSize)
+		pdf.Text(23, pdf.GetY(), latTr(seminar.ClassRoom.Location.Address.Place))
+		pdf.Line(23, pdf.GetY()+1, 65, pdf.GetY()+1)
+		pdf.SetFont("Arimo-Regular", "", fontSize)
+		pdf.Text(65.5, pdf.GetY(), ", dana")
+		pdf.SetFont("Arimo-Bold", "", fontSize)
+		pdf.Line(78, pdf.GetY()+1, 110, pdf.GetY()+1)
+		pdf.Text(80, pdf.GetY(), time.Now().Format("02.01.2006."))
+		pdf.SetFont("Arimo-Regular", "", fontSize)
+		pdf.Text(110.5, pdf.GetY(), ", godine")
+
+		pdf.Ln(30)
+		pdf.Text(135, pdf.GetY(), "Potpis podnosioca prijave: ")
+		pdf.Ln(15)
+		pdf.Line(135, pdf.GetY(), 190, pdf.GetY())
+		pdf.Ln(10)
+
+		pdf.SetFont("Arimo-Regular", "", 9)
+		pdf.Text(15, pdf.GetY(), latTr("*Obrazac prijave popuniti čitko đtampanim slovima"))
+		pdf.Ln(5)
+		pdf.Text(15, pdf.GetY(), latTr("*Upisati broj kartice (SRB broj) ili broj „Potvrde o prijemu zahteva za izdavanje sertifikata o stručnoj"))
+		pdf.Ln(4)
+		pdf.Text(17, pdf.GetY(), latTr("kompetenciji i kvalifikacione kartice vozača„, ukoliko ste pokrenuli postupak izdavanja"))
+		pdf.Ln(4)
+		pdf.Text(17, pdf.GetY(), latTr("kvalifikacione kartice i sertifikata"))
 	}
 
 	var buf bytes.Buffer

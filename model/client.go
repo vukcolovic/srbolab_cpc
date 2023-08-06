@@ -29,6 +29,10 @@ type Client struct {
 	Seminars                 []ClientSeminar `json:"seminars"`
 }
 
+func (a Address) GetStreetWithNumber() string {
+	return a.Street + " " + a.HouseNumber
+}
+
 type ClientFilter struct {
 	FirstName   string `json:"first_name"`
 	LastName    string `json:"last_name"`

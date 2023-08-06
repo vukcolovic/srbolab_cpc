@@ -135,7 +135,7 @@
           <button class="btn btn-secondary text-white" @click="printConfirmationStatement()">Izjava o pristanku</button>
         </div>
         <div class="col-sm-1">
-          <button class="btn btn-secondary text-white">Prijava</button>
+          <button class="btn btn-secondary text-white" @click="printCheckIn()">Prijava</button>
         </div>
         <div class="col-sm-1">
           <button class="btn btn-secondary text-white" @click="printConfirmations()">Potvrda</button>
@@ -328,6 +328,27 @@ export default {
     },
     async printStatementOfReceving() {
       await axios.get('/print/seminar/confirmation-receive/' + this.seminarId).then((response) => {
+        if (response.data === null || response.data.Status === 'error') {
+          this.toast.error(response.data != null ? response.data.ErrorMessage : "");
+          return;
+        }
+        var fileContent = JSON.parse(response.data.Data);
+        var sampleArr = this.base64ToArrayBuffer(fileContent);
+        const blob = new Blob([sampleArr], {type: 'application/pdf'});
+
+        var iframe = document.createElement('iframe');
+        iframe.src = URL.createObjectURL(blob);
+        document.body.appendChild(iframe);
+
+        URL.revokeObjectURL(iframe.src);
+        iframe.contentWindow.print();
+        iframe.setAttribute("hidden", "hidden");
+      }, (error) => {
+        this.toast.error(error.message);
+      });
+    },
+    async printCheckIn() {
+      await axios.get('/print/seminar/check-in/' + this.seminarId).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;
