@@ -26,30 +26,29 @@ app.component('VueTable', VueTableLite);
 app.component('v-select', vSelect);
 
 axios.interceptors.request.use(request => {
-
     request.headers.Authorization = store.getters.token;
     return request;
 })
 
-// axios.interceptors.response.use(function (response) {
-//     if (response.config.url !== "/api/login" && response.headers.authorization) {
-//         store.dispatch('setTokenAction', response.headers.authorization);
-//     }
-//
-//     return response
-// }, function(error) {
-//     if (error.response != null && error.response.status === 403) {
-//         store.dispatch('setTokenAction', "");
-//         localStorage.removeItem('roles');
-//     }
-//     return Promise.reject(error.response)
-// })
+axios.interceptors.response.use(function (response) {
+    if (response.config.url !== "/api/login" && response.headers.authorization) {
+        store.dispatch('setTokenAction', response.headers.authorization);
+    }
+
+    return response
+}, function(error) {
+    if (error.response != null && error.response.status === 403) {
+        store.dispatch('setTokenAction', "");
+        localStorage.removeItem('roles');
+    }
+    return Promise.reject(error.response)
+})
 
 //create v-can directive
-// app.directive('can', (el, binding) => {
-//     if (!JSON.parse(localStorage.getItem('roles')).includes(binding.value)) {
-//         el.style.display = "none";
-//     }
-// })
+app.directive('can', (el, binding) => {
+    if (!JSON.parse(localStorage.getItem('roles')).includes(binding.value)) {
+        el.style.display = "none";
+    }
+})
 
 app.mount('#app')

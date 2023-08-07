@@ -9,7 +9,7 @@ type Client struct {
 	gorm.Model
 	Person                   Person          `json:"person" gorm:"embedded"`
 	Address                  Address         `json:"address" gorm:"embedded"`
-	JMBG                     *string         `json:"jmbg"`
+	JMBG                     *string         `json:"jmbg" gorm:"index:idx_jmbg,unique"`
 	DriveLicence             *string         `json:"drive_licence"`
 	PlaceBirth               *string         `json:"place_birth"`
 	CountryBirth             *string         `json:"country_birth"`

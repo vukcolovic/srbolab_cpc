@@ -1,30 +1,30 @@
 <template>
   <div class="container">
-    <img src="../assets/srbolab_logo.png" href="">
-      <div class="col-sm-5 mx-auto mt-5">
-        <hr>
-        <form-tag @formEvent="submitHandler" name="myForm" event="formEvent">
-          <text-input
+    <img href="" src="../assets/srbolab_logo.png">
+    <div class="col-sm-5 mx-auto mt-5">
+      <hr>
+      <form-tag event="formEvent" name="myForm" @formEvent="submitHandler">
+        <text-input
             v-model.trim="email"
+            :required=true
             label="Email"
-            type="email"
-            style="color: #007bff; font-size: 1.4em"
             name="email"
-            :required=true>
-          </text-input>
-          <br>
-          <text-input
-              v-model.trim="password"
-              label="Šifra"
-              type="password"
-              style="color: #007bff; font-size: 1.4em"
-              name="password"
-              :required=true>
-          </text-input>
-          <input type="submit" class="btn btn-primary mt-3" value="Prijava">
-        </form-tag>
-      </div>
+            style="color: #007bff; font-size: 1.4em"
+            type="email">
+        </text-input>
+        <br>
+        <text-input
+            v-model.trim="password"
+            :required=true
+            label="Šifra"
+            name="password"
+            style="color: #007bff; font-size: 1.4em"
+            type="password">
+        </text-input>
+        <input class="btn btn-primary mt-3" type="submit" value="Prijava">
+      </form-tag>
     </div>
+  </div>
 </template>
 
 <script>
@@ -61,15 +61,15 @@ export default {
         this.$store.dispatch('setLastNameAction', loginData.last_name);
         this.$store.dispatch('setFirstNameAction', loginData.first_name);
         localStorage.setItem("roles", JSON.stringify(loginData.roles))
-        }, (error) => {
+      }, (error) => {
         this.toast.error(error);
       });
       await router.push("/");
     },
-    },
+  },
   setup() {
     const toast = useToast();
     return {toast}
   },
-  }
+}
 </script>

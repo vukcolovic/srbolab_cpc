@@ -6,6 +6,7 @@ import (
 	"srbolab_cpc/logoped"
 	"srbolab_cpc/model"
 	"strconv"
+	"time"
 )
 
 var (
@@ -21,7 +22,6 @@ type authServiceInterface interface {
 }
 
 func (s *authService) Login(request model.LoginRequest) (model.LoginResponse, error) {
-	return model.LoginResponse{Token: "dsdscs"}, nil
 	user, err := UsersService.GetUserByEmail(request.Email)
 	if err != nil {
 		return model.LoginResponse{}, nil
@@ -32,27 +32,32 @@ func (s *authService) Login(request model.LoginRequest) (model.LoginResponse, er
 		return model.LoginResponse{}, err
 	}
 
-	//roles, err := UsersService.GetRolesByUserID(user.ID)
-	//if err != nil {
-	//	logoped.ErrorLog.Println("Error login user, error getting oles: ", err)
-	//	return model.LoginResponse{}, err
-	//}
-	//
-	//claims := jwt.MapClaims{
-	//	"Id":         strconv.Itoa(int(user.ID)),
-	//	"ExpiresAt":  time.Now().Add(time.Hour * 8).Unix(),
-	//	"Activities": roles,
-	//}
-	//
-	//jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	//
-	//token, err := jwtToken.SignedString([]byte("secret"))
-	//if err != nil {
-	//	loger.ErrorLog.Println("Error login user, error signing token: ", err)
-	//	return nil, err
-	//}
+	roles, err := RoleService.GetRolesByUserID(user.ID)
+	if err != nil {
+		logoped.ErrorLog.Println("Error login user, error getting roles: ", err)
+		return model.LoginResponse{}, err
+	}
 
-	return model.LoginResponse{}, nil
+	roleCodes := []string{}
+	for _, r := range roles {
+		roleCodes = append(roleCodes, r.Code)
+	}
+
+	claims := jwt.MapClaims{
+		"Id":        strconv.Itoa(int(user.ID)),
+		"ExpiresAt": time.Now().Add(time.Hour * 8).Unix(),
+		"Roles":     roleCodes,
+	}
+
+	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	token, err := jwtToken.SignedString([]byte("secret"))
+	if err != nil {
+		logoped.ErrorLog.Println("Error login user, error signing token: ", err)
+		return model.LoginResponse{}, err
+	}
+
+	return model.LoginResponse{Token: token, FirstName: user.Person.FirstName, LastName: user.Person.LastName, Roles: roleCodes}, nil
 }
 
 func (s *authService) GetUserIDByToken(token string) (int, error) {

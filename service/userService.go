@@ -1,8 +1,10 @@
 package service
 
 import (
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 	"srbolab_cpc/db"
+	"srbolab_cpc/logoped"
 	"srbolab_cpc/model"
 )
 
@@ -63,6 +65,13 @@ func (s *userService) DeleteUser(id int) error {
 }
 
 func (s *userService) CreateUser(user model.User) (*model.User, error) {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), 14)
+	if err != nil {
+		logoped.ErrorLog.Println("Error creating user, hashing password error: ", err)
+		return nil, err
+	}
+
+	user.Password = string(hashedPassword)
 	result := db.Client.Create(&user)
 	if result.Error != nil {
 		return nil, result.Error
@@ -100,5 +109,6 @@ func (s *userService) UpdateUser(user model.User) (*model.User, error) {
 		}
 	}
 
+	user.Password = ""
 	return &user, nil
 }

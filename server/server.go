@@ -5,6 +5,7 @@ import (
 	"github.com/rs/cors"
 	"net/http"
 	"srbolab_cpc/handlers"
+	"srbolab_cpc/middleware"
 )
 
 func RunServer(host string) {
@@ -14,14 +15,16 @@ func RunServer(host string) {
 		w.Write([]byte("pong"))
 	})
 
+	r.Use(middleware.AuthToken)
+
 	r.HandleFunc("/api/login", handlers.Login).Methods("POST")
 
 	s := r.PathPrefix("/api/users").Subrouter()
-	s.HandleFunc("/register", handlers.Register).Methods("POST")
-	s.HandleFunc("/update", handlers.UpdateUser).Methods("POST")
-	s.HandleFunc("/list", handlers.ListUsers).Methods("GET")
+	s.HandleFunc("/register", handlers.Register).Methods("POST").Name("users_register")
+	s.HandleFunc("/update", handlers.UpdateUser).Methods("POST").Name("users_update")
+	s.HandleFunc("/list", handlers.ListUsers).Methods("GET").Name("users_list")
 	s.HandleFunc("/id/{id}", handlers.GetUserByID).Methods("GET")
-	s.HandleFunc("/delete/{id}", handlers.DeleteUser).Methods("GET")
+	s.HandleFunc("/delete/{id}", handlers.DeleteUser).Methods("GET").Name("users_delete")
 	s.HandleFunc("/count", handlers.CountUsers).Methods("GET")
 
 	s = r.PathPrefix("/api/roles").Subrouter()

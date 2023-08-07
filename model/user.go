@@ -9,7 +9,7 @@ type Person struct {
 	FirstName   string `json:"first_name"`
 	MiddleName  string `json:"middle_name"`
 	LastName    string `json:"last_name"`
-	Email       string `json:"email"`
+	Email       string `json:"email" gorm:"index:idx_email,unique"`
 	PhoneNumber string `json:"phone_number"`
 }
 
@@ -41,10 +41,10 @@ type User struct {
 	Roles    []Role `json:"roles" gorm:"many2many:user_role;"`
 }
 
-func (u *User) AfterFind(tx *gorm.DB) (err error) {
-	u.Password = ""
-	return nil
-}
+//func (u *User) AfterFind(tx *gorm.DB) (err error) {
+//	u.Password = ""
+//	return nil
+//}
 
 type Role struct {
 	gorm.Model

@@ -32,7 +32,7 @@
               </li>
             </ul>
           </li>
-          <li v-can="'AdminPanelMeni'" class="nav-item dropdown">
+          <li v-can="'ADMINISTRATOR'" class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
                aria-expanded="false">
               Admin panel
