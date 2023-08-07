@@ -4,6 +4,7 @@ import (
 	"gorm.io/gorm"
 	"srbolab_cpc/db"
 	"srbolab_cpc/model"
+	"strings"
 )
 
 var (
@@ -62,6 +63,17 @@ func (c *clientService) GetAllClients(skip, take int, filter model.ClientFilter)
 			return nil, err
 		}
 
+		for i, c := range clients {
+			if filter.FirstName != "" && !strings.Contains(c.Person.FirstName, filter.FirstName) {
+				clients = append(clients[:i], clients[i+1:]...)
+			}
+			if filter.LastName != "" && !strings.Contains(c.Person.LastName, filter.LastName) {
+				clients = append(clients[:i], clients[i+1:]...)
+			}
+			if filter.JMBG != "" && !strings.Contains(*c.JMBG, filter.JMBG) {
+				clients = append(clients[:i], clients[i+1:]...)
+			}
+		}
 		return clients, nil
 	}
 

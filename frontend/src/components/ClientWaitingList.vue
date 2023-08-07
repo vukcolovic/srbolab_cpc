@@ -157,7 +157,7 @@ export default {
           }
         });
       }, (error) => {
-        this.toast.error(error.message);
+        this.toast.error(error);
       });
 
       this.isLoading = false;
