@@ -2,6 +2,7 @@ package model
 
 import (
 	"gorm.io/gorm"
+	"strconv"
 	"time"
 )
 
@@ -24,6 +25,13 @@ type Seminar struct {
 	SeminarStatus   SeminarStatus   `json:"seminar_status"`
 	Days            []SeminarDay    `json:"days"`
 	Documents       []*File         `json:"documents" gorm:"many2many:seminar_file;"`
+}
+
+// ID-DATE-BASE_ID_TYPE-THEME_ID-LOCATION_ID-CLASSROOM_ID
+func (s Seminar) GetCode() string {
+	return strconv.Itoa(int(s.ID)) + "-" + s.Start.Format("02.01.2006.") + "-" +
+		strconv.Itoa(int(s.SeminarTheme.BaseSeminarTypeID)) + "-" + strconv.Itoa(int(s.SeminarThemeID)) +
+		strconv.Itoa(int(s.ClassRoom.LocationID)) + "-" + strconv.Itoa(int(s.ClassRoomID))
 }
 
 type BaseSeminarType struct {
