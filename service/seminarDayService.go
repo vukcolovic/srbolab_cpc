@@ -33,7 +33,7 @@ func (c *seminarDayService) GetSeminarDaysBySeminarID(seminarID int) ([]model.Se
 
 func (c *seminarDayService) GetSeminarDayByID(seminarDayID int) (*model.SeminarDay, error) {
 	var seminarDay *model.SeminarDay
-	if err := db.Client.Preload("Seminar").Preload("Documents").Preload("Seminar.SeminarTheme").Preload("Seminar.SeminarTheme.BaseSeminarType").Preload("Presence").Preload("Presence.Client").Find(&seminarDay, seminarDayID).Error; err != nil {
+	if err := db.Client.Preload("Seminar").Preload("Documents").Preload("Seminar.SeminarTheme").Preload("Seminar.SeminarTheme.BaseSeminarType").Preload("Seminar.ClassRoom.Location").Preload("Presence").Preload("Presence.Client").Preload("Classes").Preload("Classes.Teacher").Find(&seminarDay, seminarDayID).Error; err != nil {
 		return nil, err
 	}
 
@@ -98,7 +98,12 @@ func (c *seminarDayService) CreateAllSeminarDaysForSeminar(seminarID int) ([]mod
 			presence := false
 			presences = append(presences, model.ClientPresence{ClientID: client.ClientID, Presence: &presence})
 		}
-		day := model.SeminarDay{SeminarID: seminar.ID, Date: dateForDay, Number: i, Presence: presences}
+
+		classes := []model.SeminarClass{}
+		for j := 1; j <= 7; j++ {
+			classes = append(classes, model.SeminarClass{Number: j})
+		}
+		day := model.SeminarDay{SeminarID: seminar.ID, Date: dateForDay, Number: i, Presence: presences, Classes: classes}
 		result := db.Client.Create(&day)
 		if result.Error != nil {
 			return []model.SeminarDay{}, result.Error

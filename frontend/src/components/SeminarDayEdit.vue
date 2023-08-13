@@ -2,50 +2,51 @@
   <div class="container">
     <div class="row">
       <div class="col-sm-11 mx-auto">
-        <button class="btn btn-primary" @click="backToSeminar()"><i class="fa fa-arrow-left"></i>Vrati se na seminar</button>
+        <button class="btn btn-primary" @click="backToSeminar()"><i class="fa fa-arrow-left"></i>Vrati se na seminar
+        </button>
       </div>
     </div>
     <div class="row">
       <div class="col-sm-4">
-    <form-tag @formEvent="submitHandler" name="myForm" event="formEvent">
-          <label style="font-size: 1.2em">{{seminarDay.seminar_theme}} - Dan {{seminarDay.number}}</label>
+        <form-tag event="formEvent" name="myForm" @formEvent="submitHandler">
+          <label style="font-size: 1.2em">{{ seminarDay.seminar_theme }} - Dan {{ seminarDay.number }}</label>
           <text-input
               v-model.trim="seminarDay.name"
+              :readonly="readonly"
+              :required=false
               label="Naziv"
-              type="text"
               name="name"
-              :required=true
-              :readonly="readonly">
+              type="text">
           </text-input>
 
           <text-input
               v-model="seminarDay.date"
-              label="Datum"
-              type="date"
-              name="date"
+              :readonly="readonly"
               :required=true
-              :readonly="readonly">
+              label="Datum"
+              name="date"
+              type="date">
           </text-input>
-          <input type="submit" class="btn btn-primary m-2" value="Snimi">
+          <input class="btn btn-primary m-2" type="submit" value="Snimi">
 
-    </form-tag>
+        </form-tag>
 
-    </div>
+      </div>
 
-    <div class="col-sm-5">
-      <h6>Evidencija prisustva</h6>
-      <ul>
-        <li v-for="pres in seminarDay.presence" :key="pres.client_id" style="list-style-type: none;">
-          <input id="verified" type="checkbox" :hidden="readonly" v-model="pres.presence" />
-          {{pres.client.person.first_name}} {{pres.client.person.last_name}}
-        </li>
-      </ul>
+      <div class="col-sm-5">
+        <h6>Evidencija prisustva</h6>
+        <ul>
+          <li v-for="pres in seminarDay.presence" :key="pres.client_id" style="list-style-type: none;">
+            <input id="verified" v-model="pres.presence" :hidden="readonly" type="checkbox"/>
+            {{ pres.client.person.first_name }} {{ pres.client.person.last_name }}
+          </li>
+        </ul>
 
-    </div>
+      </div>
 
       <div class="col-sm-3">
         <label :style=styleLabel>Dokumenta: </label>
-        <input id="fileId" type="file" ref="file" @change="uploadFile()"/>
+        <input id="fileId" ref="file" type="file" @change="uploadFile()"/>
         <ul>
           <li v-for="(doc, index) in seminarDay.documents" :key="index" style="list-style-type: none;">
             <label for="index">&nbsp; {{ doc.name }}</label>
@@ -66,8 +67,40 @@
       <div class="col-sm-1">
         <button class="btn btn-secondary text-white" @click="printMuster()">Prozivka</button>
       </div>
+      <div class="col-sm-2">
+        <button class="btn btn-secondary text-white" @click="printTeacherEvidence()">Dnevnik predavača</button>
+      </div>
     </div>
     <hr>
+    <div>
+      <h5>Časovi</h5>
+      <table class="styled-table" style="width: 80%">
+        <thead>
+        <tr class="bg-primary text-white">
+          <td style="width: 5%;">R.B.</td>
+          <td style="width: 55%;">Tema</td>
+          <td style="width: 40%;">Predavač</td>
+        </tr>
+        </thead>
+        <tbody>
+        <tr v-for="cls in seminarDay.classes" :key="cls.ID">
+          <td class="p-1">{{ cls.number}}</td>
+          <td>
+            <input type="text" size="40" v-model="cls.name">
+          </td>
+          <td>
+          <v-select
+              v-model="cls.teacher"
+              :options="users"
+              :style="styleInput"
+              label="full_name"
+              placeholder="Traži">
+          </v-select>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </template>
 
@@ -81,11 +114,12 @@ import {useToast} from "vue-toastification";
 import {apiMixin} from "@/mixins/apiMixin";
 import {dateMixin} from "@/mixins/dateMixin";
 import {styleMixin} from "@/mixins/styleMixin";
+import vSelect from "vue-select";
 
 export default {
   name: 'SeminarDayEdit',
   mixins: [fileMixin, apiMixin, dateMixin, styleMixin],
-  components: {FormTag, TextInput},
+  components: {vSelect, FormTag, TextInput},
   computed: {
     readonly() {
       return this.action === 'view';
@@ -93,7 +127,18 @@ export default {
   },
   data() {
     return {
-      seminarDay: {ID: 0, date: null, number: 0, name: "", seminar_id: 0, seminar: null, seminar_theme: "", presence: [], documents: []},
+      seminarDay: {
+        ID: 0,
+        date: null,
+        number: 0,
+        name: "",
+        seminar_id: 0,
+        seminar: null,
+        seminar_theme: "",
+        presence: [],
+        documents: [],
+        classes: [],
+      },
       seminarDayId: 0,
     }
   },
@@ -124,15 +169,15 @@ export default {
     removeFile(i) {
       this.seminarDay.documents.splice(i, 1);
     },
-    async printMuster() {
-      await axios.get('/print/seminar/muster/' + this.seminarDayId).then((response) => {
+    async printTeacherEvidence() {
+      await axios.get('/print/seminar/teacher-evidence/' + this.seminarDayId).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;
         }
         var fileContent = JSON.parse(response.data.Data);
         var sampleArr = this.base64ToArrayBuffer(fileContent);
-        const blob = new Blob([sampleArr], { type: 'application/pdf' });
+        const blob = new Blob([sampleArr], {type: 'application/pdf'});
 
         var iframe = document.createElement('iframe');
         iframe.src = URL.createObjectURL(blob);
@@ -145,7 +190,28 @@ export default {
         this.toast.error(error.message);
       });
     },
-    backToSeminar(){
+    async printMuster() {
+      await axios.get('/print/seminar/muster/' + this.seminarDayId).then((response) => {
+        if (response.data === null || response.data.Status === 'error') {
+          this.toast.error(response.data != null ? response.data.ErrorMessage : "");
+          return;
+        }
+        var fileContent = JSON.parse(response.data.Data);
+        var sampleArr = this.base64ToArrayBuffer(fileContent);
+        const blob = new Blob([sampleArr], {type: 'application/pdf'});
+
+        var iframe = document.createElement('iframe');
+        iframe.src = URL.createObjectURL(blob);
+        document.body.appendChild(iframe);
+
+        URL.revokeObjectURL(iframe.src);
+        iframe.contentWindow.print();
+        iframe.setAttribute("hidden", "hidden");
+      }, (error) => {
+        this.toast.error(error.message);
+      });
+    },
+    backToSeminar() {
       router.push({name: 'SeminarEdit', query: {id: this.seminarDay.seminar_id, action: "update"}});
     },
     async getSeminarDayById() {
@@ -160,7 +226,12 @@ export default {
         if (this.seminarDay.documents == null) {
           this.seminarDay.documents = [];
         }
-        }, (error) => {
+        this.seminarDay.classes.forEach(cls => {
+          if (cls.teacher) {
+            cls.teacher.full_name = cls.teacher.person.first_name + " "+ cls.teacher.person.last_name;
+          }
+        });
+      }, (error) => {
         this.toast.error(error.message);
       });
     },
@@ -171,7 +242,7 @@ export default {
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;
         }
-        this.seminarDay.date = this.getDateInMMDDYYYYFormat(this.seminarDay.date );
+        this.seminarDay.date = this.getDateInMMDDYYYYFormat(this.seminarDay.date);
         this.toast.info("Uspešno ažuriran seminar dan.");
       }, (error) => {
         this.toast.error(error.message);
@@ -183,6 +254,7 @@ export default {
     return {toast}
   },
   async mounted() {
+    this.getAllUsers();
     this.seminarDayId = this.$route.query.id;
     await this.getSeminarDayById();
   }

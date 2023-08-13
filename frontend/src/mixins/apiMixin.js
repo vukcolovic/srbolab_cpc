@@ -10,9 +10,28 @@ export const apiMixin = {
             seminarBaseTypes: [],
             seminarStatuses: [],
             companies: [],
+            users: [],
         }
     },
     methods: {
+        async getAllUsers() {
+            await axios.get('/users/list?skip=' + 0 + '&take=' + 1000).then((response) => {
+                if (response.data === null || response.data.Status === 'error') {
+                    this.toast.error(response.data != null ? response.data.ErrorMessage : "");
+                    return;
+                }
+                this.users = JSON.parse(response.data.Data);
+                this.users.forEach(vs => {
+                    vs.first_name = vs.person.first_name;
+                    vs.last_name = vs.person.last_name;
+                    vs.email = vs.person.email;
+                    vs.phone_number = vs.person.phone_number;
+                    vs.full_name = vs.person.first_name + " " + vs.person.last_name;
+                });
+            }, (error) => {
+                this.toast.error(error.message);
+            });
+        },
         async getAllLocations() {
             await axios.get('/locations/list').then((response) => {
                 if (response.data === null || response.data.Status === 'error') {

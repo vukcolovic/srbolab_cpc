@@ -96,6 +96,7 @@ func RunServer(host string) {
 	s.HandleFunc("/seminar/confirmation-receive/{seminar_id}", handlers.PrintConfirmationReceives).Methods("GET")
 	s.HandleFunc("/seminar/muster/{seminar_day_id}", handlers.PrintMuster).Methods("GET")
 	s.HandleFunc("/seminar/check-in/{seminar_id}", handlers.PrintCheckIn).Methods("GET")
+	s.HandleFunc("/seminar/teacher-evidence/{seminar_day_id}", handlers.PrintSeminarEvidence).Methods("GET")
 
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{"*"}, // All origins

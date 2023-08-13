@@ -1,11 +1,12 @@
 <template>
   <div class="container">
+    <form-tag event="formEvent" name="myForm" @formEvent="submitHandler">
     <div class="row">
       <div class="col-sm-3">
         <h4 v-if="action === 'add'" class="mt-2">Dodavanje</h4>
         <h4 v-if="action === 'update'" class="mt-2">Seminar</h4>
       </div>
-      <div class="col-sm-7">
+      <div  v-if="seminar.class_room && seminar.class_room.ID " class="col-sm-7">
         <div class="shell mt-1">
           <div :style="{ width: percentFilled  + '%' }" class="bar">
           </div>
@@ -16,8 +17,9 @@
     </div>
 
     <div class="row">
+
       <div class="col-sm-4">
-        <form-tag event="formEvent" name="myForm" @formEvent="submitHandler">
+
           <div v-if="seminar.seminar_status && action !== 'add'">
             Status seminara: {{ seminar.seminar_status.name }}
           </div>
@@ -73,8 +75,10 @@
               name="start"
               type="date">
           </text-input>
-        </form-tag>
       </div>
+
+
+
 
       <div v-if="action !== 'add'" class="col-sm-8" style="font-size: 0.8em">
         <div>
@@ -123,6 +127,7 @@
             class="btn btn-primary m-2" value="Završi seminar" @click.prevent="finishSeminar()">
       </div>
     </div>
+    </form-tag>
 
     <div
         v-if="this.seminar && this.seminar.seminar_status && (this.seminar.seminar_status.ID === SEMINAR_STATUSES.IN_PROGRESS || this.seminar.seminar_status.ID === SEMINAR_STATUSES.CLOSED)">
@@ -461,7 +466,7 @@ export default {
     },
     async updateSeminar() {
       this.seminar.start_date = this.getBackendFormat(this.seminar.start_date);
-      await axios.post('/seminar/update', JSON.stringify(this.seminar)).then((response) => {
+      await axios.post('/seminars/update', JSON.stringify(this.seminar)).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;

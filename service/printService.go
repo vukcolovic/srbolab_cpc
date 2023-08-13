@@ -33,6 +33,7 @@ type printServiceInterface interface {
 	PrintConfirmationReceives(seminar *model.Seminar) ([]byte, error)
 	PrintMuster(day *model.SeminarDay) ([]byte, error)
 	PrintCheckIn(seminar *model.Seminar) ([]byte, error)
+	PrintSeminarEvidence(day *model.SeminarDay) ([]byte, error)
 }
 
 func (p *printService) PrintSeminarStudentList(seminar *model.Seminar) ([]byte, error) {
@@ -600,4 +601,74 @@ func createSimpleHeader(pdf *fpdf.Fpdf, tr func(string) string) {
 	pdf.Text(100, 14, "SRBOLAB D.O.O.")
 	pdf.Text(60, 18, tr("SEKTOR ZA STRUČNO USAVRŠAVANJE, RAZVOJ I BEZBEDNOST SAOBRAĆAJA"))
 	pdf.Ln(15)
+}
+
+func (p *printService) PrintSeminarEvidence(day *model.SeminarDay) ([]byte, error) {
+	pwd, err := os.Getwd()
+	if err != nil {
+		logoped.ErrorLog.Println("Error getting pwd: ", err)
+		return []byte{}, err
+	}
+	pdf := fpdf.New("L", "mm", "A4", filepath.Join(pwd, "font"))
+	pdf.AddFont("Arimo-Regular", "", "Arimo-Regular.json")
+	pdf.AddFont("Arimo-Bold", "", "Arimo-Bold.json")
+	latTr := pdf.UnicodeTranslatorFromDescriptor("iso-8859-16")
+
+	pdf.SetMargins(marginLeft, marginTop, marginRight)
+	pdf.AddPage()
+
+	pdf.SetFont("Arimo-Regular", "", 9)
+	createSimpleHeader(pdf, latTr)
+
+	pdf.Ln(5)
+	pdf.SetFont("Arimo-Bold", "", 9)
+	pdf.Text(15, pdf.GetY(), latTr("Dnevnik predavača seminara unašređenja znanja na FIXME obuci profesionalnih vozača"))
+	pdf.Ln(5)
+	pdf.SetFont("Arimo-Regular", "", 9)
+	pdf.Text(15, pdf.GetY(), latTr("Datum održavanja seminara"))
+	pdf.Text(80, pdf.GetY(), day.Date.Format("02.01.2006."))
+	pdf.Ln(5)
+	pdf.Text(15, pdf.GetY(), latTr(day.Seminar.ClassRoom.Location.Address.Place))
+	pdf.Ln(2)
+
+	ch := 10.0
+
+	pdf.CellFormat(20, ch, "", "1", 0, "TC", false, 0, "")
+	pdf.Text(13, pdf.GetY()+3.5, latTr("Redni broj"))
+	pdf.Text(17, pdf.GetY()+8.5, latTr("časa"))
+	pdf.CellFormat(40, ch, latTr("Vreme održavanja časa"), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(90, ch, latTr("Nastavni čas"), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(70, ch, "", "1", 0, "TC", false, 0, "")
+	pdf.Text(178, pdf.GetY()+3.5, latTr("Ime i prezime predavača"))
+	pdf.Line(160, pdf.GetY()+5, 230, pdf.GetY()+5)
+	pdf.Text(182, pdf.GetY()+8.5, latTr("Potpis predavača"))
+	pdf.CellFormat(50, ch, latTr("Napomena"), "1", 0, "C", false, 0, "")
+
+	for i := 0; i < len(day.Classes); i++ {
+		pdf.Ln(ch)
+		pdf.CellFormat(20, ch, strconv.Itoa(i+1), "1", 0, "C", false, 0, "")
+		pdf.CellFormat(40, ch, "FIXME", "1", 0, "C", false, 0, "")
+		pdf.CellFormat(90, ch, day.Classes[i].Name, "1", 0, "C", false, 0, "")
+		pdf.CellFormat(70, ch, "", "1", 0, "C", false, 0, "")
+		teacher := ""
+		if day.Classes[i].Teacher != nil {
+			teacher = day.Classes[i].Teacher.Person.FullName()
+		}
+		pdf.Text(178, pdf.GetY()+3.5, teacher)
+		pdf.Line(160, pdf.GetY()+5, 230, pdf.GetY()+5)
+		pdf.Text(182, pdf.GetY()+8.5, "")
+		pdf.CellFormat(50, ch, "", "1", 0, "C", false, 0, "")
+	}
+
+	pdf.Ln(15)
+	pdf.Text(100, pdf.GetY(), latTr("Šifra obuke:"))
+	pdf.Text(120, pdf.GetY(), day.Seminar.GetCode())
+
+	var buf bytes.Buffer
+	err = pdf.Output(&buf)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return buf.Bytes(), nil
 }

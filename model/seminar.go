@@ -69,7 +69,11 @@ type SeminarDay struct {
 
 type SeminarClass struct {
 	gorm.Model
-	Name         string
-	Teachers     []User `gorm:"many2many:class_teacher;"`
-	SeminarDayID uint
+	Number int    `json:"number"`
+	Name   string `json:"name"`
+	//Teachers     User       `json:"teachers" gorm:"many2many:class_teacher;"`
+	TeacherID    *int       `json:"teacher_id" gorm:"default:null"`
+	Teacher      *User      `json:"teacher"`
+	SeminarDayID uint       `json:"seminar_day_id"`
+	SeminarDay   SeminarDay `json:"seminar_day"`
 }

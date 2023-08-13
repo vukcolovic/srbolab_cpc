@@ -17,7 +17,7 @@ type Location struct {
 type ClassRoom struct {
 	gorm.Model
 	Name        string   `json:"name"`
-	MaxStudents int      ` json:"max_students"`
+	MaxStudents int      `json:"max_students"`
 	LocationID  uint     `json:"location_id"`
 	Location    Location `json:"location"`
 }
