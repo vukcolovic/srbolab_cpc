@@ -11,6 +11,7 @@
         <button class="iconBtn" title="Izmeni" :disabled="!table.selectedUser" @click="$router.push({name: 'UserEdit', query: {id: table.selectedUser.ID, action: 'update' }})">
           <i class="fa fa-user-md">
           </i></button>
+        <label class="m-1" style="font-size: 1.2em; font-style: italic">Korisnici</label>
       </div>
     </div>
     <div class="row mt-2">

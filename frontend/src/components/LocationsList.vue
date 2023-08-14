@@ -11,6 +11,7 @@
         <button class="iconBtn" title="Izmeni" :disabled="table.selectedLocation == null" @click="$router.push({name: 'LocationEdit', query: {id: table.selectedLocation.ID, action: 'update' }})">
           <i class="fa fa-user-md">
           </i></button>
+        <label class="m-1" style="font-size: 1.2em; font-style: italic">Lokacije</label>
       </div>
     </div>
     <div class="row mt-2">
