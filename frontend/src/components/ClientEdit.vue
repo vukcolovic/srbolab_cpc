@@ -291,7 +291,7 @@
             <h6>Odslušani seminari</h6>
             <ul>
               <li style="list-style-type: none" v-for="seminarClient in finishedSeminars" :key="seminarClient.ID">
-                {{seminarClient.seminar.ID}}: {{seminarClient.seminar.seminar_theme.base_seminar_type.name}} {{seminarClient.seminar.seminar_theme.name}} {{getDateInMMDDYYYYFormat(seminarClient.seminar.start_date)}}
+                {{seminarClient.seminar.ID}}: {{seminarClient.seminar.type}} {{getDateInMMDDYYYYFormat(seminarClient.seminar.start_date)}} <span :style="[seminarClient.pass ? {'color':'green'} : {'color':'red'} ]">{{seminarClient.passedText}}</span>
               </li>
             </ul>
           </div>
@@ -299,7 +299,7 @@
             <h6>Aktuelni seminari</h6>
             <ul>
               <li style="list-style-type: none;" v-for="seminarClient in inProgressSeminars" :key="seminarClient.ID">
-                {{seminarClient.seminar.ID}}: {{seminarClient.seminar.seminar_theme.base_seminar_type.name}} {{seminarClient.seminar.seminar_theme.name}} {{getDateInMMDDYYYYFormat(seminarClient.seminar.start_date)}}
+                {{seminarClient.seminar.ID}}: {{seminarClient.seminar.type}} {{getDateInMMDDYYYYFormat(seminarClient.seminar.start_date)}}
               </li>
             </ul>
           </div>
@@ -310,7 +310,7 @@
                 <button class="iconBtn" title="Obriši" @click.prevent="removeSeminar(seminarClient)">
                   <i class="fa fa-remove"></i>
                 </button>
-                <span v-if="seminarClient.payed" class="bg-success">Plaćeno</span><span v-if="!seminarClient.payed" class="bg-warning">Nije plaćeno</span>{{seminarClient.seminar.ID}}: {{seminarClient.seminar.seminar_theme.base_seminar_type.name}} {{seminarClient.seminar.seminar_theme.name}} {{getDateInMMDDYYYYFormat(seminarClient.seminar.start_date)}}
+                <span v-if="seminarClient.payed" class="bg-success">Plaćeno</span><span v-if="!seminarClient.payed" class="bg-warning">Nije plaćeno</span>{{seminarClient.seminar.ID}}: {{seminarClient.seminar.type}} {{getDateInMMDDYYYYFormat(seminarClient.seminar.start_date)}}
               </li>
             </ul>
           </div>
@@ -320,7 +320,7 @@
               :disabled=readonly
               :options="openedSeminars"
               :style="styleInputSmall"
-              label="details"
+              label="base_info"
               placeholder="Traži">
           </v-select>
         </div>
@@ -443,6 +443,10 @@ export default {
         }
         this.client = JSON.parse(response.data.Data);
         this.client.cpc_date = this.getDateInMMDDYYYYFormat(this.client.cpc_date);
+        this.client.seminars.forEach(s => {
+          s.seminar.type = this.getSeminarFullType(s.seminar.seminar_theme.base_seminar_type, s.seminar.seminar_theme);
+          s.passedText = s.pass ? "Položio" : "Nije položio";
+        });
         if (this.client.seminars) {
           this.finishedSeminars = this.client.seminars.filter(s => s.seminar.seminar_status.ID === this.SEMINAR_STATUSES.CLOSED);
           this.inProgressSeminars = this.client.seminars.filter(s => s.seminar.seminar_status.ID === this.SEMINAR_STATUSES.IN_PROGRESS);

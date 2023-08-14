@@ -93,9 +93,7 @@ import vSelect from "vue-select";
 import {styleMixin} from "@/mixins/styleMixin";
 import {apiMixin} from "@/mixins/apiMixin";
 import {commonMixin} from "@/mixins/commonMixin";
-import router from "@/router";
 import {useToast} from "vue-toastification";
-// import {useToast} from "vue-toastification";
 
 export default {
   name: 'ClientWaitingList',
@@ -133,7 +131,7 @@ export default {
           return;
         }
         this.toast.info("Uspešno ažuriran klijent.");
-        router.push("/clients");
+        this.$router.go();
       }, (error) => {
         this.toast.error(error.message);
       });
