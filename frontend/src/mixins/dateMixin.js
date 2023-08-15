@@ -12,11 +12,27 @@ export const dateMixin = {
             }
             return date + "T12:05:05.576147+02:00"
         },
+        getBackendFormatWithTime(date, time) {
+            if (this.isDateEmpty(date)) {
+                return null;
+            }
+            return date + "T" + time + ":05.576147+02:00"
+        },
         getDateInMMDDYYYYFormat(date) {
             if (this.isDateEmpty(date)) {
                 return null;
             }
             return date.split('T')[0];
+        },
+        getTime(date) {
+            console.log(date);
+            if (this.isDateEmpty(date)) {
+                return null;
+            }
+
+            var t = date.split('T')[1];
+            console.log(t);
+            return t.split(':')[0] + ":" + t.split(':')[1];
         },
         // formatDate(inputDate) {
         //     if (typeof(inputDate) === 'string')

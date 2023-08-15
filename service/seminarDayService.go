@@ -6,6 +6,7 @@ import (
 	"srbolab_cpc/db"
 	"srbolab_cpc/model"
 	"srbolab_cpc/util"
+	"time"
 )
 
 var (
@@ -92,6 +93,7 @@ func (c *seminarDayService) CreateAllSeminarDaysForSeminar(seminarID int) ([]mod
 
 	seminarDays := []model.SeminarDay{}
 	dateForDay := util.IfWeekendGetFirstWorkDay(seminar.Start)
+	dateForDay = time.Date(dateForDay.Year(), dateForDay.Month(), dateForDay.Day(), 8, 0, 0, 0, dateForDay.Location())
 	for i := 1; i <= seminar.SeminarTheme.NumberOfDays; i++ {
 		presences := []model.ClientPresence{}
 		for _, client := range seminar.Trainees {

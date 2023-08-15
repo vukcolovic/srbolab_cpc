@@ -27,6 +27,15 @@
               name="date"
               type="date">
           </text-input>
+
+          <text-input
+              v-model="startTime"
+              :readonly="readonly"
+              :required=true
+              label="Vreme početka"
+              name="time"
+              type="time">
+          </text-input>
           <input class="btn btn-primary m-2" type="submit" value="Snimi">
 
         </form-tag>
@@ -140,6 +149,7 @@ export default {
         classes: [],
       },
       seminarDayId: 0,
+      startTime: null,
     }
   },
   methods: {
@@ -221,6 +231,7 @@ export default {
           return;
         }
         this.seminarDay = JSON.parse(response.data.Data);
+        this.startTime = this.getTime(this.seminarDay.date);
         this.seminarDay.date = this.getDateInMMDDYYYYFormat(this.seminarDay.date);
         this.seminarDay.seminar_theme = this.getSeminarFullType(this.seminarDay.seminar.seminar_theme.base_seminar_type, this.seminarDay.seminar.seminar_theme);
         if (this.seminarDay.documents == null) {
@@ -236,7 +247,7 @@ export default {
       });
     },
     async submitHandler() {
-      this.seminarDay.date = this.getBackendFormat(this.seminarDay.date);
+      this.seminarDay.date = this.getBackendFormatWithTime(this.seminarDay.date, this.startTime);
       await axios.post('/seminar-days/update', JSON.stringify(this.seminarDay)).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");

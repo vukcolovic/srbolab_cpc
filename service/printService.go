@@ -644,10 +644,30 @@ func (p *printService) PrintSeminarEvidence(day *model.SeminarDay) ([]byte, erro
 	pdf.Text(182, pdf.GetY()+8.5, latTr("Potpis predavača"))
 	pdf.CellFormat(50, ch, latTr("Napomena"), "1", 0, "C", false, 0, "")
 
+	getClassTime := func(d time.Time, i int) string {
+		switch i {
+		case 1:
+			return d.Format("15:04") + " - " + d.Add(45*time.Minute).Format("15:04")
+		case 2:
+			return d.Add(55*time.Minute).Format("15:04") + " - " + d.Add(100*time.Minute).Format("15:04")
+		case 3:
+			return d.Add(105*time.Minute).Format("15:04") + " - " + d.Add(150*time.Minute).Format("15:04")
+		case 4:
+			return d.Add(175*time.Minute).Format("15:04") + " - " + d.Add(220*time.Minute).Format("15:04")
+		case 5:
+			return d.Add(225*time.Minute).Format("15:04") + " - " + d.Add(270*time.Minute).Format("15:04")
+		case 6:
+			return d.Add(280*time.Minute).Format("15:04") + " - " + d.Add(325*time.Minute).Format("15:04")
+		case 7:
+			return d.Add(330*time.Minute).Format("15:04") + " - " + d.Add(375*time.Minute).Format("15:04")
+		}
+		return ""
+	}
+
 	for i := 0; i < len(day.Classes); i++ {
 		pdf.Ln(ch)
 		pdf.CellFormat(20, ch, strconv.Itoa(i+1), "1", 0, "C", false, 0, "")
-		pdf.CellFormat(40, ch, "FIXME", "1", 0, "C", false, 0, "")
+		pdf.CellFormat(40, ch, getClassTime(day.Date, i+1), "1", 0, "C", false, 0, "")
 		pdf.CellFormat(90, ch, day.Classes[i].Name, "1", 0, "C", false, 0, "")
 		pdf.CellFormat(70, ch, "", "1", 0, "C", false, 0, "")
 		teacher := ""
