@@ -77,6 +77,9 @@
           </text-input>
       </div>
 
+
+
+
       <div v-if="action !== 'add'" class="col-sm-8" style="font-size: 0.8em">
         <div>
           <h5>Spisak polaznika</h5>
@@ -121,7 +124,7 @@
             class="btn btn-primary m-2" value="Startuj seminar" @click.prevent="startSeminar()">
         <input
             v-if="this.seminar && this.seminar.seminar_status && this.seminar.seminar_status.ID === SEMINAR_STATUSES.IN_PROGRESS"
-            class="btn btn-primary m-2" value="Završi seminar" @click.prevent="openFinishSeminarDialog()">
+            class="btn btn-primary m-2" value="Završi seminar" @click.prevent="finishSeminar()">
       </div>
     </div>
     </form-tag>
@@ -179,22 +182,7 @@
           </ul>
         </div>
       </div>
-    </div>
 
-    <div class="overlay" id="overlay" hidden>
-      <div class="confirm-box">
-        <h5>Rezultati polaznika</h5>
-      <ul>
-        <li v-for="sc in seminar.trainees" :key="sc.ID" style="list-style-type: none; text-align: left">
-          <input id="payed" v-model="sc.pass" :hidden="readonly" type="checkbox" />
-          {{ sc.client.person.first_name }} {{ sc.client.person.last_name }}
-        </li>
-      </ul>
-        <div style="margin-top: 10px">
-          <button class="btn btn-outline-primary" style="margin-right: 5px" @click="closeFinishBox(true)">Cancel</button>
-          <button class="btn btn-primary" @click="finishSeminar()">Završi</button>
-        </div>
-    </div>
     </div>
   </div>
 </template>
@@ -503,13 +491,6 @@ export default {
       this.seminar.seminar_status = this.seminarStatuses.find(ss => ss.ID == this.SEMINAR_STATUSES.IN_PROGRESS);
       this.updateSeminar();
       this.createSeminarDays();
-      this.$router.go();
-    },
-    openFinishSeminarDialog() {
-      document.getElementById('overlay').hidden = false;
-    },
-    closeFinishBox() {
-      document.getElementById('overlay').hidden = true;
     },
     finishSeminar() {
       this.seminar.seminar_status = this.seminarStatuses.find(ss => ss.ID == this.SEMINAR_STATUSES.CLOSED);
@@ -579,27 +560,4 @@ export default {
 .styled-table tbody tr:nth-of-type(even) {
   background-color: #f3f3f3;
 }
-
-.overlay {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  background: rgba(0, 0, 0, 0.8);
-  z-index: 2;
-}
-
-.confirm-box {
-  position: absolute;
-  width: 40%;
-  height: 70%;
-  top: 10%;
-  left: 25%;
-  text-align: center;
-  background: whitesmoke;
-  border: solid #3B71CA 3px;
-  border-radius: 10px;
-}
 </style>
-
