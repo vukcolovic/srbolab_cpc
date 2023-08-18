@@ -1,6 +1,7 @@
 package service
 
 import (
+	"gorm.io/gorm"
 	"srbolab_cpc/db"
 	"srbolab_cpc/model"
 )
@@ -81,7 +82,25 @@ func (c *seminarService) UpdateSeminar(seminar model.Seminar) (*model.Seminar, e
 		return nil, err
 	}
 
-	result := db.Client.Save(&seminar)
+	if seminar.SeminarStatus.ID == model.SEMINAR_STATUS_CLOSED {
+		notPassed := make(map[uint]string)
+		for _, day := range seminar.Days {
+			for _, pr := range day.Presence {
+				if !*pr.Presence {
+					notPassed[pr.ClientID] = ""
+				}
+			}
+		}
+
+		for i, pr := range seminar.Trainees {
+			if _, ok := notPassed[pr.ClientID]; !ok {
+				b := true
+				seminar.Trainees[i].Pass = &b
+			}
+		}
+	}
+
+	result := db.Client.Session(&gorm.Session{FullSaveAssociations: true}).Updates(&seminar)
 	if result.Error != nil {
 		return nil, result.Error
 	}

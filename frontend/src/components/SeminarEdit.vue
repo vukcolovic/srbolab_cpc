@@ -449,7 +449,6 @@ export default {
       } else {
         await this.createSeminar();
       }
-      router.push("/seminars");
     },
     async createSeminar() {
       this.seminar.start_date = this.getBackendFormat(this.seminar.start_date);
@@ -458,7 +457,7 @@ export default {
         if (response.data === null || response.data.Status === 'error') {
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;
-        }
+        }this.seminar.start_date = this.getDateInMMDDYYYYFormat(this.seminar.start_date);
         this.toast.info("Uspešno kreiran seminar!");
       }, (error) => {
         this.toast.error(error.message);
@@ -471,6 +470,7 @@ export default {
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;
         }
+        this.seminar.start_date = this.getDateInMMDDYYYYFormat(this.seminar.start_date);
         this.toast.info("Uspešno ažuriran seminar!");
       }, (error) => {
         this.toast.error(error.message);
