@@ -58,7 +58,7 @@ func (p *printService) PrintSeminarStudentList(seminar *model.Seminar) ([]byte, 
 	pdf.Text(35, pdf.GetY(), "")
 	pdf.Ln(5)
 	pdf.Text(15, pdf.GetY(), latTr("Šifra obuke: "))
-	pdf.Text(30, pdf.GetY(), "")
+	pdf.Text(30, pdf.GetY(), seminar.GetCode())
 	pdf.Ln(5)
 	pdf.Text(15, pdf.GetY(), "Mesto: ")
 	pdf.Text(27, pdf.GetY(), seminar.ClassRoom.Location.Address.Place)
@@ -105,7 +105,19 @@ func (p *printService) PrintConfirmationStatements(seminar *model.Seminar) ([]by
 
 	pdf.SetMargins(marginLeft, 40, marginRight)
 
+	notPassedClientIds := make(map[uint]string)
+	for _, day := range seminar.Days {
+		for _, p := range day.Presence {
+			if !*p.Presence && !day.Date.After(time.Now()) {
+				notPassedClientIds[p.ClientID] = ""
+			}
+		}
+	}
+
 	for _, client := range seminar.Trainees {
+		if _, exist := notPassedClientIds[client.ClientID]; exist {
+			continue
+		}
 		pdf.AddPage()
 
 		pdf.SetFont("Arimo-Regular", "", 11)
@@ -190,13 +202,23 @@ func (p *printService) PrintConfirmations(seminar *model.Seminar) ([]byte, error
 
 	startSeminar := seminar.Start
 	endSeminar := seminar.Start
+	notPassedClientIds := make(map[uint]string)
 	for _, day := range seminar.Days {
 		if day.Date.After(endSeminar) {
 			endSeminar = day.Date
 		}
+
+		for _, p := range day.Presence {
+			if !*p.Presence && !day.Date.After(time.Now()) {
+				notPassedClientIds[p.ClientID] = ""
+			}
+		}
 	}
 
 	for _, client := range seminar.Trainees {
+		if _, exist := notPassedClientIds[client.ClientID]; exist {
+			continue
+		}
 		pdf.AddPage()
 
 		pdf.SetFont("Arimo-Regular", "", 11)
@@ -219,7 +241,7 @@ func (p *printService) PrintConfirmations(seminar *model.Seminar) ([]byte, error
 		pdf.Ln(10)
 
 		pdf.SetFont("Arimo-Regular", "", 11)
-		pdf.Text(25, pdf.GetY(), latTr("o završenoj periodičnoj obuci na obaveynim seminarima unapređenja znanja"))
+		pdf.Text(25, pdf.GetY(), latTr("o završenoj periodičnoj obuci na obaveznim seminarima unapređenja znanja"))
 		pdf.Ln(10)
 
 		ch := 9.0
@@ -396,7 +418,7 @@ func (p *printService) PrintMuster(day *model.SeminarDay) ([]byte, error) {
 	pdf.Text(27, pdf.GetY(), day.Seminar.ClassRoom.Location.Address.Place)
 	pdf.Ln(5)
 	pdf.Text(15, pdf.GetY(), latTr("Šifra obuke: "))
-	pdf.Text(30, pdf.GetY(), "")
+	pdf.Text(30, pdf.GetY(), day.Seminar.GetCode())
 	pdf.Ln(5)
 	pdf.Text(15, pdf.GetY(), "Datum: ")
 	dayInWeek := util.GetDaySerbian(day.Date)
