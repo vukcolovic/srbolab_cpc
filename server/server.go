@@ -98,6 +98,12 @@ func RunServer(host string) {
 	s.HandleFunc("/seminar/check-in/{seminar_id}", handlers.PrintCheckIn).Methods("GET")
 	s.HandleFunc("/seminar/teacher-evidence/{seminar_day_id}", handlers.PrintSeminarEvidence).Methods("GET")
 
+	s = r.PathPrefix("/api/questions").Subrouter()
+	s.HandleFunc("/list", handlers.ListQuestions).Methods("GET")
+	s.HandleFunc("/create", handlers.CreateQuestion).Methods("POST")
+	s.HandleFunc("/update", handlers.UpdateQuestion).Methods("POST")
+	s.HandleFunc("/id/{id}", handlers.GetQuestionByID).Methods("GET")
+
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{"*"}, // All origins
 		AllowedHeaders: []string{"*"},

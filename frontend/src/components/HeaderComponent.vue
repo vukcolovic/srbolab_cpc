@@ -58,6 +58,12 @@
               <li>
                 <router-link class="dropdown-item" to="/class-rooms">Učionice</router-link>
               </li>
+              <li>
+                <router-link class="dropdown-item" to="/questions">Pitanja i odgovori</router-link>
+              </li>
+              <li>
+                <router-link class="dropdown-item" to="/class-rooms">Testovi</router-link>
+              </li>
             </ul>
           </li>
           <li class="nav-item">
