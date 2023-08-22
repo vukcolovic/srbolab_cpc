@@ -36,7 +36,7 @@ import {dateMixin} from "@/mixins/dateMixin";
 import {apiMixin} from "@/mixins/apiMixin";
 
 export default {
-  name: 'LocationsList',
+  name: 'QuestionsList',
   mixins: [dateMixin, apiMixin],
   components: { VueTableLite },
   setup() {
@@ -84,7 +84,7 @@ export default {
       if (document.getElementsByClassName('row_id_' + rowData.ID)[0]) {
         document.getElementsByClassName('row_id_' + rowData.ID)[0].style.backgroundColor = '#E8E8E8';
       }
-      table.selectedLocation = rowData;
+      table.selectedQuestion = rowData;
     }
 
     const toast = useToast();

@@ -60,7 +60,6 @@ import axios from "axios";
 import {apiMixin} from "@/mixins/apiMixin";
 import {styleMixin} from "@/mixins/styleMixin";
 import {useToast} from "vue-toastification";
-// import TextInput from "@/components/forms/TextInput.vue";
 import TextAreaInput from "@/components/forms/TextAreaInput.vue";
 import {dateMixin} from "@/mixins/dateMixin";
 import {commonMixin} from "@/mixins/commonMixin";
@@ -89,21 +88,35 @@ export default {
   },
   methods: {
     async getQuestionById() {
-      axios.get('/questions/id/' + this.seminarId).then((response) => {
+      axios.get('/questions/id/' + this.questionId).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;
         }
         this.question = JSON.parse(response.data.Data);
         if (this.question.answers == null) {
-          this.seminar.trainees = [];
+          this.question.answers = [];
         }
       }, (error) => {
         this.toast.error(error.message);
       });
     },
     async submitHandler() {
-      if (this.seminarId) {
+      var correctAnswers = 0;
+      for (let i = 0; i < this.question.answers.length; i++) {
+        if (this.question.answers[i].correct) {
+          correctAnswers++;
+        }
+      }
+      if (correctAnswers > 1) {
+        this.toast.warning("Broj tačnih odgovora ne može biti veći od 1");
+        return;
+      }
+      if (correctAnswers === 0) {
+        this.toast.warning("Broj tačnih odgovora ne može biti manju od 1");
+        return;
+      }
+      if (this.questionId) {
         await this.updateQuestion();
       } else {
         await this.createQuestion();
@@ -122,7 +135,7 @@ export default {
       });
     },
     async updateQuestion() {
-      await axios.post('/questions/update', JSON.stringify(this.seminar)).then((response) => {
+      await axios.post('/questions/update', JSON.stringify(this.question)).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;

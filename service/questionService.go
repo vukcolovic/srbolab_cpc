@@ -32,7 +32,7 @@ func (c *questionService) GetAllQuestions(skip, take int) ([]model.Question, err
 
 func (c *questionService) GetQuestionByID(id int) (*model.Question, error) {
 	var question *model.Question
-	if err := db.Client.First(&question, id).Error; err != nil {
+	if err := db.Client.Preload("SeminarTheme").Preload("SeminarTheme.BaseSeminarType").Preload("Answers").First(&question, id).Error; err != nil {
 		return nil, err
 	}
 

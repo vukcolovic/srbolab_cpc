@@ -34,7 +34,7 @@ func GetQuestionByID(w http.ResponseWriter, req *http.Request) {
 	questionID, err := strconv.Atoi(questionIDParam)
 	if err != nil {
 		logoped.ErrorLog.Println(err.Error())
-		SetErrorResponse(w, NewWrongParamFormatErrorError("locationID", questionIDParam))
+		SetErrorResponse(w, NewWrongParamFormatErrorError("QuestionID", questionIDParam))
 		return
 	}
 	question, err := service.QuestionService.GetQuestionByID(questionID)
