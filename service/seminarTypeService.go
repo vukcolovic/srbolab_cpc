@@ -15,6 +15,7 @@ type seminarTypeService struct {
 type seminarTypeServiceInterface interface {
 	GetAllBaseSeminarTypes() ([]model.BaseSeminarType, error)
 	GetSeminarThemesBypeID(typeID int) ([]model.SeminarTheme, error)
+	GetallSeminarThemes() ([]model.SeminarTheme, error)
 }
 
 func (c *seminarTypeService) GetAllBaseSeminarTypes() ([]model.BaseSeminarType, error) {
@@ -31,4 +32,12 @@ func (c *seminarTypeService) GetSeminarThemesBypeID(typeID int) ([]model.Seminar
 		return nil, err
 	}
 	return seminarThemes, nil
+}
+
+func (c *seminarTypeService) GetallSeminarThemes() ([]model.SeminarTheme, error) {
+	var themes []model.SeminarTheme
+	if err := db.Client.Find(&themes).Error; err != nil {
+		return nil, err
+	}
+	return themes, nil
 }

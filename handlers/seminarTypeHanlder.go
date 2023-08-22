@@ -44,3 +44,14 @@ func ListSeminarThemesBySeminarType(w http.ResponseWriter, r *http.Request) {
 
 	SetSuccessResponse(w, seminarThemes)
 }
+
+func ListSeminarThemes(w http.ResponseWriter, r *http.Request) {
+	seminarThemes, err := service.SeminarTypeService.GetallSeminarThemes()
+	if err != nil {
+		logoped.ErrorLog.Println(err.Error())
+		SetErrorResponse(w, errors.New("Greška prilikom povlačenja liste tema seminara: "+err.Error()))
+		return
+	}
+
+	SetSuccessResponse(w, seminarThemes)
+}

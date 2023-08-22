@@ -5,9 +5,6 @@
         <button class="iconBtn" title="Dodaj" @click="$router.push({name: 'QuestionEdit', query: {id: '', action: 'add' }})">
           <i class="fa fa-user-plus"></i>
         </button>
-        <button class="iconBtn" title="Pregledaj" :disabled="table.selectedQuestion == null" @click="$router.push({name: 'QuestionEdit', query: {id: table.selectedQuestion.ID, action: 'view' }})">
-          <i class="fa fa-user"></i>
-        </button>
         <button class="iconBtn" title="Izmeni" :disabled="table.selectedQuestion == null" @click="$router.push({name: 'QuestionEdit', query: {id: table.selectedQuestion.ID, action: 'update' }})">
           <i class="fa fa-user-md">
           </i></button>
@@ -17,7 +14,7 @@
     <div class="row mt-2">
       <vue-table-lite
           ref="localTable"
-          @row-clicked="selectLocation"
+          @row-clicked="selectQuestion"
           :total= "table.totalCount"
           :columns="table.columns"
           :messages="table.messages"
@@ -36,10 +33,11 @@ import axios from "axios";
 import {reactive} from "vue";
 import {useToast} from "vue-toastification";
 import {dateMixin} from "@/mixins/dateMixin";
+import {apiMixin} from "@/mixins/apiMixin";
 
 export default {
   name: 'LocationsList',
-  mixins: [dateMixin],
+  mixins: [dateMixin, apiMixin],
   components: { VueTableLite },
   setup() {
     // Table config
@@ -57,14 +55,14 @@ export default {
           isKey: true,
         },
         {
-          label: 'Mesto',
-          field: 'address_place',
-          width: '20%',
+          label: 'Pitanje',
+          field: 'content',
+          width: '70%',
         },
         {
-          label: 'Ulica i broj',
-          field: 'address_street_and_number',
-          width: '50%',
+          label: 'Vrsta seminara',
+          field: 'seminar_type',
+          width: '23%',
         }
       ],
       rows: [],
@@ -77,7 +75,7 @@ export default {
       },
     });
 
-    const selectLocation= (rowData) => {
+    const selectQuestion= (rowData) => {
       // clear all
       Array.from(document.getElementsByClassName('is-rows-el')).map((el) => {
         el.style.backgroundColor = 'white';
@@ -93,43 +91,33 @@ export default {
     return {
       toast,
       table,
-      selectLocation,
+      selectQuestion,
     };
   },
   methods: {
     async doSearch(offset, limit, order, sort) {
       console.log(order, sort)
       this.isLoading = true;
-      await axios.get('/locations/list?skip=' + offset + '&take=' + limit).then((response) => {
+      await axios.get('/questions/list?skip=' + offset + '&take=' + limit).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;
         }
         this.table.rows = JSON.parse(response.data.Data);
         this.table.rows.forEach(s => {
-          s.address_place = s.address.place;
-          s.address_street_and_number = s.address.street + " " + s.address.house_number;
+          if (s.seminar_theme) {
+            s.seminar_type = this.getSeminarFullType(s.seminar_theme.base_seminar_type, s.seminar_theme);
+          }
+
         });
       }, (error) => {
         this.toast.error(error.message);
       });
 
       this.isLoading = false;
-    },
-    async countLocations() {
-      await axios.get('/locations/count').then((response) => {
-        if (response.data === null || response.data.Status === 'error') {
-          this.toast.error(response.data != null ? response.data.ErrorMessage : "");
-          return;
-        }
-        this.table.totalCount = response.data.Data;
-      }, (error) => {
-        this.toast.error(error.message);
-      });
     }
   },
   async created() {
-    await this.countLocations();
     await this.doSearch(0, 10, 'id', 'asc');
   }
   }

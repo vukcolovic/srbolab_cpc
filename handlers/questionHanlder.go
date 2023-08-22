@@ -86,14 +86,3 @@ func UpdateQuestion(w http.ResponseWriter, r *http.Request) {
 
 	SetSuccessResponse(w, updatedQuestion)
 }
-
-func CountQuestion(w http.ResponseWriter, req *http.Request) {
-	count, err := service.QuestionService.GetQuestionsCount()
-	if err != nil {
-		logoped.ErrorLog.Println("error getting questions count")
-		SetErrorResponse(w, errors.New("Greška prilikom dobijanja broja pitanja: "+err.Error()))
-		return
-	}
-
-	SetSuccessResponse(w, count)
-}
