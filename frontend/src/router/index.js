@@ -18,6 +18,8 @@ import ClassRoomEdit from './../components/ClassRoomEdit.vue'
 import SeminarDayEdit from './../components/SeminarDayEdit.vue'
 import QuestionsList from '../components/QuestionsList.vue'
 import QuestionEdit from '../components/QuestionEdit.vue'
+import TestsList from '../components/TestsList.vue'
+import TestEdit from '../components/TestEdit.vue'
 
 const routes = [
   {
@@ -121,6 +123,17 @@ const routes = [
     path: '/question',
     name: 'QuestionEdit',
     component: QuestionEdit,
+    props: true,
+  },
+  {
+    path: '/tests',
+    name: 'Tests',
+    component: TestsList,
+  },
+  {
+    path: '/test',
+    name: 'TestEdit',
+    component: TestEdit,
     props: true,
   },
 ]

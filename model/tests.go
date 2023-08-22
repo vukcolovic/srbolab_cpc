@@ -6,6 +6,7 @@ import (
 
 type Test struct {
 	gorm.Model
+	Name           string        `json:"name"`
 	SeminarTheme   *SeminarTheme `json:"seminar_theme"`
 	SeminarThemeID *uint         `json:"seminar_theme_id"`
 	Questions      []Question    `json:"questions"`
