@@ -15,6 +15,7 @@ type questionService struct {
 
 type questionServiceInterface interface {
 	GetAllQuestions(skip, take int) ([]model.Question, error)
+	GetAllQuestionsBySeminarTheme(seminarThemeID int) ([]model.Question, error)
 	GetQuestionByID(id int) (*model.Question, error)
 	GetQuestionsCount() (int64, error)
 	DeleteQuestion(id int) error
@@ -25,6 +26,14 @@ type questionServiceInterface interface {
 func (c *questionService) GetAllQuestions(skip, take int) ([]model.Question, error) {
 	var questions []model.Question
 	if err := db.Client.Order("id desc").Limit(take).Offset(skip).Preload("SeminarTheme").Preload("SeminarTheme.BaseSeminarType").Preload("Answers").Find(&questions).Error; err != nil {
+		return nil, err
+	}
+	return questions, nil
+}
+
+func (c *questionService) GetAllQuestionsBySeminarTheme(seminarThemeID int) ([]model.Question, error) {
+	var questions []model.Question
+	if err := db.Client.Order("id desc").Where("seminar_theme_id = ?", seminarThemeID).Find(&questions).Error; err != nil {
 		return nil, err
 	}
 	return questions, nil

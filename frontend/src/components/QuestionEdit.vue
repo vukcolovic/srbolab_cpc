@@ -2,6 +2,11 @@
   <div class="container">
     <form-tag event="formEvent" name="myForm" @formEvent="submitHandler">
     <div class="row">
+      <div class="col-sm-11 mx-auto">
+        <h3 v-if="action === 'add'" class="mt-2">Dodavanje</h3>
+        <h3 v-if="action === 'update'" class="mt-2">Ažuriranje</h3>
+        <hr>
+      </div>
       <div class="col-sm-8">
             <label :style="styleLabel" class="mb-1 mt-1">Tema seminara</label>
             <v-select

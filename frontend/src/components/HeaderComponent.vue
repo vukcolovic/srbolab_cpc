@@ -62,7 +62,7 @@
                 <router-link class="dropdown-item" to="/questions">Pitanja i odgovori</router-link>
               </li>
               <li>
-                <router-link class="dropdown-item" to="/class-rooms">Testovi</router-link>
+                <router-link class="dropdown-item" to="/tests">Testovi</router-link>
               </li>
             </ul>
           </li>

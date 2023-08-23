@@ -1,40 +1,56 @@
 <template>
   <div class="container">
     <form-tag event="formEvent" name="myForm" @formEvent="submitHandler">
-    <div class="row">
-      <div class="col-sm-8">
-            <label :style="styleLabel" class="mb-1 mt-1">Tema seminara</label>
-            <v-select
-                v-model="question.seminar_theme"
-                :disabled=readonly
-                :options="seminarThemes"
-                :style="styleInput"
-                label="name"
-                placeholder="Traži">
-            </v-select>
-
+      <div class="row">
+        <div class="col-sm-11 mx-auto">
+          <h3 v-if="action === 'add'" class="mt-2">Dodavanje</h3>
+          <h3 v-if="action === 'update'" class="mt-2">Ažuriranje</h3>
+          <hr>
+        </div>
+        <div class="col-sm-12">
           <text-input
               v-model="test.name"
               :readonly="readonly"
               :required=true
-              label="Pitanje"
-              name="start"
+              label="Naziv testa"
+              name="name"
               type="text">
           </text-input>
 
-        <hr>
-        <h6>Pitanja</h6>
-        <div class="row" v-for="question in test.questions" :key="question.ID">
+          <label :style="styleLabel" class="mb-1 mt-1">Tema seminara</label>
+          <v-select
+              v-model="test.seminar_theme"
+              :disabled=readonly
+              :options="seminarThemes"
+              :style="styleInput"
+              label="name"
+              placeholder="Traži"
+              @option:selected="onSeminarThemeChange">
+          </v-select>
 
+          <hr>
+          <h6>Pitanja</h6>
+          <div v-for="(question, index) in questions" :key="question.ID" class="row">
+            <div class="col-sm-1 d-flex aligns-items-center justify-content-center">
+              <input :id="index" :value="question" :disabled="readonly" type="checkbox" v-model="test.questions" />
+            </div>
+            <div class="col-sm-11">
+              <text-area-input
+                  v-model="question.content"
+                  :readonly=true
+              ></text-area-input>
+            </div>
+
+
+          </div>
         </div>
       </div>
-    </div>
       <div>
-        <input type="submit" v-if="this.action === 'add'" class="btn btn-primary m-2" value="Snimi">
-        <input type="submit" v-if="this.action === 'update'" class="btn btn-primary m-2" value="Snimi">
+        <input v-if="this.action === 'add'" class="btn btn-primary m-2" type="submit" value="Snimi">
+        <input v-if="this.action === 'update'" class="btn btn-primary m-2" type="submit" value="Snimi">
       </div>
     </form-tag>
-    </div>
+  </div>
 </template>
 
 <script>
@@ -45,6 +61,7 @@ import {apiMixin} from "@/mixins/apiMixin";
 import {styleMixin} from "@/mixins/styleMixin";
 import {useToast} from "vue-toastification";
 import TextAreaInput from "@/components/forms/TextAreaInput.vue";
+import TextInput from "@/components/forms/TextInput.vue";
 import {dateMixin} from "@/mixins/dateMixin";
 import {commonMixin} from "@/mixins/commonMixin";
 import {fileMixin} from "@/mixins/fileMixin";
@@ -53,7 +70,7 @@ import router from "@/router";
 export default {
   name: 'TestEdit',
   mixins: [apiMixin, styleMixin, dateMixin, commonMixin, fileMixin],
-  components: {TextAreaInput, FormTag, vSelect},
+  components: {TextAreaInput, TextInput, FormTag, vSelect},
   computed: {
     readonly() {
       return this.action === 'view';
@@ -66,13 +83,33 @@ export default {
         seminar_theme: null,
         questions: [],
       },
+      questions: [],
       action: "view",
       testId: "",
     }
   },
   methods: {
+    async onSeminarThemeChange() {
+      this.test.questions = [];
+      if (!this.test.seminar_theme) {
+        this.questions = [];
+        return;
+      }
+      await this.getQuestionsBySeminarTheme();
+    },
+    async getQuestionsBySeminarTheme() {
+      await axios.get('/questions/list/seminar-theme/' + this.test.seminar_theme.ID).then((response) => {
+        if (response.data === null || response.data.Status === 'error') {
+          this.toast.error(response.data != null ? response.data.ErrorMessage : "");
+          return;
+        }
+        this.questions = JSON.parse(response.data.Data);
+      }, (error) => {
+        this.toast.error(error.message);
+      });
+    },
     async getTestById() {
-      axios.get('/tests/id/' + this.questionId).then((response) => {
+      await axios.get('/tests/id/' + this.testId).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;
@@ -91,26 +128,27 @@ export default {
       } else {
         await this.createTest();
       }
-      router.push("/tests");
     },
     async createTest() {
-      await axios.post('/tests/create', JSON.stringify(this.question)).then((response) => {
+      await axios.post('/tests/create', JSON.stringify(this.test)).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;
         }
         this.toast.info("Uspešno kreiran test!");
+        router.push("/tests");
       }, (error) => {
         this.toast.error(error.message);
       });
     },
     async updateTest() {
-      await axios.post('/tests/update', JSON.stringify(this.question)).then((response) => {
+      await axios.post('/tests/update', JSON.stringify(this.test)).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;
         }
         this.toast.info("Uspešno ažuriran test!");
+        router.push("/tests");
       }, (error) => {
         this.toast.error(error.message);
       });
@@ -121,12 +159,13 @@ export default {
     return {toast}
   },
   async mounted() {
+    await this.getAllSeminarThemes();
     if (this.$route.query.id !== '') {
       this.testId = this.$route.query.id;
       await this.getTestById();
+      await this.getQuestionsBySeminarTheme();
     }
     this.action = this.$route.query.action;
-    await this.getAllSeminarThemes();
   }
 }
 </script>

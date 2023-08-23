@@ -111,7 +111,7 @@ export default {
 
         });
       }, (error) => {
-        this.toast.error(error.message);
+        this.toast.error((error && error.message) ? error.message : "Greška prilikom poziva api-a /tests/list");
       });
 
       this.isLoading = false;

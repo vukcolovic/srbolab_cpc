@@ -47,9 +47,31 @@ func (c *testService) CreateTest(test model.Test) (*model.Test, error) {
 }
 
 func (c *testService) UpdateTest(test model.Test) (*model.Test, error) {
+	oldTest, err := c.GetTestByID(int(test.ID))
+	if err != nil {
+		return nil, err
+	}
+
 	result := db.Client.Session(&gorm.Session{FullSaveAssociations: true}).Updates(&test)
 	if result.Error != nil {
 		return nil, result.Error
+	}
+
+	for _, od := range oldTest.Questions {
+		found := false
+		for _, nd := range test.Questions {
+			if od.ID == nd.ID {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			result := db.Client.Exec("DELETE FROM test_question WHERE test_id = ? AND question_id = ?", test.ID, od.ID)
+			if result.Error != nil {
+				return nil, result.Error
+			}
+		}
 	}
 
 	return &test, nil

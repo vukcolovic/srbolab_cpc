@@ -9,7 +9,7 @@ type Test struct {
 	Name           string        `json:"name"`
 	SeminarTheme   *SeminarTheme `json:"seminar_theme"`
 	SeminarThemeID *uint         `json:"seminar_theme_id"`
-	Questions      []Question    `json:"questions"`
+	Questions      []Question    `json:"questions" gorm:"many2many:test_question;"`
 }
 
 type Question struct {

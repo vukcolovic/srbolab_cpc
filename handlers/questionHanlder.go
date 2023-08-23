@@ -22,6 +22,31 @@ func ListQuestions(w http.ResponseWriter, r *http.Request) {
 	SetSuccessResponse(w, questions)
 }
 
+func ListQuestionsBySeminarThemeID(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	seminarThemeIdParam, ok := params["id"]
+	if !ok {
+		logoped.ErrorLog.Println("missing parameter seminarThemeId")
+		SetErrorResponse(w, NewMissingRequestParamError("seminarThemeId"))
+		return
+	}
+	seminarThemeId, err := strconv.Atoi(seminarThemeIdParam)
+	if err != nil {
+		logoped.ErrorLog.Println(err.Error())
+		SetErrorResponse(w, NewWrongParamFormatErrorError("seminarThemeId", seminarThemeIdParam))
+		return
+	}
+
+	questions, err := service.QuestionService.GetAllQuestionsBySeminarTheme(seminarThemeId)
+	if err != nil {
+		logoped.ErrorLog.Println(err.Error())
+		SetErrorResponse(w, errors.New("Greška prilikom povlačenja liste pitanja: "+err.Error()))
+		return
+	}
+
+	SetSuccessResponse(w, questions)
+}
+
 func GetQuestionByID(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	questionIDParam, ok := vars["id"]

@@ -104,7 +104,7 @@ export const apiMixin = {
                 });
                 return result;
             }, (error) => {
-                this.toast.error(error.message ? error.message : "Greška prilikom poziva api-a /seminars/list/status/");
+                this.toast.error((error && error.message) ? error.message : "Greška prilikom poziva api-a /seminars/list/status/");
             });
         },
         getSeminarFullType(base, theme) {
