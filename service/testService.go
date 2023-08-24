@@ -15,6 +15,7 @@ type testService struct {
 
 type testServiceInterface interface {
 	GetAllTests() ([]model.Test, error)
+	GetAllTestsBySeminarTheme(seminarThemeID int) ([]model.Test, error)
 	GetTestByID(id int) (*model.Test, error)
 	CreateTest(test model.Test) (*model.Test, error)
 	UpdateTest(test model.Test) (*model.Test, error)
@@ -23,6 +24,14 @@ type testServiceInterface interface {
 func (c *testService) GetAllTests() ([]model.Test, error) {
 	var tests []model.Test
 	if err := db.Client.Order("id desc").Preload("SeminarTheme").Preload("SeminarTheme.BaseSeminarType").Find(&tests).Error; err != nil {
+		return nil, err
+	}
+	return tests, nil
+}
+
+func (c *testService) GetAllTestsBySeminarTheme(seminarThemeID int) ([]model.Test, error) {
+	var tests []model.Test
+	if err := db.Client.Order("id desc").Where("seminar_theme_id = ?", seminarThemeID).Find(&tests).Error; err != nil {
 		return nil, err
 	}
 	return tests, nil

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/go-pdf/fpdf"
+	"github.com/skip2/go-qrcode"
 	"os"
 	"path/filepath"
 	"srbolab_cpc/logoped"
@@ -34,6 +35,7 @@ type printServiceInterface interface {
 	PrintMuster(day *model.SeminarDay) ([]byte, error)
 	PrintCheckIn(seminar *model.Seminar) ([]byte, error)
 	PrintSeminarEvidence(day *model.SeminarDay) ([]byte, error)
+	PrintTestBarcode(day *model.SeminarDay) ([]byte, error)
 }
 
 func (p *printService) PrintSeminarStudentList(seminar *model.Seminar) ([]byte, error) {
@@ -708,6 +710,19 @@ func (p *printService) PrintSeminarEvidence(day *model.SeminarDay) ([]byte, erro
 
 	var buf bytes.Buffer
 	err = pdf.Output(&buf)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return buf.Bytes(), nil
+}
+
+func (p *printService) PrintTestBarcode(day *model.SeminarDay) ([]byte, error) {
+	url := fmt.Sprintf("http://localhost:8080/api/v1/seminar-day/%d/test/%d", day.ID, day.Test.ID)
+	qrCode, _ := qrcode.New(url, qrcode.Medium)
+	var buf bytes.Buffer
+
+	err := qrCode.Write(500, &buf)
 	if err != nil {
 		return []byte{}, err
 	}

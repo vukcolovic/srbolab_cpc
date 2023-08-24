@@ -36,8 +36,21 @@
               name="time"
               type="time">
           </text-input>
-          <input class="btn btn-primary m-2" type="submit" value="Snimi">
 
+          <label :style="styleLabel" class="mb-1 mt-1">Test</label>
+          <v-select
+              v-model="seminarDay.test"
+              :disabled=readonly
+              :options="tests"
+              :style="styleInput"
+              label="name"
+              placeholder="Traži"
+              @option:selected="onTestChange">
+          </v-select>
+          <input class="btn btn-primary m-2" type="submit" value="Snimi">
+          <button class="iconBtn" title="Štampaj barcode testa" @click.prevent="printBarcode()">
+            <i class="fa fa-barcode"></i>
+          </button>
         </form-tag>
 
       </div>
@@ -143,16 +156,22 @@ export default {
         name: "",
         seminar_id: 0,
         seminar: null,
+        test_id: 0,
+        test: null,
         seminar_theme: "",
         presence: [],
         documents: [],
         classes: [],
       },
+      tests: [],
       seminarDayId: 0,
       startTime: null,
     }
   },
   methods: {
+    onTestChange() {
+
+    },
     downloadFile(i) {
       const arr = this.seminarDay.documents[i].content.split(',')
       var sampleArr = this.base64ToArrayBuffer(arr[1]);
@@ -179,6 +198,27 @@ export default {
     removeFile(i) {
       this.seminarDay.documents.splice(i, 1);
     },
+    async printBarcode() {
+      await axios.get('/print/seminar-day/test/barcode/' + this.seminarDayId).then((response) => {
+        if (response.data === null || response.data.Status === 'error') {
+          this.toast.error(response.data != null ? response.data.ErrorMessage : "");
+          return;
+        }
+        var fileContent = JSON.parse(response.data.Data);
+        var sampleArr = this.base64ToArrayBuffer(fileContent);
+        const blob = new Blob([sampleArr], {type: 'application/png'});
+
+        var iframe = document.createElement('iframe');
+        iframe.src = URL.createObjectURL(blob);
+        document.body.appendChild(iframe);
+
+        URL.revokeObjectURL(iframe.src);
+        // iframe.contentWindow.print();
+        // iframe.setAttribute("hidden", "hidden");
+      }, (error) => {
+        this.toast.error(error.message);
+      });
+  },
     async printTeacherEvidence() {
       await axios.get('/print/seminar/teacher-evidence/' + this.seminarDayId).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
@@ -225,7 +265,7 @@ export default {
       router.push({name: 'SeminarEdit', query: {id: this.seminarDay.seminar_id, action: "update"}});
     },
     async getSeminarDayById() {
-      axios.get('/seminar-days/id/' + this.seminarDayId).then((response) => {
+      await axios.get('/seminar-days/id/' + this.seminarDayId).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;
@@ -259,6 +299,18 @@ export default {
         this.toast.error(error.message);
       });
     },
+    async getTestsBySeminarTheme() {
+      await axios.get('/tests/list/seminar-theme/' + this.seminarDay.seminar.seminar_theme.ID).then((response) => {
+        if (response.data === null || response.data.Status === 'error') {
+          this.toast.error(response.data != null ? response.data.ErrorMessage : "");
+          return;
+        }
+        this.tests = JSON.parse(response.data.Data);
+        console.log(this.tests);
+      }, (error) => {
+        this.toast.error(error.message);
+      });
+    },
   },
   setup() {
     const toast = useToast();
@@ -268,6 +320,7 @@ export default {
     this.getAllUsers();
     this.seminarDayId = this.$route.query.id;
     await this.getSeminarDayById();
+    await this.getTestsBySeminarTheme();
   }
 }
 </script>

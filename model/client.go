@@ -27,6 +27,10 @@ type Client struct {
 	Comment                  *string         `json:"comment"`
 	InitialCompletedSeminars *int            `json:"initial_completed_seminars"`
 	Seminars                 []ClientSeminar `json:"seminars"`
+	CreatedBy                User            `json:"created_by"`
+	CreatedByID              uint            `json:"created_by_id"`
+	VerifiedBy               User            `json:"verified_by"`
+	VerifiedByID             uint            `json:"verified_by_id"`
 }
 
 func (a Address) GetStreetWithNumber() string {

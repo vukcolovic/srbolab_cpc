@@ -1,11 +1,13 @@
 package service
 
 import (
+	"github.com/dgrijalva/jwt-go"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 	"srbolab_cpc/db"
 	"srbolab_cpc/logoped"
 	"srbolab_cpc/model"
+	"strconv"
 )
 
 var (
@@ -16,6 +18,7 @@ type userService struct {
 }
 
 type usersServiceInterface interface {
+	GetUserIDByToken(token string) (int, error)
 	GetAllUsers(skip, take int) ([]model.User, error)
 	GetUserByID(id int) (*model.User, error)
 	GetUserByEmail(email string) (*model.User, error)
@@ -23,6 +26,26 @@ type usersServiceInterface interface {
 	DeleteUser(id int) error
 	CreateUser(user model.User) (*model.User, error)
 	UpdateUser(user model.User) (*model.User, error)
+}
+
+func (s *userService) GetUserIDByToken(token string) (int, error) {
+	claims := jwt.MapClaims{}
+
+	_, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
+		return []byte("secret"), nil
+	})
+	if err != nil {
+		logoped.ErrorLog.Println("Error getting user by token, error parse claims: ", err)
+		return 0, err
+	}
+
+	id, err := strconv.Atoi(claims["Id"].(string))
+	if err != nil {
+		logoped.ErrorLog.Println("Error getting user by token: ", err)
+		return 0, err
+	}
+
+	return id, nil
 }
 
 func (s *userService) GetAllUsers(skip, take int) ([]model.User, error) {

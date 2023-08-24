@@ -21,7 +21,21 @@ func CreateClient(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	createdClient, err := service.ClientService.CreateClient(client)
+	token, err := GetTokenFromRequest(r)
+	if err != nil {
+		logoped.ErrorLog.Println("Unable to retrieve token from requeste: ", err)
+		SetErrorResponse(w, err)
+		return
+	}
+
+	userId, err := service.UsersService.GetUserIDByToken(token)
+	if err != nil {
+		logoped.ErrorLog.Println("Error getting user from token: ", err)
+		SetErrorResponse(w, errors.New("Greška prilikom kreiranja klijenta: "+err.Error()))
+		return
+	}
+
+	createdClient, err := service.ClientService.CreateClient(client, userId)
 	if err != nil {
 		logoped.ErrorLog.Println("Error creating client " + err.Error())
 		SetErrorResponse(w, errors.New("Greška prilikom kreiranja klijenta: "+err.Error()))
@@ -132,7 +146,21 @@ func UpdateClient(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	updatedClient, err := service.ClientService.UpdateClient(client)
+	token, err := GetTokenFromRequest(r)
+	if err != nil {
+		logoped.ErrorLog.Println("Unable to retrieve token from requeste: ", err)
+		SetErrorResponse(w, err)
+		return
+	}
+
+	userId, err := service.UsersService.GetUserIDByToken(token)
+	if err != nil {
+		logoped.ErrorLog.Println("Error getting user from token: ", err)
+		SetErrorResponse(w, errors.New("Greška prilikom ažuriranja klijenta: "+err.Error()))
+		return
+	}
+
+	updatedClient, err := service.ClientService.UpdateClient(client, userId)
 	if err != nil {
 		logoped.ErrorLog.Println("Error updating client: ", err)
 		SetErrorResponse(w, errors.New("Greška prilikom ažuriranja klijenta: "+err.Error()))

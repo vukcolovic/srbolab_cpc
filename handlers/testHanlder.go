@@ -22,6 +22,31 @@ func ListTests(w http.ResponseWriter, r *http.Request) {
 	SetSuccessResponse(w, tests)
 }
 
+func ListTestsBySeminarThemeID(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	seminarThemeIdParam, ok := params["id"]
+	if !ok {
+		logoped.ErrorLog.Println("missing parameter seminarThemeId")
+		SetErrorResponse(w, NewMissingRequestParamError("seminarThemeId"))
+		return
+	}
+	seminarThemeId, err := strconv.Atoi(seminarThemeIdParam)
+	if err != nil {
+		logoped.ErrorLog.Println(err.Error())
+		SetErrorResponse(w, NewWrongParamFormatErrorError("seminarThemeId", seminarThemeIdParam))
+		return
+	}
+
+	tests, err := service.TestService.GetAllTestsBySeminarTheme(seminarThemeId)
+	if err != nil {
+		logoped.ErrorLog.Println(err.Error())
+		SetErrorResponse(w, errors.New("Greška prilikom povlačenja liste testova: "+err.Error()))
+		return
+	}
+
+	SetSuccessResponse(w, tests)
+}
+
 func GetTestByID(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	testIDParam, ok := vars["id"]

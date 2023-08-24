@@ -20,8 +20,8 @@ type clientServiceInterface interface {
 	GetClientByJMBG(jmbg string) (*model.Client, error)
 	GetClientsCount() (int64, error)
 	DeleteClient(id int) error
-	CreateClient(client model.Client) (*model.Client, error)
-	UpdateClient(client model.Client) (*model.Client, error)
+	CreateClient(client model.Client, userID int) (*model.Client, error)
+	UpdateClient(client model.Client, userID int) (*model.Client, error)
 }
 
 func makeFilterMap(filter model.ClientFilter) map[string]interface{} {
@@ -116,7 +116,11 @@ func (c *clientService) DeleteClient(id int) error {
 	return db.Client.Delete(&model.Client{}, id).Error
 }
 
-func (c *clientService) CreateClient(client model.Client) (*model.Client, error) {
+func (c *clientService) CreateClient(client model.Client, userID int) (*model.Client, error) {
+	client.CreatedByID = uint(userID)
+	if *client.Verified {
+		client.VerifiedByID = uint(userID)
+	}
 	result := db.Client.Create(&client)
 	if result.Error != nil {
 		return nil, result.Error
@@ -125,10 +129,14 @@ func (c *clientService) CreateClient(client model.Client) (*model.Client, error)
 	return &client, nil
 }
 
-func (c *clientService) UpdateClient(client model.Client) (*model.Client, error) {
+func (c *clientService) UpdateClient(client model.Client, userID int) (*model.Client, error) {
 	oldClient, err := c.GetClientByID(int(client.ID))
 	if err != nil {
 		return nil, err
+	}
+
+	if !*oldClient.Verified && *client.Verified {
+		client.VerifiedByID = uint(userID)
 	}
 	oldSeminars := oldClient.Seminars
 
