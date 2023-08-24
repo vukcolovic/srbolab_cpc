@@ -44,8 +44,7 @@
               :options="tests"
               :style="styleInput"
               label="name"
-              placeholder="Traži"
-              @option:selected="onTestChange">
+              placeholder="Traži">
           </v-select>
           <input class="btn btn-primary m-2" type="submit" value="Snimi">
           <button class="iconBtn" title="Štampaj barcode testa" @click.prevent="printBarcode()">
@@ -169,9 +168,6 @@ export default {
     }
   },
   methods: {
-    onTestChange() {
-
-    },
     downloadFile(i) {
       const arr = this.seminarDay.documents[i].content.split(',')
       var sampleArr = this.base64ToArrayBuffer(arr[1]);
