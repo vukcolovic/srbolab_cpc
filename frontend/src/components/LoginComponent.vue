@@ -33,10 +33,12 @@ import FormTag from "@/components/forms/FormTag";
 import axios from "axios";
 import router from "@/router";
 import {useToast} from "vue-toastification";
+import {apiMixin} from "@/mixins/apiMixin";
 
 export default {
   name: 'LoginComponent',
   components: {FormTag, TextInput},
+  mixins: [apiMixin],
   data() {
     return {
       email: "",
@@ -71,5 +73,8 @@ export default {
     const toast = useToast();
     return {toast}
   },
+  mounted() {
+    this.isCorporateIp();
+  }
 }
 </script>

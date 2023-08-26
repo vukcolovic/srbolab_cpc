@@ -293,9 +293,9 @@ export default {
         cpc_number: "",
         cpc_date: null,
         educational_profile: "",
-        verified: true,
+        verified: false,
         initial_completed_seminars: 0,
-        wait_seminar: true,
+        wait_seminar: false,
         seminars: []
       },
       finishedSeminars: [],

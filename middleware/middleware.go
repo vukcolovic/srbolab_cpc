@@ -30,7 +30,7 @@ func init() {
 
 func AuthToken(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if strings.Contains(r.URL.Path, "login") || strings.Contains(r.URL.Path, "corporate-ip") || strings.Contains(r.URL.Path, "create-not-verified") {
+		if strings.Contains(r.URL.Path, "login") || strings.Contains(r.URL.Path, "corporate-ip") || strings.Contains(r.URL.Path, "create-not-verified") || strings.Contains(r.URL.Path, "seminar-days/id") || strings.Contains(r.URL.Path, "/client-test/create") {
 			w.Header().Set("Access-Control-Allow-Origin", "*")
 			next.ServeHTTP(w, r)
 			return

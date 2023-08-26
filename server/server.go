@@ -115,6 +115,8 @@ func RunServer(host string) {
 	s.HandleFunc("/create", handlers.CreateTest).Methods("POST")
 	s.HandleFunc("/update", handlers.UpdateTest).Methods("POST")
 	s.HandleFunc("/id/{id}", handlers.GetTestByID).Methods("GET")
+	s.HandleFunc("/id/{id}/seminar-day/{seminar-day}/client-jmbg/{jmbg}", handlers.ClientDoneTest).Methods("POST")
+	s.HandleFunc("/client-test/create", handlers.SaveClientTest).Methods("POST")
 
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{"*"}, // All origins

@@ -116,6 +116,7 @@ export const apiMixin = {
                 var corporate = JSON.parse(response.data.Data);
                 this.$store.dispatch('setIsCorporateAction', corporate.is_corporate);
                 if (corporate.is_corporate) {
+                    console.log("ca");
                     router.push("/home");
                 }
             }, (error) => {

@@ -21,12 +21,19 @@ import QuestionEdit from '../components/QuestionEdit.vue'
 import TestsList from '../components/TestsList.vue'
 import TestEdit from '../components/TestEdit.vue'
 import ClientEditNoCorporate from '../components/ClientEditNoCorporate.vue'
+import DoTest from '../components/DoTest.vue'
 
 const routes = [
   {
     path: '/',
     name: 'ClientEditNoCorporate',
     component: ClientEditNoCorporate,
+  },
+  {
+    path: '/do-test',
+    name: 'DoTest',
+    component: DoTest,
+    props: true,
   },
   {
     path: '/home',

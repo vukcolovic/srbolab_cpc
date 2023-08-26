@@ -21,6 +21,13 @@ const options = {
     timeout: 2000
 };
 
+router.beforeEach(async (to, from) => {
+    console.log("from" + from);
+    if (!store.getters.isCorporate && (to.name !== 'ClientEditNoCorporate' && to.name !== 'DoTest')) {
+        return '/'
+    }
+})
+
 app.use(Toast, options);
 app.component('VueTable', VueTableLite);
 app.component('v-select', vSelect);

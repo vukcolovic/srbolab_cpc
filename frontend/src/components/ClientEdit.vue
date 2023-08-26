@@ -259,6 +259,16 @@
               :styleLabel=styleLabelSmall>
           </text-input>
 
+          <text-input
+              v-model.trim="client.company_pib"
+              label="PIB Firme"
+              type="text"
+              name="company_pib"
+              :required=false
+              :styleInput=styleInputSmall
+              :styleLabel=styleLabelSmall>
+          </text-input>
+
           <label :style="styleLabelSmall" class="mb-1 mt-1">Firma</label>
           <v-select
               v-model="client.company"
@@ -366,6 +376,7 @@ export default {
         country_birth: "",
         documents: [],
         company: null,
+        company_pib: "",
         comment: "",
         resident: true,
         second_citizenship: "",

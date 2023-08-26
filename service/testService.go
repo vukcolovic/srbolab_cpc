@@ -2,8 +2,11 @@ package service
 
 import (
 	"gorm.io/gorm"
+	"sort"
 	"srbolab_cpc/db"
 	"srbolab_cpc/model"
+	"srbolab_cpc/util"
+	"strconv"
 )
 
 var (
@@ -19,6 +22,7 @@ type testServiceInterface interface {
 	GetTestByID(id int) (*model.Test, error)
 	CreateTest(test model.Test) (*model.Test, error)
 	UpdateTest(test model.Test) (*model.Test, error)
+	CreateClientTest(clientTest model.ClientTest) (*model.ClientTest, error)
 }
 
 func (c *testService) GetAllTests() ([]model.Test, error) {
@@ -53,6 +57,43 @@ func (c *testService) CreateTest(test model.Test) (*model.Test, error) {
 	}
 
 	return &test, nil
+}
+
+func (c *testService) CreateClientTest(clientTest model.ClientTest) (*model.ClientTest, error) {
+	res := ""
+	mapAnswers := map[uint]string{}
+	sort.Slice(clientTest.QuestionAnswer, func(i, j int) bool {
+		return clientTest.QuestionAnswer[i].QuestionID < clientTest.QuestionAnswer[i].QuestionID
+	})
+	for _, qa := range clientTest.QuestionAnswer {
+		mapAnswers[qa.QuestionID] = qa.Answer
+		res = res + strconv.Itoa(int(qa.QuestionID)) + ":" + qa.Answer + ","
+	}
+	res = util.TrimSuffix(res, ",")
+	clientTest.ResultStr = res
+
+	correctAnswers := 0
+
+	for _, q := range clientTest.Test.Questions {
+		for _, a := range q.Answers {
+			if a.Correct != nil && *a.Correct == true {
+				v, ok := mapAnswers[q.ID]
+				if !ok || v != a.Letter {
+					break
+				} else {
+					correctAnswers++
+				}
+			}
+		}
+	}
+	clientTest.Result = float64(correctAnswers) / float64(len(clientTest.Test.Questions))
+
+	result := db.Client.Create(&clientTest)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &clientTest, nil
 }
 
 func (c *testService) UpdateTest(test model.Test) (*model.Test, error) {

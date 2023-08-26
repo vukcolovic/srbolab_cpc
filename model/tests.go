@@ -14,13 +14,21 @@ type Test struct {
 
 type ClientTest struct {
 	gorm.Model
-	Name      string  `json:"name"`
-	Client    Client  `json:"seminar_theme"`
-	ClientID  uint    `json:"seminar_theme_id"`
-	Test      Test    `json:"test"`
-	TestID    uint    `json:"test_id"`
-	Result    float64 `json:"result"`
-	ResultStr string  `json:"result_str"`
+	Jmbg           string           `json:"jmbg"`
+	Client         Client           `json:"seminar_theme"`
+	ClientID       uint             `json:"seminar_theme_id"`
+	Test           Test             `json:"test"`
+	TestID         uint             `json:"test_id"`
+	SeminarDay     SeminarDay       `json:"seminar_day"`
+	SeminarDayID   uint             `json:"seminar_day_id"`
+	Result         float64          `json:"result"`
+	ResultStr      string           `json:"result_str"`
+	QuestionAnswer []QuestionAnswer `json:"questions_answers" gorm:"-:all"`
+}
+
+type QuestionAnswer struct {
+	QuestionID uint   `json:"question_id"`
+	Answer     string `json:"answer"`
 }
 
 type Question struct {

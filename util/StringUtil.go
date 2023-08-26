@@ -1,5 +1,7 @@
 package util
 
+import "strings"
+
 func Contains(s []string, str string) bool {
 	for _, v := range s {
 		if v == str {
@@ -8,4 +10,11 @@ func Contains(s []string, str string) bool {
 	}
 
 	return false
+}
+
+func TrimSuffix(s, suffix string) string {
+	if strings.HasSuffix(s, suffix) {
+		s = s[:len(s)-len(suffix)]
+	}
+	return s
 }
