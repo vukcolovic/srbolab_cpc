@@ -5,6 +5,7 @@ import (
 	"log"
 	"srbolab_cpc"
 	"srbolab_cpc/db"
+	"srbolab_cpc/handlers"
 	"srbolab_cpc/server"
 )
 
@@ -27,6 +28,8 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+
+	handlers.CorporateIps = conf.CorporateIps
 
 	server.RunServer(conf.HTTP)
 }

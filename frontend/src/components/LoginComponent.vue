@@ -64,7 +64,7 @@ export default {
       }, (error) => {
         this.toast.error(error);
       });
-      await router.push("/");
+      await router.push("/home");
     },
   },
   setup() {

@@ -18,6 +18,7 @@ func RunServer(host string) {
 	r.Use(middleware.AuthToken)
 
 	r.HandleFunc("/api/login", handlers.Login).Methods("POST")
+	r.HandleFunc("/api/corporate-ip", handlers.IsCorporateIp).Methods("GET")
 
 	s := r.PathPrefix("/api/users").Subrouter()
 	s.HandleFunc("/register", handlers.Register).Methods("POST").Name("users_register")
@@ -33,6 +34,7 @@ func RunServer(host string) {
 
 	s = r.PathPrefix("/api/clients").Subrouter()
 	s.HandleFunc("/create", handlers.CreateClient).Methods("POST")
+	s.HandleFunc("/create-not-verified", handlers.CreateClientNotVerified).Methods("POST")
 	s.HandleFunc("/update", handlers.UpdateClient).Methods("POST")
 	s.HandleFunc("/list", handlers.ListClients).Methods("POST")
 	s.HandleFunc("/id/{id}", handlers.GetClientByID).Methods("GET")

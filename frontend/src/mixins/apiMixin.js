@@ -1,6 +1,7 @@
 import axios from "axios";
 import {useToast} from "vue-toastification";
 import {dateMixin} from "@/mixins/dateMixin";
+import router from "@/router";
 
 export const apiMixin = {
     mixins: [dateMixin],
@@ -105,6 +106,20 @@ export const apiMixin = {
                 return result;
             }, (error) => {
                 this.toast.error((error && error.message) ? error.message : "Greška prilikom poziva api-a /seminars/list/status/");
+            });
+        },
+        async isCorporateIp() {
+            await axios.get('/corporate-ip').then((response) => {
+                if (response.data === null || response.data.Status === 'error') {
+                    return;
+                }
+                var corporate = JSON.parse(response.data.Data);
+                this.$store.dispatch('setIsCorporateAction', corporate.is_corporate);
+                if (corporate.is_corporate) {
+                    router.push("/home");
+                }
+            }, (error) => {
+                this.toast.error(error.message);
             });
         },
         getSeminarFullType(base, theme) {

@@ -2,6 +2,9 @@ export default {
   setToken(state, newToken) {
     state.token = newToken;
   },
+  setIsCorporate(state, newIsCorporate) {
+    state.isCorporate = newIsCorporate;
+  },
   setFirstName(state, firstName) {
     state.firstName = firstName;
   },

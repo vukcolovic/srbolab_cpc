@@ -45,6 +45,26 @@ func CreateClient(w http.ResponseWriter, r *http.Request) {
 	SetSuccessResponse(w, createdClient)
 }
 
+func CreateClientNotVerified(w http.ResponseWriter, r *http.Request) {
+	var client model.Client
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&client)
+	if err != nil {
+		logoped.ErrorLog.Println("unable to retrieve the just parsed code")
+		SetErrorResponse(w, NewJSONDecodeError("Client"))
+		return
+	}
+
+	_, err = service.ClientService.CreateClientNotVerified(client)
+	if err != nil {
+		logoped.ErrorLog.Println("Error creating client " + err.Error())
+		SetErrorResponse(w, errors.New("Greška prilikom snimanja: "+err.Error()))
+		return
+	}
+
+	SetSuccessResponse(w, nil)
+}
+
 func ListClients(w http.ResponseWriter, r *http.Request) {
 	var filter model.ClientFilter
 	decoder := json.NewDecoder(r.Body)

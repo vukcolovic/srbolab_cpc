@@ -20,10 +20,16 @@ import QuestionsList from '../components/QuestionsList.vue'
 import QuestionEdit from '../components/QuestionEdit.vue'
 import TestsList from '../components/TestsList.vue'
 import TestEdit from '../components/TestEdit.vue'
+import ClientEditNoCorporate from '../components/ClientEditNoCorporate.vue'
 
 const routes = [
   {
     path: '/',
+    name: 'ClientEditNoCorporate',
+    component: ClientEditNoCorporate,
+  },
+  {
+    path: '/home',
     name: 'Home',
     component: BodyComponent,
   },

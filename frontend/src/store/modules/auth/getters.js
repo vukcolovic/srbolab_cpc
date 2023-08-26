@@ -5,6 +5,9 @@ export default {
   isAuthenticated(state) {
     return !!state.token;
   },
+  isCorporate(state) {
+    return !!state.isCorporate;
+  },
   firstName(state) {
     return state.firstName;
   },

@@ -33,6 +33,7 @@ func Connect(conf srbolab_cpc.Config) error {
 		&model.Question{},
 		&model.Answer{},
 		&model.Test{},
+		&model.ClientTest{},
 	)
 	if err != nil {
 		return err

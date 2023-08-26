@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"gorm.io/gorm"
 	"srbolab_cpc/db"
 	"srbolab_cpc/model"
@@ -21,6 +22,7 @@ type clientServiceInterface interface {
 	GetClientsCount() (int64, error)
 	DeleteClient(id int) error
 	CreateClient(client model.Client, userID int) (*model.Client, error)
+	CreateClientNotVerified(client model.Client) (*model.Client, error)
 	UpdateClient(client model.Client, userID int) (*model.Client, error)
 }
 
@@ -117,9 +119,23 @@ func (c *clientService) DeleteClient(id int) error {
 }
 
 func (c *clientService) CreateClient(client model.Client, userID int) (*model.Client, error) {
-	client.CreatedByID = uint(userID)
+	userIDUint := uint(userID)
+	client.CreatedByID = &userIDUint
 	if *client.Verified {
-		client.VerifiedByID = uint(userID)
+		client.VerifiedByID = &userIDUint
+	}
+	result := db.Client.Create(&client)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &client, nil
+}
+
+func (c *clientService) CreateClientNotVerified(client model.Client) (*model.Client, error) {
+	cl, _ := c.GetClientByJMBG(*client.JMBG)
+	if cl != nil {
+		return nil, errors.New("Osoba sa datim JMBG-om već postoji u sistemu")
 	}
 	result := db.Client.Create(&client)
 	if result.Error != nil {
@@ -135,8 +151,10 @@ func (c *clientService) UpdateClient(client model.Client, userID int) (*model.Cl
 		return nil, err
 	}
 
+	userIDUint := uint(userID)
+
 	if !*oldClient.Verified && *client.Verified {
-		client.VerifiedByID = uint(userID)
+		client.VerifiedByID = &userIDUint
 	}
 	oldSeminars := oldClient.Seminars
 

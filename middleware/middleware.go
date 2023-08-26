@@ -30,7 +30,7 @@ func init() {
 
 func AuthToken(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if strings.Contains(r.URL.Path, "login") {
+		if strings.Contains(r.URL.Path, "login") || strings.Contains(r.URL.Path, "corporate-ip") || strings.Contains(r.URL.Path, "create-not-verified") {
 			w.Header().Set("Access-Control-Allow-Origin", "*")
 			next.ServeHTTP(w, r)
 			return
@@ -43,7 +43,7 @@ func AuthToken(next http.Handler) http.Handler {
 		tokenHeader = strings.TrimSpace(tokenHeader)
 		if tokenHeader == "" {
 			w.WriteHeader(http.StatusForbidden)
-			json.NewEncoder(w).Encode("Greška autentifikacije")
+			handlers.SetAuthErrorResponse(w, errors.New("Greška autentifikacije"))
 			return
 		}
 

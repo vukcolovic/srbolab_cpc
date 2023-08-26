@@ -5,7 +5,7 @@
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse d-flex">
-        <a class="navbar-brand" href="/"><img src="../assets/left_logo.png" href=""></a>
+        <a class="navbar-brand" href="/home"><img src="../assets/left_logo.png" href=""></a>
         <ul class="navbar-nav">
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"

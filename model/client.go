@@ -15,6 +15,7 @@ type Client struct {
 	CountryBirth             *string         `json:"country_birth"`
 	CompanyID                *uint           `json:"company_id"`
 	Company                  Company         `json:"company"`
+	CompanyPIB               *string         `json:"company_pib"`
 	Verified                 *bool           `json:"verified"`
 	WaitSeminar              *bool           `json:"wait_seminar"`
 	Documents                []*File         `json:"documents" gorm:"many2many:client_file;"`
@@ -28,9 +29,9 @@ type Client struct {
 	InitialCompletedSeminars *int            `json:"initial_completed_seminars"`
 	Seminars                 []ClientSeminar `json:"seminars"`
 	CreatedBy                User            `json:"created_by"`
-	CreatedByID              uint            `json:"created_by_id"`
+	CreatedByID              *uint           `json:"created_by_id"`
 	VerifiedBy               User            `json:"verified_by"`
-	VerifiedByID             uint            `json:"verified_by_id"`
+	VerifiedByID             *uint           `json:"verified_by_id"`
 }
 
 func (a Address) GetStreetWithNumber() string {

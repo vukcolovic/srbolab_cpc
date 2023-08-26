@@ -6,6 +6,7 @@ export default {
   state() {
     return {
       token: "",
+      isCorporate: false,
       firstName: "",
       lastName: "",
       roles: [],
