@@ -15,8 +15,8 @@ type Test struct {
 type ClientTest struct {
 	gorm.Model
 	Jmbg           string           `json:"jmbg"`
-	Client         Client           `json:"seminar_theme"`
-	ClientID       uint             `json:"seminar_theme_id"`
+	Client         Client           `json:"client"`
+	ClientID       uint             `json:"client_id"`
 	Test           Test             `json:"test"`
 	TestID         uint             `json:"test_id"`
 	SeminarDay     SeminarDay       `json:"seminar_day"`

@@ -9,6 +9,7 @@ import (
 	"srbolab_cpc/model"
 	"srbolab_cpc/service"
 	"strconv"
+	"time"
 )
 
 func ListTests(w http.ResponseWriter, r *http.Request) {
@@ -112,29 +113,37 @@ func UpdateTest(w http.ResponseWriter, r *http.Request) {
 	SetSuccessResponse(w, updatedTest)
 }
 
-func ClientDoneTest(w http.ResponseWriter, req *http.Request) {
+func GetClientTests(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
-	testIDParam, ok := vars["id"]
+	seminarDayIDParam, ok := vars["seminar-day"]
 	if !ok {
-		logoped.ErrorLog.Println("missing parameter id")
-		SetErrorResponse(w, NewMissingRequestParamError("id"))
+		logoped.ErrorLog.Println("missing parameter seminar-day")
+		SetErrorResponse(w, NewMissingRequestParamError("SeminarDayID"))
 		return
 	}
 
-	testID, err := strconv.Atoi(testIDParam)
+	seminarDayID, err := strconv.Atoi(seminarDayIDParam)
 	if err != nil {
 		logoped.ErrorLog.Println(err.Error())
-		SetErrorResponse(w, NewWrongParamFormatErrorError("TestID", testIDParam))
-		return
-	}
-	test, err := service.TestService.GetTestByID(testID)
-	if err != nil {
-		logoped.ErrorLog.Println(err.Error())
-		SetErrorResponse(w, errors.New("Greška prilikom povlačenja testa: "+err.Error()))
+		SetErrorResponse(w, NewWrongParamFormatErrorError("SeminarDayID", seminarDayIDParam))
 		return
 	}
 
-	SetSuccessResponse(w, test)
+	jmbg, ok := vars["jmbg"]
+	if !ok {
+		logoped.ErrorLog.Println("missing parameter jmbg")
+		SetErrorResponse(w, NewMissingRequestParamError("JMBG"))
+		return
+	}
+
+	clientTests, err := service.TestService.GetClientTestBySeminarDayIDAndJMBG(seminarDayID, jmbg)
+	if err != nil {
+		logoped.ErrorLog.Println(err.Error())
+		SetErrorResponse(w, errors.New("Greška prilikom povlačenja testova klijenta: "+err.Error()))
+		return
+	}
+
+	SetSuccessResponse(w, clientTests)
 }
 
 func SaveClientTest(w http.ResponseWriter, r *http.Request) {
@@ -150,9 +159,11 @@ func SaveClientTest(w http.ResponseWriter, r *http.Request) {
 	msg, err := isTestValid(&clientTest)
 	if err != nil {
 		SetErrorResponse(w, errors.New("Greška prilikom snimanja testa: "+err.Error()))
+		return
 	}
 	if len(msg) > 0 {
 		SetErrorResponse(w, errors.New(msg))
+		return
 	}
 
 	createdClientTest, err := service.TestService.CreateClientTest(clientTest)
@@ -172,6 +183,27 @@ func isTestValid(clientTest *model.ClientTest) (string, error) {
 	}
 	if client == nil {
 		return "Korisnik sa ovim jmbg-om ne postoji u sistemu.", nil
+	}
+
+	dayTime := clientTest.SeminarDay.Date
+	now := time.Now()
+	if now.Day() != dayTime.Day() || now.Month() != dayTime.Month() || now.Year() != dayTime.Year() {
+		return "Ovaj test nije dozvoljeno raditi danas.", nil
+	}
+
+	tests, err := service.TestService.GetClientTestBySeminarDayIDAndJMBG(int(clientTest.SeminarDay.ID), *client.JMBG)
+	if err != nil {
+		return "", err
+	}
+
+	if len(tests) > 1 {
+		return "Ovaj test nije dozvoljeno, klijent je već odradio dva testa u toku dana.", nil
+	}
+
+	if len(tests) == 1 {
+		if !tests[0].CreatedAt.Add(2 * time.Hour).Before(time.Now()) {
+			return "Nije dozvoljeno snimiti test, rađen je skoro.", nil
+		}
 	}
 
 	clientTest.Client = *client

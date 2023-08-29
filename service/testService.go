@@ -23,6 +23,7 @@ type testServiceInterface interface {
 	CreateTest(test model.Test) (*model.Test, error)
 	UpdateTest(test model.Test) (*model.Test, error)
 	CreateClientTest(clientTest model.ClientTest) (*model.ClientTest, error)
+	GetClientTestBySeminarDayIDAndJMBG(seminarDayID int, jmbg string) ([]model.ClientTest, error)
 }
 
 func (c *testService) GetAllTests() ([]model.Test, error) {
@@ -125,4 +126,18 @@ func (c *testService) UpdateTest(test model.Test) (*model.Test, error) {
 	}
 
 	return &test, nil
+}
+
+func (c *testService) GetClientTestBySeminarDayIDAndJMBG(seminarDayID int, jmbg string) ([]model.ClientTest, error) {
+	client, err := ClientService.GetClientByJMBG(jmbg)
+	if err != nil {
+		return []model.ClientTest{}, err
+	}
+
+	var clientTests []model.ClientTest
+	if err := db.Client.Where("seminar_day_id = ? AND client_id = ?", seminarDayID, client.ID).Find(&clientTests).Error; err != nil {
+		return nil, err
+	}
+
+	return clientTests, nil
 }

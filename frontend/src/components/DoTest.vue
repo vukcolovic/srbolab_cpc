@@ -48,6 +48,7 @@ import TextInput from "@/components/forms/TextInput.vue";
 import {dateMixin} from "@/mixins/dateMixin";
 import {commonMixin} from "@/mixins/commonMixin";
 import {fileMixin} from "@/mixins/fileMixin";
+import router from "@/router";
 
 export default {
   name: 'DoTest',
@@ -58,12 +59,14 @@ export default {
       client_test: {
         jmbg: "",
         seminar_day: null,
+        seminar_day_id: 0,
         test: null,
         questions_answers: [],
         result: 0.0,
       },
       seminarDay: {
         ID: 0,
+        date: null,
         test_id: 0,
         test: null,
       },
@@ -80,6 +83,8 @@ export default {
           return;
         }
         this.seminarDay = JSON.parse(response.data.Data);
+        var date = this.getDateInMMDDYYYYFormat(this.seminarDay.date);
+        this.seminarDay.date = date;
         this.questions = this.seminarDay.test.questions;
         this.questions.sort((a, b) => (a - b))
         this.questions.forEach(q => {
@@ -99,6 +104,7 @@ export default {
       await this.createClientTest();
     },
     async createClientTest() {
+      this.seminarDay.date = this.getBackendFormat(this.seminarDay.date);
       this.client_test.seminar_day = this.seminarDay;
       this.client_test.test = this.seminarDay.test;
       await axios.post('/tests/client-test/create', JSON.stringify(this.client_test)).then((response) => {
@@ -126,6 +132,10 @@ export default {
     }
     this.seminarDayId = this.$route.query.seminar_day_id;
     await this.getSeminarDayById();
+    if (!this.isToday(new Date(this.seminarDay.date))) {
+      this.toast.error("Ovaj test danas nije dozvoljen!");
+      router.push("/");
+    }
   }
 }
 </script>
