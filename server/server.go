@@ -115,8 +115,12 @@ func RunServer(host string) {
 	s.HandleFunc("/create", handlers.CreateTest).Methods("POST")
 	s.HandleFunc("/update", handlers.UpdateTest).Methods("POST")
 	s.HandleFunc("/id/{id}", handlers.GetTestByID).Methods("GET")
-	s.HandleFunc("/id/{id}/seminar-day/{seminar-day}/client-jmbg/{jmbg}", handlers.GetClientTests).Methods("GET")
+	s.HandleFunc("/id/{id}/seminar-day/{seminar-day}/client-jmbg/{jmbg}", handlers.GetClientTestsBySeminarDayAndJMBG).Methods("GET")
 	s.HandleFunc("/client-test/create", handlers.SaveClientTest).Methods("POST")
+	s.HandleFunc("/client-test/seminar-day/{seminar-day}", handlers.GetClientTestsBySeminarDay).Methods("GET")
+
+	s = r.PathPrefix("/api/excel").Subrouter()
+	s.HandleFunc("/client-tests/{seminar-day}", handlers.PrintClientTestsBySeminarDay).Methods("GET")
 
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{"*"}, // All origins

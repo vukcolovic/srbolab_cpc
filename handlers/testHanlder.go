@@ -113,7 +113,7 @@ func UpdateTest(w http.ResponseWriter, r *http.Request) {
 	SetSuccessResponse(w, updatedTest)
 }
 
-func GetClientTests(w http.ResponseWriter, req *http.Request) {
+func GetClientTestsBySeminarDayAndJMBG(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	seminarDayIDParam, ok := vars["seminar-day"]
 	if !ok {
@@ -137,6 +137,32 @@ func GetClientTests(w http.ResponseWriter, req *http.Request) {
 	}
 
 	clientTests, err := service.TestService.GetClientTestBySeminarDayIDAndJMBG(seminarDayID, jmbg)
+	if err != nil {
+		logoped.ErrorLog.Println(err.Error())
+		SetErrorResponse(w, errors.New("Greška prilikom povlačenja testova klijenta: "+err.Error()))
+		return
+	}
+
+	SetSuccessResponse(w, clientTests)
+}
+
+func GetClientTestsBySeminarDay(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	seminarDayIDParam, ok := vars["seminar-day"]
+	if !ok {
+		logoped.ErrorLog.Println("missing parameter seminar-day")
+		SetErrorResponse(w, NewMissingRequestParamError("SeminarDayID"))
+		return
+	}
+
+	seminarDayID, err := strconv.Atoi(seminarDayIDParam)
+	if err != nil {
+		logoped.ErrorLog.Println(err.Error())
+		SetErrorResponse(w, NewWrongParamFormatErrorError("SeminarDayID", seminarDayIDParam))
+		return
+	}
+
+	clientTests, err := service.TestService.GetClientTestBySeminarDayID(seminarDayID)
 	if err != nil {
 		logoped.ErrorLog.Println(err.Error())
 		SetErrorResponse(w, errors.New("Greška prilikom povlačenja testova klijenta: "+err.Error()))

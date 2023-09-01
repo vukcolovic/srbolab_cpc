@@ -49,6 +49,14 @@ type SeminarTheme struct {
 	NumberOfDays      int             `json:"number_of_days"`
 }
 
+func (s SeminarTheme) GetSeminarThemeWithBaseTheme() string {
+	base := ""
+	if s.BaseSeminarType.Code != "BASIC" && s.BaseSeminarType.Code != "ADDITIONAL" {
+		base = s.BaseSeminarType.Name
+	}
+	return base + " " + s.Name
+}
+
 type SeminarStatus struct {
 	gorm.Model
 	Code string `json:"code"`
