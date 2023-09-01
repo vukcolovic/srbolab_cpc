@@ -71,7 +71,7 @@ type SeminarDay struct {
 	Classes   []SeminarClass   `json:"classes"`
 	SeminarID uint             `json:"seminar_id"`
 	Seminar   Seminar          `json:"seminar"`
-	TestID    uint             `json:"test_id"`
+	TestID    *uint            `json:"test_id"`
 	Test      Test             `json:"test"`
 	Presence  []ClientPresence `json:"presence"`
 	Documents []*File          `json:"documents" gorm:"many2many:seminarday_file;"`

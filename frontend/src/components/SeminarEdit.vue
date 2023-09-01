@@ -457,8 +457,11 @@ export default {
         if (response.data === null || response.data.Status === 'error') {
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;
-        }this.seminar.start_date = this.getDateInMMDDYYYYFormat(this.seminar.start_date);
+        }
+        this.seminar = JSON.parse(response.data.Data);
+        this.seminar.start_date = this.getDateInMMDDYYYYFormat(this.seminar.start_date);
         this.toast.info("Uspešno kreiran seminar!");
+        router.push("/seminars");
       }, (error) => {
         this.toast.error(error.message);
       });
