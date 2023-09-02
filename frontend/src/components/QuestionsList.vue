@@ -34,10 +34,11 @@ import {reactive} from "vue";
 import {useToast} from "vue-toastification";
 import {dateMixin} from "@/mixins/dateMixin";
 import {apiMixin} from "@/mixins/apiMixin";
+import {commonMixin} from "@/mixins/commonMixin";
 
 export default {
   name: 'QuestionsList',
-  mixins: [dateMixin, apiMixin],
+  mixins: [dateMixin, apiMixin, commonMixin],
   components: { VueTableLite },
   setup() {
     // Table config
@@ -111,7 +112,7 @@ export default {
 
         });
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/questions/list");
       });
 
       this.isLoading = false;

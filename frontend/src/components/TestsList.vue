@@ -34,10 +34,11 @@ import {reactive} from "vue";
 import {useToast} from "vue-toastification";
 import {dateMixin} from "@/mixins/dateMixin";
 import {apiMixin} from "@/mixins/apiMixin";
+import {commonMixin} from "@/mixins/commonMixin";
 
 export default {
   name: 'TestsList',
-  mixins: [dateMixin, apiMixin],
+  mixins: [dateMixin, apiMixin, commonMixin],
   components: { VueTableLite },
   setup() {
     // Table config
@@ -111,7 +112,7 @@ export default {
 
         });
       }, (error) => {
-        this.toast.error((error && error.message) ? error.message : "Greška prilikom poziva api-a /tests/list");
+        this.errorToast(error, "/tests/list");
       });
 
       this.isLoading = false;

@@ -36,10 +36,11 @@ import axios from "axios";
 import {reactive} from "vue";
 import {useToast} from "vue-toastification";
 import {dateMixin} from "@/mixins/dateMixin";
+import {commonMixin} from "@/mixins/commonMixin";
 
 export default {
   name: 'CompaniesList',
-  mixins: [dateMixin],
+  mixins: [dateMixin, commonMixin],
   components: { VueTableLite },
   setup() {
     // Table config
@@ -107,7 +108,7 @@ export default {
         }
         this.table.rows = JSON.parse(response.data.Data);
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/companies/list")
       });
 
       this.isLoading = false;
@@ -120,7 +121,7 @@ export default {
         }
         this.table.totalCount = response.data.Data;
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/companies/list")
       });
     }
   },

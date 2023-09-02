@@ -105,7 +105,7 @@ export default {
         }
         this.questions = JSON.parse(response.data.Data);
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/questions/list/seminar-theme");
       });
     },
     async getTestById() {
@@ -119,7 +119,7 @@ export default {
           this.test.questions = [];
         }
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/tests/id");
       });
     },
     async submitHandler() {
@@ -138,7 +138,7 @@ export default {
         this.toast.info("Uspešno kreiran test!");
         router.push("/tests");
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/tests/create");
       });
     },
     async updateTest() {
@@ -150,7 +150,7 @@ export default {
         this.toast.info("Uspešno ažuriran test!");
         router.push("/tests");
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/tests/update");
       });
     },
   },

@@ -133,7 +133,7 @@ export default {
         this.toast.info("Uspešno ažuriran klijent.");
         this.$router.go();
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/clients/update");
       });
     },
     async doSearch(offset, limit, order, sort) {
@@ -155,7 +155,7 @@ export default {
           }
         });
       }, (error) => {
-        this.toast.error(error);
+        this.errorToast(error, "/clients/list");
       });
 
       this.isLoading = false;
@@ -168,7 +168,7 @@ export default {
           }
             this.totalCount = response.data.Data;
         }, (error) => {
-          this.toast.error(error.message);
+          this.errorToast(error, "/clients/count");
         });
     }
   },

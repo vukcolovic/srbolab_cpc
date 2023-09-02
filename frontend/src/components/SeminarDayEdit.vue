@@ -139,10 +139,11 @@ import {apiMixin} from "@/mixins/apiMixin";
 import {dateMixin} from "@/mixins/dateMixin";
 import {styleMixin} from "@/mixins/styleMixin";
 import vSelect from "vue-select";
+import {commonMixin} from "@/mixins/commonMixin";
 
 export default {
   name: 'SeminarDayEdit',
-  mixins: [fileMixin, apiMixin, dateMixin, styleMixin],
+  mixins: [fileMixin, apiMixin, dateMixin, styleMixin, commonMixin],
   components: {vSelect, FormTag, TextInput},
   computed: {
     readonly() {
@@ -230,7 +231,7 @@ export default {
         // iframe.contentWindow.print();
         // iframe.setAttribute("hidden", "hidden");
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/print/seminar-day/test/barcode");
       });
   },
     async printTeacherEvidence() {
@@ -251,7 +252,7 @@ export default {
         iframe.contentWindow.print();
         iframe.setAttribute("hidden", "hidden");
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/print/seminar/teacher-evidence");
       });
     },
     async printMuster() {
@@ -272,7 +273,7 @@ export default {
         iframe.contentWindow.print();
         iframe.setAttribute("hidden", "hidden");
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/print/seminar/muster");
       });
     },
     backToSeminar() {
@@ -297,7 +298,7 @@ export default {
           }
         });
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/seminar-days/id");
       });
     },
     async submitHandler() {
@@ -310,7 +311,7 @@ export default {
         this.seminarDay.date = this.getDateInMMDDYYYYFormat(this.seminarDay.date);
         this.toast.info("Uspešno ažuriran seminar dan.");
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/seminar-days/update");
       });
     },
     async getTestsBySeminarTheme() {
@@ -322,7 +323,7 @@ export default {
         this.tests = JSON.parse(response.data.Data);
         console.log(this.tests);
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/tests/list/seminar-theme");
       });
     },
   },

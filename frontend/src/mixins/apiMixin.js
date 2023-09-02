@@ -31,7 +31,7 @@ export const apiMixin = {
                     vs.full_name = vs.person.first_name + " " + vs.person.last_name;
                 });
             }, (error) => {
-                this.toast.error(error.message ? error.message : "Greška prilikom poziva api-a /users/list");
+                this.errorToast(error, "/users/list");
             });
         },
         async getAllLocations() {
@@ -45,7 +45,7 @@ export const apiMixin = {
                     s.address_place = s.address.place;
                 });
             }, (error) => {
-                this.toast.error(error.message ? error.message : "Greška prilikom poziva api-a /locations/list");
+                this.errorToast(error, "/locations/list");
             });
         },
         async getAllCompanies() {
@@ -56,7 +56,7 @@ export const apiMixin = {
                 }
                 this.companies = JSON.parse(response.data.Data);
             }, (error) => {
-                this.toast.error(error.message ? error.message : "Greška prilikom poziva api-a /companies/list");
+                this.errorToast(error, "/companies/list");
             });
         },
         async getAllBaseSeminarTypes() {
@@ -67,7 +67,7 @@ export const apiMixin = {
                 }
                 this.seminarBaseTypes = JSON.parse(response.data.Data);
             }, (error) => {
-                this.toast.error(error.message ? error.message : "Greška prilikom poziva api-a /seminar-types/list");
+                this.errorToast(error, "/seminar-types/list");
             });
         },
         async getAllSeminarThemes() {
@@ -78,7 +78,7 @@ export const apiMixin = {
                 }
                 this.seminarThemes = JSON.parse(response.data.Data);
             }, (error) => {
-                this.toast.error(error.message ? error.message : "Greška prilikom poziva api-a /seminar-types/themes/list");
+                this.errorToast(error, "/seminar-types/themes/list");
             });
         },
         async getAllSeminarStatuses() {
@@ -89,7 +89,7 @@ export const apiMixin = {
                 }
                 this.seminarStatuses = JSON.parse(response.data.Data);
             }, (error) => {
-                this.toast.error(error.message ? error.message : "Greška prilikom poziva api-a /seminar-statuses/list");
+                this.errorToast(error, "/seminar-statuses/list");
             });
         },
         async getSeminarsByStatusCode(statusCode) {
@@ -105,7 +105,7 @@ export const apiMixin = {
                 });
                 return result;
             }, (error) => {
-                this.toast.error((error && error.message) ? error.message : "Greška prilikom poziva api-a /seminars/list/status/");
+                this.errorToast(error, "/seminars/list/status/");
             });
         },
         async isCorporateIp() {
@@ -119,7 +119,7 @@ export const apiMixin = {
                     router.push("/home");
                 }
             }, (error) => {
-                this.toast.error(error.message);
+                this.errorToast(error, "/corporate-ip");
             });
         },
         getSeminarFullType(base, theme) {

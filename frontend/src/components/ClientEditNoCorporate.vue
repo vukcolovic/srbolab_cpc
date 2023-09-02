@@ -362,7 +362,7 @@ export default {
         }
         this.toast.info("Uspešno snimljeno.");
       }, (error) => {
-        this.toast.error(error);
+        this.errorToast(error, "/clients/create-not-verified");
       });
     },
   },

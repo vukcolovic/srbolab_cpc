@@ -34,11 +34,12 @@ import axios from "axios";
 import router from "@/router";
 import {useToast} from "vue-toastification";
 import {apiMixin} from "@/mixins/apiMixin";
+import {commonMixin} from "@/mixins/commonMixin";
 
 export default {
   name: 'LoginComponent',
   components: {FormTag, TextInput},
-  mixins: [apiMixin],
+  mixins: [apiMixin, commonMixin],
   data() {
     return {
       email: "",
@@ -64,7 +65,7 @@ export default {
         this.$store.dispatch('setFirstNameAction', loginData.first_name);
         localStorage.setItem("roles", JSON.stringify(loginData.roles))
       }, (error) => {
-        this.toast.error(error);
+        this.errorToast(error, "/login");
       });
       await router.push("/home");
     },

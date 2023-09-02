@@ -36,10 +36,11 @@ import axios from "axios";
 import {reactive} from "vue";
 import {useToast} from "vue-toastification";
 import {dateMixin} from "@/mixins/dateMixin";
+import {commonMixin} from "@/mixins/commonMixin";
 
 export default {
   name: 'LocationsList',
-  mixins: [dateMixin],
+  mixins: [dateMixin, commonMixin],
   components: { VueTableLite },
   setup() {
     // Table config
@@ -111,7 +112,7 @@ export default {
           s.address_street_and_number = s.address.street + " " + s.address.house_number;
         });
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/locations/list");
       });
 
       this.isLoading = false;
@@ -124,7 +125,7 @@ export default {
         }
         this.table.totalCount = response.data.Data;
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/locations/count");
       });
     }
   },

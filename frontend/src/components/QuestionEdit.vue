@@ -103,7 +103,7 @@ export default {
           this.question.answers = [];
         }
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/questions/id");
       });
     },
     async submitHandler() {
@@ -136,7 +136,7 @@ export default {
         }
         this.toast.info("Uspešno kreirano pitanje!");
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/questions/create");
       });
     },
     async updateQuestion() {
@@ -147,7 +147,7 @@ export default {
         }
         this.toast.info("Uspešno ažurirano pitanje!");
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/questions/update");
       });
     },
   },

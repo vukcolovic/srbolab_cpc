@@ -63,10 +63,11 @@ import axios from "axios";
 import router from "@/router";
 import {fileMixin} from "@/mixins/fileMixin";
 import {useToast} from "vue-toastification";
+import {commonMixin} from "@/mixins/commonMixin";
 
 export default {
   name: 'LocationEdit',
-  mixins: [fileMixin],
+  mixins: [fileMixin, commonMixin],
   components: {FormTag, TextInput},
   computed: {
     readonly() {
@@ -88,7 +89,7 @@ export default {
         }
         this.location = JSON.parse(response.data.Data);
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/locations/id");
       });
     },
     async submitHandler() {
@@ -107,7 +108,7 @@ export default {
         this.toast.info("Uspešno kreirana lokacija.");
         router.push("/locations");
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/locations/create");
       });
     },
     async updateLocation() {
@@ -119,7 +120,7 @@ export default {
         this.toast.info("Uspešno ažurirana lokacija.");
         router.push("/locations");
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/locations/update");
       });
     },
   },

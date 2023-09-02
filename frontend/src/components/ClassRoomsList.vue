@@ -36,10 +36,11 @@ import axios from "axios";
 import {reactive} from "vue";
 import {useToast} from "vue-toastification";
 import {dateMixin} from "@/mixins/dateMixin";
+import {commonMixin} from "@/mixins/commonMixin";
 
 export default {
   name: 'ClassRoomsList',
-  mixins: [dateMixin],
+  mixins: [dateMixin, commonMixin],
   components: { VueTableLite },
   setup() {
     // Table config
@@ -124,7 +125,7 @@ export default {
         });
         this.table.totalCount = this.table.rows.length;
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/class-rooms/list");
       });
 
       this.isLoading = false;

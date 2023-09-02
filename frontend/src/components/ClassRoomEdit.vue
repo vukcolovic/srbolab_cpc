@@ -58,10 +58,11 @@ import {useToast} from "vue-toastification";
 import vSelect from "vue-select";
 import {styleMixin} from "@/mixins/styleMixin";
 import {apiMixin} from "@/mixins/apiMixin";
+import {commonMixin} from "@/mixins/commonMixin";
 
 export default {
   name: 'ClassRoomEdit',
-  mixins: [fileMixin, styleMixin, apiMixin],
+  mixins: [fileMixin, styleMixin, apiMixin, commonMixin],
   components: {vSelect, FormTag, TextInput},
   computed: {
     readonly() {
@@ -85,7 +86,7 @@ export default {
         this.classRoom = JSON.parse(response.data.Data);
         this.classRoom.location.address_place = this.classRoom.location.address.place;
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/class-rooms/id/");
       });
     },
     async submitHandler() {
@@ -104,7 +105,7 @@ export default {
         this.toast.info("Uspešno kreirana učionica.");
         router.push("/class-rooms");
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/class-rooms/create");
       });
     },
     async updateClassRoom() {
@@ -116,7 +117,7 @@ export default {
         this.toast.info("Uspešno ažurirana učionica.");
         router.push("/class-rooms");
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/class-rooms/update");
       });
     },
   },

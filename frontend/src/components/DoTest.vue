@@ -93,7 +93,7 @@ export default {
         })
 
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/seminar-days/id");
       });
     },
     async submitHandler() {
@@ -117,7 +117,7 @@ export default {
         this.isfinish = true;
         this.toast.info("Uspešno snimljen test!");
       }, (error) => {
-        this.toast.error(error ? error.data : "");
+        this.errorToast(error, "/tests/client-test/create");
       });
     },
   },

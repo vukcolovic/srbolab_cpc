@@ -201,7 +201,7 @@ export default {
           vs.waiting_seminar_text = vs.wait_seminar ? "Da" : "Ne";
         });
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/clients/list");
       });
 
       this.isLoading = false;
@@ -214,7 +214,7 @@ export default {
         }
         this.table.totalCount = response.data.Data;
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/clients/count");
       });
     }
   },

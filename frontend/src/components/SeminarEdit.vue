@@ -286,7 +286,7 @@ export default {
         iframe.contentWindow.print();
         iframe.setAttribute("hidden", "hidden");
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/print/seminar/student-list");
       });
     },
     async printConfirmationStatement() {
@@ -307,7 +307,7 @@ export default {
         iframe.contentWindow.print();
         iframe.setAttribute("hidden", "hidden");
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/print/seminar/confirmation-statement");
       });
     },
     async printConfirmations() {
@@ -328,7 +328,7 @@ export default {
         iframe.contentWindow.print();
         iframe.setAttribute("hidden", "hidden");
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/print/seminar/confirmation");
       });
     },
     async printStatementOfReceving() {
@@ -349,7 +349,7 @@ export default {
         iframe.contentWindow.print();
         iframe.setAttribute("hidden", "hidden");
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/print/seminar/confirmation-receive");
       });
     },
     async printCheckIn() {
@@ -370,7 +370,7 @@ export default {
         iframe.contentWindow.print();
         iframe.setAttribute("hidden", "hidden");
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/print/seminar/check-in");
       });
     },
     openSeminarDayEdit(dayId) {
@@ -389,7 +389,7 @@ export default {
         }
         this.seminarThemesByType = JSON.parse(response.data.Data);
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/seminar-types/themes/seminar-type");
       });
     },
     onLocationChange() {
@@ -405,7 +405,7 @@ export default {
         }
         this.classRoomsByLocationId = JSON.parse(response.data.Data);
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/class-rooms/location");
       });
     },
     async updateClientSeminar(trainee) {
@@ -415,7 +415,7 @@ export default {
           return;
         }
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/client-seminar/update");
       });
     },
     async getSeminarById() {
@@ -440,7 +440,7 @@ export default {
           this.seminar.documents = [];
         }
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/seminars/id");
       });
     },
     async submitHandler() {
@@ -463,7 +463,7 @@ export default {
         this.toast.info("Uspešno kreiran seminar!");
         router.push("/seminars");
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/seminars/create");
       });
     },
     async updateSeminar() {
@@ -476,7 +476,7 @@ export default {
         this.seminar.start_date = this.getDateInMMDDYYYYFormat(this.seminar.start_date);
         this.toast.info("Uspešno ažuriran seminar!");
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/seminars/update");
       });
     },
     async createSeminarDays() {
@@ -487,7 +487,7 @@ export default {
         }
         this.toast.info("Uspešno kreirani dani seminara!");
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/seminar-days/create-all");
       });
     },
     startSeminar() {

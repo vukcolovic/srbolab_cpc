@@ -45,10 +45,11 @@ import axios from "axios";
 import router from "@/router";
 import {fileMixin} from "@/mixins/fileMixin";
 import {useToast} from "vue-toastification";
+import {commonMixin} from "@/mixins/commonMixin";
 
 export default {
   name: 'CompanyEdit',
-  mixins: [fileMixin],
+  mixins: [fileMixin, commonMixin],
   components: {FormTag, TextInput},
   computed: {
     readonly() {
@@ -70,7 +71,7 @@ export default {
         }
         this.company = JSON.parse(response.data.Data);
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/companies/id");
       });
     },
     async submitHandler() {
@@ -89,7 +90,7 @@ export default {
         this.toast.info("Uspešno kreirana firma.");
         router.push("/companies");
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/companies/create");
       });
     },
     async updateCompany() {
@@ -101,7 +102,7 @@ export default {
         this.toast.info("Uspešno ažurirana firma.");
         router.push("/companies");
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/companies/update");
       });
     },
   },

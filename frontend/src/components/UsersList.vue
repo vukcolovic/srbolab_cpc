@@ -35,9 +35,11 @@ import VueTableLite from "vue3-table-lite";
 import axios from "axios";
 import {reactive} from "vue";
 import {useToast} from "vue-toastification";
+import {commonMixin} from "@/mixins/commonMixin";
 
 export default {
   name: 'UsersList',
+  mixins:[commonMixin],
   components: { VueTableLite },
   data() {
     return {
@@ -125,7 +127,7 @@ export default {
           vs.phone_number = vs.person.phone_number;
         });
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "users/list");
       });
 
       this.isLoading = false;
@@ -138,7 +140,7 @@ export default {
         }
         this.table.totalCount = response.data.Data;
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "users/count");
       });
     }
   },

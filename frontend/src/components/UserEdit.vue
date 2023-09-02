@@ -97,11 +97,12 @@ import axios from "axios";
 import router from "@/router";
 import {fileMixin} from "@/mixins/fileMixin";
 import {useToast} from "vue-toastification";
+import {commonMixin} from "@/mixins/commonMixin";
 // import {commonMixin} from "@/mixins/commonMixin";
 
 export default {
   name: 'UserEdit',
-  mixins: [fileMixin],
+  mixins: [fileMixin, commonMixin],
   components: {FormTag, TextInput},
   computed: {
     readonly() {
@@ -134,7 +135,7 @@ export default {
           this.user.roles = [];
         }
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/users/id");
       });
     },
     async submitHandler() {
@@ -153,7 +154,7 @@ export default {
         this.toast.info("Uspešno kreiran korisnik.");
         router.push("/users");
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/users/register");
       });
     },
     async updateUser() {
@@ -165,7 +166,7 @@ export default {
         this.toast.info("Uspešno ažuriran korisnik.");
         router.push("/users");
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/users/update");
       });
     },
     async getAllRoles() {
@@ -176,7 +177,7 @@ export default {
         }
         this.roles = JSON.parse(response.data.Data);
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/roles/list");
       });
     },
   },

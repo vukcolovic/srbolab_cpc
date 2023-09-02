@@ -14,6 +14,19 @@ export const commonMixin = {
             yesNoOptions: [{label: 'ДА', value: 'true'}, {label: 'НЕ', value: 'false'}],
         }
     },
+    methods: {
+        async errorToast(error, api) {
+            if (error == null) {
+                this.toast.error("Greška prilikom poziva " + api);
+                return;
+            }
+            if (error.data) {
+                this.toast.error(error.data);
+                return;
+            }
+            this.toast.error(error);
+        },
+    },
     setup() {
         const toast = useToast();
         return {toast}

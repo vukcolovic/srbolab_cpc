@@ -37,10 +37,11 @@ import {reactive} from "vue";
 import {useToast} from "vue-toastification";
 import {dateMixin} from "@/mixins/dateMixin";
 import {apiMixin} from "@/mixins/apiMixin";
+import {commonMixin} from "@/mixins/commonMixin";
 
 export default {
   name: 'SeminarsList',
-  mixins: [dateMixin, apiMixin],
+  mixins: [dateMixin, apiMixin, commonMixin],
   components: { VueTableLite },
   setup() {
     // Table config
@@ -130,7 +131,7 @@ export default {
           s.start_date = this.getDateInMMDDYYYYFormat(s.start_date);
         });
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/seminars/list");
       });
 
       this.isLoading = false;
@@ -143,7 +144,7 @@ export default {
         }
         this.table.totalCount = response.data.Data;
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/seminars/count");
       });
     }
   },

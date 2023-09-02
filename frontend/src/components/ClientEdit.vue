@@ -407,7 +407,7 @@ export default {
         var foundClient = JSON.parse(response.data.Data);
         router.push("/client?action=update&id=" + foundClient.ID.toString());
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/clients/jmbg");
       });
     },
     downloadFile(i) {
@@ -472,7 +472,7 @@ export default {
           this.client.seminars = [];
         }
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/clients/id");
       });
     },
     validateClient() {
@@ -514,7 +514,7 @@ export default {
         this.toast.info("Uspešno kreiran klijent.");
         router.push("/clients");
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/clients/create");
       });
     },
     async updateClient() {
@@ -527,7 +527,7 @@ export default {
         this.toast.info("Uspešno ažuriran klijent.");
         router.push("/clients");
       }, (error) => {
-        this.toast.error(error.message);
+        this.errorToast(error, "/clients/update");
       });
     },
   },
