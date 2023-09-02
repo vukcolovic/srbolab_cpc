@@ -67,9 +67,9 @@ func (c *testService) CreateClientTest(clientTest model.ClientTest) (*model.Clie
 	sort.Slice(clientTest.QuestionAnswer, func(i, j int) bool {
 		return clientTest.QuestionAnswer[i].QuestionID < clientTest.QuestionAnswer[i].QuestionID
 	})
-	for _, qa := range clientTest.QuestionAnswer {
+	for i, qa := range clientTest.QuestionAnswer {
 		mapAnswers[qa.QuestionID] = qa.Answer
-		res = res + strconv.Itoa(int(qa.QuestionID)) + ":" + qa.Answer + ","
+		res = res + strconv.Itoa(i+1) + ":" + qa.Answer + ","
 	}
 	res = util.TrimSuffix(res, ",")
 	clientTest.ResultStr = res

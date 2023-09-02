@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <form-tag event="formEvent" name="myForm" @formEvent="submitHandler">
+    <form-tag v-if="allowed" event="formEvent" name="myForm" @formEvent="submitHandler">
       <div class="row">
         <div class="col-sm-11 mx-auto">
           <h3 class="mt-2">Test - {{ seminarDay.test ? seminarDay.test.name : "" }}</h3>
@@ -35,6 +35,7 @@
         <p v-if="isfinish" class="bg-info mt-1">Rezultat: {{client_test.result * 100}}%</p>
       </div>
     </form-tag>
+    <h2 v-else>Test nije dozvoljen, obratite se rukovodiocu kursa.</h2>
   </div>
 </template>
 
@@ -48,7 +49,6 @@ import TextInput from "@/components/forms/TextInput.vue";
 import {dateMixin} from "@/mixins/dateMixin";
 import {commonMixin} from "@/mixins/commonMixin";
 import {fileMixin} from "@/mixins/fileMixin";
-import router from "@/router";
 
 export default {
   name: 'DoTest',
@@ -73,6 +73,7 @@ export default {
       questions: [],
       seminarDayId: 0,
       isfinish: false,
+      allowed: false
     }
   },
   methods: {
@@ -85,6 +86,20 @@ export default {
         this.seminarDay = JSON.parse(response.data.Data);
         var date = this.getDateInMMDDYYYYFormat(this.seminarDay.date);
         this.seminarDay.date = date;
+
+        if (!this.isToday(new Date(this.seminarDay.date))) {
+          this.toast.error("Ovaj test danas nije dozvoljen!");
+          return;
+        }
+        if (this.seminarDay.seminar.seminar_status_id != this.SEMINAR_STATUSES.IN_PROGRESS) {
+          this.toast.warning("Seminar nije u toku, test ne može da se radi.");
+          return;
+        }
+        if (!this.seminarDay.test_id) {
+          this.toast.warning("Za ovaj seminar nije odabran test.");
+          return;
+        }
+        this.allowed = true;
         this.questions = this.seminarDay.test.questions;
         this.questions.sort((a, b) => (a - b))
         this.questions.forEach(q => {
@@ -115,6 +130,7 @@ export default {
         const newClientTest = JSON.parse(response.data.Data);
         this.client_test.result = newClientTest.result;
         this.isfinish = true;
+        this.allowed = false;
         this.toast.info("Uspešno snimljen test!");
       }, (error) => {
         this.errorToast(error, "/tests/client-test/create");
@@ -132,10 +148,6 @@ export default {
     }
     this.seminarDayId = this.$route.query.seminar_day_id;
     await this.getSeminarDayById();
-    if (!this.isToday(new Date(this.seminarDay.date))) {
-      this.toast.error("Ovaj test danas nije dozvoljen!");
-      router.push("/");
-    }
   }
 }
 </script>

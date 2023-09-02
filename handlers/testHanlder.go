@@ -211,10 +211,30 @@ func isTestValid(clientTest *model.ClientTest) (string, error) {
 		return "Korisnik sa ovim jmbg-om ne postoji u sistemu.", nil
 	}
 
+	found := false
+	for _, tr := range clientTest.SeminarDay.Seminar.Trainees {
+		if tr.ClientID == client.ID {
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		return "Korisnik sa ovim jmbg-om nije učesnik seminara.", nil
+	}
+
 	dayTime := clientTest.SeminarDay.Date
 	now := time.Now()
 	if now.Day() != dayTime.Day() || now.Month() != dayTime.Month() || now.Year() != dayTime.Year() {
 		return "Ovaj test nije dozvoljeno raditi danas.", nil
+	}
+
+	if clientTest.SeminarDay.Seminar.SeminarStatusID != model.SEMINAR_STATUS_IN_PROGRESS {
+		return "Ovaj test nije dozvoljeno raditi, seminar nije u toku.", nil
+	}
+
+	if clientTest.SeminarDay.TestID == nil {
+		return "Ovaj test nije dozvoljeno raditi, test nije odabran.", nil
 	}
 
 	tests, err := service.TestService.GetClientTestBySeminarDayIDAndJMBG(int(clientTest.SeminarDay.ID), *client.JMBG)
