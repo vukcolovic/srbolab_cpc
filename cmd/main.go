@@ -7,6 +7,7 @@ import (
 	"srbolab_cpc/db"
 	"srbolab_cpc/handlers"
 	"srbolab_cpc/server"
+	"srbolab_cpc/service"
 )
 
 func main() {
@@ -30,6 +31,7 @@ func main() {
 	}
 
 	handlers.CorporateIps = conf.CorporateIps
+	service.Domain = conf.Domain
 
 	server.RunServer(conf.HTTP)
 }

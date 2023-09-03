@@ -16,6 +16,7 @@ import (
 
 var (
 	PrintService printServiceInterface = &printService{}
+	Domain       string
 )
 
 const (
@@ -718,7 +719,7 @@ func (p *printService) PrintSeminarEvidence(day *model.SeminarDay) ([]byte, erro
 }
 
 func (p *printService) PrintTestBarcode(day *model.SeminarDay) ([]byte, error) {
-	url := fmt.Sprintf("http://localhost:8080/api/v1/seminar-day/%d/test/%d", day.ID, day.Test.ID)
+	url := fmt.Sprintf("%s/api/v1/seminar-day/%d/test/%d", Domain, day.ID, day.Test.ID)
 	qrCode, _ := qrcode.New(url, qrcode.Medium)
 	var buf bytes.Buffer
 
