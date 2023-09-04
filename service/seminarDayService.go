@@ -34,7 +34,7 @@ func (c *seminarDayService) GetSeminarDaysBySeminarID(seminarID int) ([]model.Se
 
 func (c *seminarDayService) GetSeminarDayByID(seminarDayID int) (*model.SeminarDay, error) {
 	var seminarDay *model.SeminarDay
-	if err := db.Client.Preload("Seminar").Preload("Documents").Preload("Seminar.SeminarTheme").Preload("Seminar.SeminarTheme.BaseSeminarType").Preload("Seminar.ClassRoom.Location").Preload("Presence").Preload("Presence.Client").Preload("Classes").Preload("Test").Preload("Test.Questions").Preload("Test.Questions.Answers").Preload("Classes.Teacher").Find(&seminarDay, seminarDayID).Error; err != nil {
+	if err := db.Client.Preload("Seminar").Preload("Seminar.Trainees").Preload("Documents").Preload("Seminar.SeminarTheme").Preload("Seminar.SeminarTheme.BaseSeminarType").Preload("Seminar.ClassRoom.Location").Preload("Presence").Preload("Presence.Client").Preload("Classes").Preload("Test").Preload("Test.Questions").Preload("Test.Questions.Answers").Preload("Classes.Teacher").Find(&seminarDay, seminarDayID).Error; err != nil {
 		return nil, err
 	}
 

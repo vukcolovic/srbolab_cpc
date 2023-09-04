@@ -89,7 +89,19 @@ export default {
         this.errorToast(error, "/class-rooms/id/");
       });
     },
+    validateClassRoom() {
+      if (this.classRoom.max_students < 1) {
+        return "Maksimalan broj mesta mora biti veći od 0!";
+      }
+
+      return "";
+    },
     async submitHandler() {
+      const errMsg = this.validateClassRoom();
+      if (errMsg) {
+        this.toast.warning(errMsg);
+        return;
+      }
       if (this.classRoomId) {
         await this.updateClassRoom();
       } else {

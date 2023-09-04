@@ -2,6 +2,7 @@ package service
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/xuri/excelize/v2"
 	"srbolab_cpc/model"
 	"strconv"
@@ -46,14 +47,14 @@ func (excelService) CreateClientTestsBySeminarDayReport(tests []model.ClientTest
 
 	exc.SetColWidth("Sheet1", "A", "B", 25.0)
 	exc.SetColWidth("Sheet1", "C", "D", 25.0)
-	exc.SetColWidth("Sheet1", "E", "E", 10.0)
+	exc.SetColWidth("Sheet1", "E", "E", 15.0)
 	exc.SetColWidth("Sheet1", "F", "F", 25.0)
 
 	exc.SetCellValue("Sheet1", "A1", "Ime i prezime")
 	exc.SetCellValue("Sheet1", "B1", "Seminar (tema)")
 	exc.SetCellValue("Sheet1", "C1", "Dan")
 	exc.SetCellValue("Sheet1", "D1", "Vreme testa")
-	exc.SetCellValue("Sheet1", "E1", "Rezultat")
+	exc.SetCellValue("Sheet1", "E1", "Rezultat (%)")
 	exc.SetCellValue("Sheet1", "F1", "Odgovori")
 
 	for i, t := range tests {
@@ -61,7 +62,7 @@ func (excelService) CreateClientTestsBySeminarDayReport(tests []model.ClientTest
 		exc.SetCellValue("Sheet1", "B"+strconv.Itoa(i+2), t.SeminarDay.Seminar.SeminarTheme.GetSeminarThemeWithBaseTheme())
 		exc.SetCellValue("Sheet1", "C"+strconv.Itoa(i+2), t.SeminarDay.Number)
 		exc.SetCellValue("Sheet1", "D"+strconv.Itoa(i+2), t.CreatedAt.Format("02.01.2006 15:4"))
-		exc.SetCellValue("Sheet1", "E"+strconv.Itoa(i+2), t.Result)
+		exc.SetCellValue("Sheet1", "E"+strconv.Itoa(i+2), fmt.Sprintf("%.2f", t.Result*100))
 		exc.SetCellValue("Sheet1", "F"+strconv.Itoa(i+2), t.ResultStr)
 	}
 

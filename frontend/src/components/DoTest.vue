@@ -31,8 +31,8 @@
         </div>
       </div>
       <div>
+        <p v-if="isfinish" class="bg-info mt-1">Rezultat: {{(client_test.result * 100).toFixed(2)}}%</p>
         <input class="btn btn-primary m-2" type="submit" value="Snimi">
-        <p v-if="isfinish" class="bg-info mt-1">Rezultat: {{client_test.result * 100}}%</p>
       </div>
     </form-tag>
     <h2 v-else>Test nije dozvoljen, obratite se rukovodiocu kursa.</h2>
@@ -124,13 +124,13 @@ export default {
       this.client_test.test = this.seminarDay.test;
       await axios.post('/tests/client-test/create', JSON.stringify(this.client_test)).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
+          this.seminarDay.date = this.getDateInMMDDYYYYFormat(this.seminarDay.date);
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;
         }
         const newClientTest = JSON.parse(response.data.Data);
         this.client_test.result = newClientTest.result;
         this.isfinish = true;
-        this.allowed = false;
         this.toast.info("Uspešno snimljen test!");
       }, (error) => {
         this.errorToast(error, "/tests/client-test/create");

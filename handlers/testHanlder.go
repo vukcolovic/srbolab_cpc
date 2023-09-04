@@ -211,8 +211,13 @@ func isTestValid(clientTest *model.ClientTest) (string, error) {
 		return "Korisnik sa ovim jmbg-om ne postoji u sistemu.", nil
 	}
 
+	day, err := service.SeminarDayService.GetSeminarDayByID(int(clientTest.SeminarDay.ID))
+	if err != nil {
+		return "", err
+	}
+
 	found := false
-	for _, tr := range clientTest.SeminarDay.Seminar.Trainees {
+	for _, tr := range day.Seminar.Trainees {
 		if tr.ClientID == client.ID {
 			found = true
 			break
