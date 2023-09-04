@@ -61,6 +61,12 @@ func AuthToken(next http.Handler) http.Handler {
 			return
 		}
 
+		if !handlers.IsCorporateIpMethod(r) {
+			logoped.ErrorLog.Println("Error token is valid but ip is not corporate: ", err)
+			handlers.SetAuthErrorResponse(w, errors.New("Adresa nije firmina!"))
+			return
+		}
+
 		exp := claims["ExpiresAt"].(float64)
 		if time.Unix(int64(exp), 0).Before(time.Now()) {
 			handlers.SetAuthErrorResponse(w, errors.New("Token istekao"))

@@ -482,8 +482,11 @@ export default {
       if (this.client.jmbg.length != 13) {
         return "Jmbg mora imati 13 cifara!";
       }
-      if (!this.client.educational_profile && !(this.client.cpc_number && this.isDateEmpty(this.client.cpc_date))) {
-        return "Obrazovni profil ili podaci o cpc kartici moraju biti popunjeni";
+      if (!this.client.verified && this.selectedOpenSeminar) {
+        return "Ne možete prijaviti kurs za klijenta koji nije verifikovan!";
+      }
+      if (!this.client.educational_profile && (!this.client.cpc_number && this.isDateEmpty(this.client.cpc_date))) {
+        return "Obrazovni profil ili podaci o cpc kartici moraju biti popunjeni!";
       }
 
       return "";
@@ -509,6 +512,7 @@ export default {
       await axios.post('/clients/create', JSON.stringify(this.client)).then((response) => {
         if (response.data == null || response.data.Status === 'error') {
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");
+          this.client.cpc_date = this.getDateInMMDDYYYYFormat(this.client.cpc_date);
           return;
         }
         this.toast.info("Uspešno kreiran klijent.");
@@ -521,6 +525,7 @@ export default {
       this.client.cpc_date = this.getBackendFormat(this.client.cpc_date);
       await axios.post('/clients/update', JSON.stringify(this.client)).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
+          this.client.cpc_date = this.getDateInMMDDYYYYFormat(this.client.cpc_date);
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;
         }

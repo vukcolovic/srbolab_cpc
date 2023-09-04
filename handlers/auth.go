@@ -37,9 +37,10 @@ type Corporate struct {
 }
 
 func IsCorporateIp(w http.ResponseWriter, r *http.Request) {
+	SetSuccessResponse(w, Corporate{IsCorporate: IsCorporateIpMethod(r)})
+}
+
+func IsCorporateIpMethod(r *http.Request) bool {
 	ip, _ := GetIP(r)
-
-	isCorporate := util.Contains(CorporateIps, ip)
-
-	SetSuccessResponse(w, Corporate{IsCorporate: isCorporate})
+	return util.Contains(CorporateIps, ip)
 }

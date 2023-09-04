@@ -249,6 +249,7 @@
             </li>
           </ul>
 
+          //FIXME add mx file size
           <input id="fileId" type="file" ref="file" @change="uploadFile()"/>
 
         </div>
@@ -339,8 +340,11 @@ export default {
       if (this.client.jmbg.length != 13) {
         return "Jmbg mora imati 13 cifara!";
       }
-      if (!this.client.educational_profile && !(this.client.cpc_number && this.isDateEmpty(this.client.cpc_date))) {
+      if (!this.client.educational_profile && (!this.client.cpc_number && this.isDateEmpty(this.client.cpc_date))) {
         return "Obrazovni profil ili podaci o cpc kartici moraju biti popunjeni";
+      }
+      if (this.client.documents.length > 5) {
+        return "Maksimalan broj ubačnih dokumenata može biti 5";
       }
 
       return "";
@@ -358,9 +362,10 @@ export default {
       await axios.post('/clients/create-not-verified', JSON.stringify(this.client)).then((response) => {
         if (response.data == null || response.data.Status === 'error') {
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");
+          this.client.cpc_date = this.getDateInMMDDYYYYFormat(this.client.cpc_date);
           return;
         }
-        this.toast.info("Uspešno snimljeno.");
+        this.toast.info("Uspešno snimljeno, naši zaposleni će vam se javiti!");
       }, (error) => {
         this.errorToast(error, "/clients/create-not-verified");
       });

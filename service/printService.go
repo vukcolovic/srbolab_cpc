@@ -61,7 +61,7 @@ func (p *printService) PrintSeminarStudentList(seminar *model.Seminar) ([]byte, 
 	pdf.Text(35, pdf.GetY(), "")
 	pdf.Ln(5)
 	pdf.Text(15, pdf.GetY(), latTr("Šifra obuke: "))
-	pdf.Text(30, pdf.GetY(), seminar.GetCode())
+	pdf.Text(35, pdf.GetY(), seminar.GetCode())
 	pdf.Ln(5)
 	pdf.Text(15, pdf.GetY(), "Mesto: ")
 	pdf.Text(27, pdf.GetY(), seminar.ClassRoom.Location.Address.Place)
@@ -283,9 +283,24 @@ func (p *printService) PrintConfirmations(seminar *model.Seminar) ([]byte, error
 		if client.Client.InitialCompletedSeminars != nil {
 			completedSeminars = *client.Client.InitialCompletedSeminars
 		}
-		seminarNumber := completedSeminars + len(client.Client.Seminars)
-		cx := 87 + float64(seminarNumber*8)
-		pdf.Circle(cx, 137, 3, "")
+
+		completedInSrbolab := 0
+		for _, s := range client.Client.Seminars {
+			if s.Pass != nil && *s.Pass {
+				completedInSrbolab++
+			}
+		}
+		seminarNumber := completedSeminars + completedInSrbolab
+		cx := 89.5 + float64(seminarNumber)*7
+		if seminarNumber == 1 {
+			cx = cx + 1
+		}
+		if seminarNumber == 5 {
+			cx = cx + 1
+		}
+		if seminarNumber > 0 {
+			pdf.Circle(cx, 137, 3, "")
+		}
 		pdf.CellFormat(wr, ch, " I    II    III    IV    V", "1", 0, "L", false, 0, "")
 		pdf.Ln(ch)
 		pdf.SetFont("Arimo-Regular", "", 11)
@@ -647,7 +662,7 @@ func (p *printService) PrintSeminarEvidence(day *model.SeminarDay) ([]byte, erro
 
 	pdf.Ln(5)
 	pdf.SetFont("Arimo-Bold", "", 9)
-	pdf.Text(15, pdf.GetY(), latTr("Dnevnik predavača seminara unašređenja znanja na FIXME obuci profesionalnih vozača"))
+	pdf.Text(15, pdf.GetY(), latTr("Dnevnik predavača seminara unapređenja znanja na periodičnoj obuci profesionalnih vozača"))
 	pdf.Ln(5)
 	pdf.SetFont("Arimo-Regular", "", 9)
 	pdf.Text(15, pdf.GetY(), latTr("Datum održavanja seminara"))
