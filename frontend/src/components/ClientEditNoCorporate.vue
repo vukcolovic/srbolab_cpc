@@ -249,7 +249,6 @@
             </li>
           </ul>
 
-          //FIXME add mx file size
           <input id="fileId" type="file" ref="file" @change="uploadFile()"/>
 
         </div>
@@ -323,6 +322,11 @@ export default {
       if (file == null) {
         return;
       }
+      if (file.size > 10000000) {
+        this.toast.warning("Fajlovi veći od 10 MB nisu dozvoljeni!");
+        return;
+      }
+
       const reader = new FileReader()
       reader.onloadend = () => {
         const fileString = reader.result;
