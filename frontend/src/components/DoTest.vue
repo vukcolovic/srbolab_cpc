@@ -17,13 +17,14 @@
           <hr>
           <h6>Pitanja</h6>
           <div v-for="(question, index) in questions" :key="question.ID" class="row" style="margin-bottom: 5px">
-            <div class="col-sm-11">
+            <div class="col-xs-12 col-sm-12 col-md-12">
               <p> {{ index + 1 }}. {{ question.content }}</p>
-              <div v-for="(answer) in question.answers" :key="answer.ID" class="row">
-                {{ answer.letter }}) <input id={{question.ID}} v-model="client_test.questions_answers[index].answer" :value= answer.letter
-                                            class="col-sm-1" type="radio">
-                {{ answer.content }}
-                <p></p>
+              <div v-for="(answer) in question.answers" :key="answer.ID" class="row no-gutters">
+                <div class="col-2 col-sm-2 col-md-1">
+                  {{ answer.letter }})
+                  <input style="margin-left: 5px" id={{question.ID}} v-model="client_test.questions_answers[index].answer" :value= answer.letter type="radio">
+                </div>
+                <div class="col-10 col-sm-10 col-md-10">{{ answer.content }}</div>
               </div>
             </div>
           </div>
