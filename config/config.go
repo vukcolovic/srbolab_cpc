@@ -1,4 +1,4 @@
-package srbolab_cpc
+package config
 
 import (
 	"gopkg.in/yaml.v3"
