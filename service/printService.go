@@ -74,7 +74,8 @@ func (p *printService) PrintSeminarStudentList(seminar *model.Seminar) ([]byte, 
 	pdf.CellFormat(20, ch, "Redni broj", "1", 0, "C", false, 0, "")
 	pdf.CellFormat(75, ch, "Ime i prezime", "1", 0, "C", false, 0, "")
 	pdf.CellFormat(35, ch, "JMBG", "1", 0, "C", false, 0, "")
-	pdf.CellFormat(90, ch, "Firma u kojoj ste zaposleni/Telefon", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(55, ch, "Firma u kojoj ste zaposleni", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(35, ch, "Telefon", "1", 0, "C", false, 0, "")
 	pdf.CellFormat(60, ch, "Potpis", "1", 0, "C", false, 0, "")
 
 	for i, cs := range seminar.Trainees {
@@ -82,7 +83,8 @@ func (p *printService) PrintSeminarStudentList(seminar *model.Seminar) ([]byte, 
 		pdf.CellFormat(20, ch, strconv.Itoa(i+1), "1", 0, "C", false, 0, "")
 		pdf.CellFormat(75, ch, cs.Client.Person.FullName(), "1", 0, "C", false, 0, "")
 		pdf.CellFormat(35, ch, *cs.Client.JMBG, "1", 0, "C", false, 0, "")
-		pdf.CellFormat(90, ch, "", "1", 0, "C", false, 0, "")
+		pdf.CellFormat(55, ch, "", "1", 0, "C", false, 0, "")
+		pdf.CellFormat(35, ch, "", "1", 0, "C", false, 0, "")
 		pdf.CellFormat(60, ch, "", "1", 0, "C", false, 0, "")
 	}
 
