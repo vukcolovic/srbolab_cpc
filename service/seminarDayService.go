@@ -97,7 +97,7 @@ func (c *seminarDayService) CreateAllSeminarDaysForSeminar(seminarID int) ([]mod
 	for i := 1; i <= seminar.SeminarTheme.NumberOfDays; i++ {
 		presences := []model.ClientPresence{}
 		for _, client := range seminar.Trainees {
-			presence := false
+			presence := true
 			presences = append(presences, model.ClientPresence{ClientID: client.ClientID, Presence: &presence})
 		}
 

@@ -149,16 +149,22 @@
               :styleLabel=styleLabelSmall>
           </text-input>
 
-          <text-area-input
-              v-model.trim="client.comment"
-              label="Napomena:"
-              type="text"
-              rows="2"
-              name="comment"
-              :readonly="readonly"
-              :styleInput=styleInputSmall
-              :styleLabel=styleLabelSmall>
-          </text-area-input>
+          <div class="form-check form-switch">
+            <input class="form-check-input" v-model="showNote" type="checkbox" role="switch" id="flexSwitchCheckDefault">
+            <label class="form-check-label" :style="styleInputSmall" for="flexSwitchCheckDefault">Napomena</label>
+          </div>
+          <div v-if="showNote">
+            <text-area-input
+                v-model.trim="client.comment"
+                label="Napomena:"
+                type="text"
+                rows="2"
+                name="comment"
+                :readonly="readonly"
+                :styleInput=styleInputSmall
+                :styleLabel=styleLabelSmall>
+            </text-area-input>
+          </div>
 
           <div class="my-1">
             <label :style=styleLabelSmall for="verified">Klijent je verifikovan:&nbsp;&nbsp;</label>
@@ -401,6 +407,7 @@ export default {
         wait_seminar: true,
         seminars: []
       },
+      showNote: false,
       finishedSeminars: [],
       inProgressSeminars: [],
       waitingSeminars: [],
