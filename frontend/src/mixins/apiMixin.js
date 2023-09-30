@@ -55,6 +55,9 @@ export const apiMixin = {
                     return;
                 }
                 this.companies = JSON.parse(response.data.Data);
+                this.companies.forEach(com => {
+                    com.name_pib = com.name + "-" + com.pib;
+                });
             }, (error) => {
                 this.errorToast(error, "/companies/list");
             });

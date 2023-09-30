@@ -11,7 +11,8 @@
       <div class="row">
         <div class="col-sm-4">
           <div class="row">
-            <div :class="[clientId ? 'col-sm-12' : 'col-sm-8']">
+<!--            <div :class="[clientId ? 'col-sm-12' : 'col-sm-8']">-->
+              <div class="col-sm-12">
           <text-input
               v-model.trim="client.jmbg"
               label="JMBG"
@@ -20,14 +21,15 @@
               :required=true
               :readonly="readonly"
               :styleInput=styleInputSmall
-              :styleLabel=styleLabelSmall>
+              :styleLabel=styleLabelSmall
+              @focusout="onJmbgFocusOut">
           </text-input>
             </div>
-            <div class="col-sm-4 mt-4" v-if="!clientId">
-              <button class="iconBtn" title="Nađi" @click.prevent="getClientByJMBG()">
-                <i class="fa fa-search"></i>
-              </button>
-            </div>
+<!--            <div class="col-sm-4 mt-4" v-if="!clientId">-->
+<!--              <button class="iconBtn" title="Nađi" @click.prevent="getClientByJMBG()">-->
+<!--                <i class="fa fa-search"></i>-->
+<!--              </button>-->
+<!--            </div>-->
           </div>
 
           <div class="row">
@@ -76,7 +78,7 @@
               label="Broj telefona"
               type="text"
               name="phone_number"
-              :required=true
+              :required=false
               :readonly="readonly"
               :styleInput=styleInputSmall
               :styleLabel=styleLabelSmall>
@@ -275,7 +277,7 @@
               :disabled=readonly
               :style="styleInputSmall"
               :options="companies"
-              label="name"
+              label="name_pib"
               placeholder="Traži">
           </v-select>
 
@@ -324,11 +326,22 @@
               </li>
             </ul>
           </div>
+          <label :style="styleLabelSmall" class="mb-1 mt-1">Lokacije</label>
+          <v-select
+              v-model="selectedLocation"
+              :disabled=readonly
+              :options="locations"
+              :style="styleInputSmall"
+              label="address_place"
+              placeholder="Traži"
+              @option:selected="onLocationChange">
+          </v-select>
+
           <label :style="styleLabelSmall" class="mb-1 mt-1">Otvoreni seminari</label>
           <v-select
               v-model="selectedOpenSeminar"
               :disabled=readonly
-              :options="openedSeminars"
+              :options="filteredAndOpenedSeminars"
               :style="styleInputSmall"
               label="base_info"
               placeholder="Traži">
@@ -373,7 +386,7 @@ export default {
         address: {place: "", street: "", house_number: ""},
         drive_licence: "",
         place_birth: "",
-        country_birth: "",
+        country_birth: "Srbija",
         documents: [],
         company: null,
         company_pib: "",
@@ -393,15 +406,49 @@ export default {
       waitingSeminars: [],
       selectedOpenSeminar: null,
       openedSeminars: [],
+      filteredAndOpenedSeminars: [],
       action: "",
       clientId: "",
+      selectedLocation: null,
     }
   },
   methods: {
+    onJmbgFocusOut() {
+      const errMsg = this.jmbgValidation();
+      if (errMsg) {
+        this.toast.warning(errMsg);
+        return;
+      }
+      this.getClientByJMBG();
+    },
+    jmbgValidation() {
+      if (this.client.jmbg.length != 13) {
+        return "Jmbg mora imati 13 cifara!";
+      }
+      var day = this.client.jmbg.substring(0,2);
+      let dayInt = parseInt(day);
+      if (!Number.isInteger(dayInt) || dayInt > 31 || dayInt < 1) {
+        return "Jmbg nije validan, pogrešan dan rođenja";
+      }
+      var month = this.client.jmbg.substring(2,4);
+      let monthInt = parseInt(month);
+      if (!Number.isInteger(monthInt) || monthInt > 12 || monthInt < 1) {
+        return "Jmbg nije validan, pogrešan mesec rođenja";
+      }
+      var year = this.client.jmbg.substring(4,6);
+      let yearInt = parseInt(year);
+      if (!Number.isInteger(yearInt)  ) {
+        return "Jmbg nije validan, pogrešna godina rođenja";
+      }
+    },
+    onLocationChange() {
+      this.filteredAndOpenedSeminars = this.openedSeminars;
+      this.filteredAndOpenedSeminars = this.openedSeminars.filter(s => s.class_room.location.ID === this.selectedLocation.ID);
+    },
     getClientByJMBG() {
       axios.get('/clients/jmbg/' + this.client.jmbg).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
-          this.toast.error(response.data != null ? response.data.ErrorMessage : "");
+          // this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;
         }
         var foundClient = JSON.parse(response.data.Data);
@@ -541,7 +588,9 @@ export default {
     return {toast}
   },
   async mounted() {
+    await this.getAllLocations();
     await this.getSeminarsByStatusCode("OPENED").then(result => this.openedSeminars = result);
+    this.filteredAndOpenedSeminars = this.openedSeminars;
     await this.getAllCompanies();
     if (this.$route.query.id !== '') {
       this.clientId = this.$route.query.id;
