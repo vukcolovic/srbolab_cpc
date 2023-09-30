@@ -7,95 +7,95 @@
         <h3 v-if="action === 'update'" class="mt-1">Ažuriranje</h3>
       </div>
     </div>
-    <form-tag @formEvent="submitHandler" name="myForm" event="formEvent">
+    <form-tag event="formEvent" name="myForm" @formEvent="submitHandler">
       <div class="row">
         <div class="col-sm-4">
           <div class="row">
-<!--            <div :class="[clientId ? 'col-sm-12' : 'col-sm-8']">-->
-              <div class="col-sm-12">
-          <text-input
-              v-model.trim="client.jmbg"
-              label="JMBG"
-              type="text"
-              name="jmbg"
-              :required=true
-              :readonly="readonly"
-              :styleInput=styleInputSmall
-              :styleLabel=styleLabelSmall
-              @focusout="onJmbgFocusOut">
-          </text-input>
+            <!--            <div :class="[clientId ? 'col-sm-12' : 'col-sm-8']">-->
+            <div class="col-sm-12">
+              <text-input
+                  v-model.trim="client.jmbg"
+                  :readonly="readonly"
+                  :required=true
+                  :styleInput=styleInputSmall
+                  :styleLabel=styleLabelSmall
+                  label="JMBG"
+                  name="jmbg"
+                  type="text"
+                  @focusout="onJmbgFocusOut">
+              </text-input>
             </div>
-<!--            <div class="col-sm-4 mt-4" v-if="!clientId">-->
-<!--              <button class="iconBtn" title="Nađi" @click.prevent="getClientByJMBG()">-->
-<!--                <i class="fa fa-search"></i>-->
-<!--              </button>-->
-<!--            </div>-->
+            <!--            <div class="col-sm-4 mt-4" v-if="!clientId">-->
+            <!--              <button class="iconBtn" title="Nađi" @click.prevent="getClientByJMBG()">-->
+            <!--                <i class="fa fa-search"></i>-->
+            <!--              </button>-->
+            <!--            </div>-->
           </div>
 
           <div class="row">
             <div class="col-sm-6">
               <text-input
                   v-model.trim="client.person.first_name"
-                  label="Ime"
-                  type="text"
-                  name="name"
-                  :required=true
                   :readonly="readonly"
+                  :required=true
                   :styleInput=styleInputSmall
-                  :styleLabel=styleLabelSmall>
+                  :styleLabel=styleLabelSmall
+                  label="Ime"
+                  name="name"
+                  type="text">
               </text-input>
             </div>
 
             <div class="col-sm-6">
               <text-input
                   v-model.trim="client.person.middle_name"
-                  label="Ime jednog roditelja"
-                  type="text"
-                  name="middleName"
-                  :required=true
                   :readonly="readonly"
+                  :required=true
                   :styleInput=styleInputSmall
-                  :styleLabel=styleLabelSmall>
+                  :styleLabel=styleLabelSmall
+                  label="Ime jednog roditelja"
+                  name="middleName"
+                  type="text">
               </text-input>
             </div>
           </div>
 
           <text-input
               v-model.trim="client.person.last_name"
-              label="Prezime"
-              type="text"
-              name="lastName"
-              :required=true
               :readonly="readonly"
+              :required=true
               :styleInput=styleInputSmall
-              :styleLabel=styleLabelSmall>
+              :styleLabel=styleLabelSmall
+              label="Prezime"
+              name="lastName"
+              type="text">
           </text-input>
 
           <div class="row">
             <div class="col-sm-6">
-          <text-input
-              v-model.trim="client.person.phone_number"
-              label="Broj telefona"
-              type="text"
-              name="phone_number"
-              :required=false
-              :readonly="readonly"
-              :styleInput=styleInputSmall
-              :styleLabel=styleLabelSmall>
-          </text-input>
+              <text-input
+                  v-model.trim="client.person.phone_number"
+                  :readonly="readonly"
+                  :required=false
+                  :styleInput=styleInputSmall
+                  :styleLabel=styleLabelSmall
+                  label="Broj telefona"
+                  name="phone_number"
+                  type="text">
+              </text-input>
             </div>
 
             <div class="col-sm-6">
-          <text-input
-              v-model.trim="client.person.email"
-              label="Email"
-              type="text"
-              name="email"
-              :required=false
-              :readonly="readonly"
-              :styleInput=styleInputSmall
-              :styleLabel=styleLabelSmall>
-          </text-input>
+              <text-input
+                  v-model.trim="client.person.email"
+                  :readonly="readonly"
+                  :required=false
+                  :styleInput=styleInputSmall
+                  :styleLabel=styleLabelSmall
+                  label="Email"
+                  name="email"
+                  type="text">
+              </text-input>
             </div>
           </div>
 
@@ -103,186 +103,187 @@
             <div class="col-sm-6">
               <text-input
                   v-model.trim="client.cpc_number"
-                  label="Broj CPC kartice"
-                  type="text"
-                  name="cpc_number"
-                  :required=false
                   :readonly="readonly"
+                  :required=false
                   :styleInput=styleInputSmall
-                  :styleLabel=styleLabelSmall>
+                  :styleLabel=styleLabelSmall
+                  label="Broj CPC kartice"
+                  name="cpc_number"
+                  type="text">
               </text-input>
             </div>
 
             <div class="col-sm-6">
               <text-input
                   v-model.trim="client.cpc_date"
-                  label="CPC datum izdavanja"
-                  type="date"
-                  name="cpc_date"
-                  :required=false
                   :readonly="readonly"
+                  :required=false
                   :styleInput=styleInputSmall
-                  :styleLabel=styleLabelSmall>
+                  :styleLabel=styleLabelSmall
+                  label="CPC datum izdavanja"
+                  name="cpc_date"
+                  type="date">
               </text-input>
             </div>
           </div>
 
           <text-input
               v-model.number="client.initial_completed_seminars"
-              label="Broj prethodno odlušanih kurseva"
-              type="number"
-              name="initial_completed_seminars"
-              :required=false
               :readonly="readonly"
+              :required=false
               :styleInput=styleInputSmall
-              :styleLabel=styleLabelSmall>
+              :styleLabel=styleLabelSmall
+              label="Broj prethodno odlušanih kurseva"
+              name="initial_completed_seminars"
+              type="number">
           </text-input>
 
           <text-input
               v-model.trim="client.drive_licence"
-              label="Broj vozačke"
-              type="text"
-              name="drive_licence"
-              :required=true
               :readonly="readonly"
+              :required=true
               :styleInput=styleInputSmall
-              :styleLabel=styleLabelSmall>
+              :styleLabel=styleLabelSmall
+              label="Broj vozačke"
+              name="drive_licence"
+              type="text">
           </text-input>
 
           <div class="form-check form-switch">
-            <input class="form-check-input" v-model="showNote" type="checkbox" role="switch" id="flexSwitchCheckDefault">
-            <label class="form-check-label" :style="styleInputSmall" for="flexSwitchCheckDefault">Napomena</label>
+            <input id="flexSwitchCheckDefault" v-model="showNote" class="form-check-input" role="switch"
+                   type="checkbox">
+            <label :style="styleInputSmall" class="form-check-label" for="flexSwitchCheckDefault">Napomena</label>
           </div>
           <div v-if="showNote">
             <text-area-input
                 v-model.trim="client.comment"
-                label="Napomena:"
-                type="text"
-                rows="2"
-                name="comment"
                 :readonly="readonly"
                 :styleInput=styleInputSmall
-                :styleLabel=styleLabelSmall>
+                :styleLabel=styleLabelSmall
+                label="Napomena:"
+                name="comment"
+                rows="2"
+                type="text">
             </text-area-input>
           </div>
 
           <div class="my-1">
             <label :style=styleLabelSmall for="verified">Klijent je verifikovan:&nbsp;&nbsp;</label>
-            <input id="verified" type="checkbox" :hidden="readonly" v-model="client.verified" />
+            <input id="verified" v-model="client.verified" :hidden="readonly" type="checkbox"/>
           </div>
           <div class="my-1">
             <label :style=styleLabelSmall for="wait_seminar">Klijent čeka seminar:&nbsp;&nbsp;</label>
-            <input id="wait_seminar" type="checkbox" :hidden="readonly" v-model="client.wait_seminar" />
+            <input id="wait_seminar" v-model="client.wait_seminar" :hidden="readonly" type="checkbox"/>
           </div>
         </div>
 
         <div class="col-sm-4">
           <text-input
               v-model.trim="client.address.place"
-              label="Mesto"
-              type="text"
-              name="place"
-              :required=true
               :readonly="readonly"
+              :required=true
               :styleInput=styleInputSmall
-              :styleLabel=styleLabelSmall>
+              :styleLabel=styleLabelSmall
+              label="Mesto"
+              name="place"
+              type="text">
           </text-input>
 
           <div class="row">
             <div class="col-sm-9">
               <text-input
                   v-model.trim="client.address.street"
-                  label="Ulica"
-                  type="text"
-                  name="street"
-                  :required=true
                   :readonly="readonly"
+                  :required=true
                   :styleInput=styleInputSmall
-                  :styleLabel=styleLabelSmall>
+                  :styleLabel=styleLabelSmall
+                  label="Ulica"
+                  name="street"
+                  type="text">
               </text-input>
             </div>
             <div class="col-sm-3">
               <text-input
-                v-model.trim="client.address.house_number"
-                label="Broj"
-                type="text"
-                name="house_number"
-                :required=true
-                :readonly="readonly"
-                :styleInput=styleInputSmall
-                :styleLabel=styleLabelSmall>
+                  v-model.trim="client.address.house_number"
+                  :readonly="readonly"
+                  :required=true
+                  :styleInput=styleInputSmall
+                  :styleLabel=styleLabelSmall
+                  label="Broj"
+                  name="house_number"
+                  type="text">
               </text-input>
             </div>
           </div>
 
           <text-input
               v-model.trim="client.place_birth"
-              label="Mesto rođenja"
-              type="text"
-              name="place_birth"
-              :required=true
               :readonly="readonly"
+              :required=true
               :styleInput=styleInputSmall
-              :styleLabel=styleLabelSmall>
+              :styleLabel=styleLabelSmall
+              label="Mesto rođenja"
+              name="place_birth"
+              type="text">
           </text-input>
 
           <text-input
               v-model.trim="client.country_birth"
-              label="Država rođenja"
-              type="text"
-              name="country_birth"
-              :required=true
               :readonly="readonly"
+              :required=true
               :styleInput=styleInputSmall
-              :styleLabel=styleLabelSmall>
+              :styleLabel=styleLabelSmall
+              label="Država rođenja"
+              name="country_birth"
+              type="text">
           </text-input>
 
           <div class="row">
             <div class="my-1 col-sm-4">
               <label :style=styleLabelSmall for="resident">Državljanin:</label>
-              <input id="resident" type="checkbox" :hidden="readonly" v-model="client.resident" />
+              <input id="resident" v-model="client.resident" :hidden="readonly" type="checkbox"/>
             </div>
             <div class="my-1 col-sm-8">
               <text-input
                   v-model.trim="client.second_citizenship"
-                  label="Drugo državljanstvo"
-                  type="text"
-                  name="second_citizenship"
-                  :required=false
                   :readonly="readonly"
+                  :required=false
                   :styleInput=styleInputSmall
-                  :styleLabel=styleLabelSmall>
+                  :styleLabel=styleLabelSmall
+                  label="Drugo državljanstvo"
+                  name="second_citizenship"
+                  type="text">
               </text-input>
             </div>
           </div>
 
           <text-input
               v-model.trim="client.educational_profile"
-              label="Obrazovni profil"
-              type="text"
-              name="educational_profile"
-              :required=false
               :readonly="readonly"
+              :required=false
               :styleInput=styleInputSmall
-              :styleLabel=styleLabelSmall>
+              :styleLabel=styleLabelSmall
+              label="Obrazovni profil"
+              name="educational_profile"
+              type="text">
           </text-input>
 
           <text-input
               v-model.trim="client.company_pib"
-              label="PIB Firme"
-              type="text"
-              name="company_pib"
               :required=false
               :styleInput=styleInputSmall
-              :styleLabel=styleLabelSmall>
+              :styleLabel=styleLabelSmall
+              label="PIB Firme"
+              name="company_pib"
+              type="text">
           </text-input>
 
           <label :style="styleLabelSmall" class="mb-1 mt-1">Firma</label>
           <v-select
               v-model="client.company"
               :disabled=readonly
-              :style="styleInputSmall"
               :options="companies"
+              :style="styleInputSmall"
               label="name_pib"
               placeholder="Traži">
           </v-select>
@@ -301,34 +302,43 @@
             </li>
           </ul>
 
-          <input id="fileId" type="file" ref="file" @change="uploadFile()"/>
+          <input id="fileId" ref="file" type="file" @change="uploadFile()"/>
 
         </div>
         <div class="col-sm-4" style="font-size: 0.7em">
           <div v-if="finishedSeminars.length > 0">
             <h6>Odslušani seminari</h6>
             <ul>
-              <li style="list-style-type: none" v-for="seminarClient in finishedSeminars" :key="seminarClient.ID">
-                {{seminarClient.seminar.ID}}: {{seminarClient.seminar.type}} {{getDateInMMDDYYYYFormat(seminarClient.seminar.start_date)}} <span :style="[seminarClient.pass ? {'color':'green'} : {'color':'red'} ]">{{seminarClient.passedText}}</span>
+              <li v-for="seminarClient in finishedSeminars" :key="seminarClient.ID" style="list-style-type: none">
+                {{ seminarClient.seminar.ID }}: {{ seminarClient.seminar.type }}
+                {{ getDateInMMDDYYYYFormat(seminarClient.seminar.start_date) }} <span
+                  :style="[seminarClient.pass ? {'color':'green'} : {'color':'red'} ]">{{
+                  seminarClient.passedText
+                }}</span>
               </li>
             </ul>
           </div>
           <div v-if="inProgressSeminars.length > 0">
             <h6>Aktuelni seminari</h6>
             <ul>
-              <li style="list-style-type: none;" v-for="seminarClient in inProgressSeminars" :key="seminarClient.ID">
-                {{seminarClient.seminar.ID}}: {{seminarClient.seminar.type}} {{getDateInMMDDYYYYFormat(seminarClient.seminar.start_date)}}
+              <li v-for="seminarClient in inProgressSeminars" :key="seminarClient.ID" style="list-style-type: none;">
+                {{ seminarClient.seminar.ID }}: {{ seminarClient.seminar.type }}
+                {{ getDateInMMDDYYYYFormat(seminarClient.seminar.start_date) }}
               </li>
             </ul>
           </div>
           <div v-if="waitingSeminars.length > 0">
             <h6>Prijavljeni seminari</h6>
             <ul>
-              <li style="list-style-type: none;" v-for="seminarClient in waitingSeminars" :key="seminarClient.ID">
+              <li v-for="seminarClient in waitingSeminars" :key="seminarClient.ID" style="list-style-type: none;">
                 <button class="iconBtn" title="Obriši" @click.prevent="removeSeminar(seminarClient)">
                   <i class="fa fa-remove"></i>
                 </button>
-                <span v-if="seminarClient.payed" class="bg-success">Plaćeno</span><span v-if="!seminarClient.payed" class="bg-warning">Nije plaćeno</span>{{seminarClient.seminar.ID}}: {{seminarClient.seminar.type}} {{getDateInMMDDYYYYFormat(seminarClient.seminar.start_date)}}
+                <span v-if="seminarClient.payed" class="bg-success">Plaćeno</span><span v-if="!seminarClient.payed"
+                                                                                        class="bg-warning">Nije plaćeno</span>{{
+                  seminarClient.seminar.ID
+                }}:
+                {{ seminarClient.seminar.type }} {{ getDateInMMDDYYYYFormat(seminarClient.seminar.start_date) }}
               </li>
             </ul>
           </div>
@@ -354,8 +364,8 @@
           </v-select>
         </div>
         <div>
-          <input type="submit" v-if="this.action === 'add'" class="btn btn-primary m-2" value="Snimi">
-          <input type="submit" v-if="this.action === 'update'" class="btn btn-primary m-2" value="Snimi">
+          <input v-if="this.action === 'add'" class="btn btn-primary m-2" type="submit" value="Snimi">
+          <input v-if="this.action === 'update'" class="btn btn-primary m-2" type="submit" value="Snimi">
         </div>
       </div>
     </form-tag>
@@ -432,19 +442,19 @@ export default {
       if (this.client.jmbg.length != 13) {
         return "Jmbg mora imati 13 cifara!";
       }
-      var day = this.client.jmbg.substring(0,2);
+      var day = this.client.jmbg.substring(0, 2);
       let dayInt = parseInt(day);
       if (!Number.isInteger(dayInt) || dayInt > 31 || dayInt < 1) {
         return "Jmbg nije validan, pogrešan dan rođenja";
       }
-      var month = this.client.jmbg.substring(2,4);
+      var month = this.client.jmbg.substring(2, 4);
       let monthInt = parseInt(month);
       if (!Number.isInteger(monthInt) || monthInt > 12 || monthInt < 1) {
         return "Jmbg nije validan, pogrešan mesec rođenja";
       }
-      var year = this.client.jmbg.substring(4,6);
+      var year = this.client.jmbg.substring(4, 6);
       let yearInt = parseInt(year);
-      if (!Number.isInteger(yearInt)  ) {
+      if (!Number.isInteger(yearInt)) {
         return "Jmbg nije validan, pogrešna godina rođenja";
       }
     },
@@ -517,7 +527,7 @@ export default {
           this.inProgressSeminars = this.client.seminars.filter(s => s.seminar.seminar_status.ID === this.SEMINAR_STATUSES.IN_PROGRESS);
           this.waitingSeminars = this.client.seminars.filter(s => (s.seminar.seminar_status.ID === this.SEMINAR_STATUSES.OPENED || s.seminar.seminar_status.ID === this.SEMINAR_STATUSES.FILLED));
 
-          this.openedSeminars = this.openedSeminars.filter( ( el ) => !this.waitingSeminars.find(rm => (rm.seminar.ID === el.ID)));
+          this.openedSeminars = this.openedSeminars.filter((el) => !this.waitingSeminars.find(rm => (rm.seminar.ID === el.ID)));
         }
         if (this.client.documents == null) {
           this.client.documents = [];
@@ -536,9 +546,6 @@ export default {
       if (this.client.jmbg.length != 13) {
         return "Jmbg mora imati 13 cifara!";
       }
-      if (!this.client.verified && this.selectedOpenSeminar) {
-        return "Ne možete prijaviti kurs za klijenta koji nije verifikovan!";
-      }
       if (!this.client.educational_profile && (!this.client.cpc_number && this.isDateEmpty(this.client.cpc_date))) {
         return "Obrazovni profil ili podaci o cpc kartici moraju biti popunjeni!";
       }
@@ -553,7 +560,7 @@ export default {
       }
       if (this.selectedOpenSeminar) {
         this.client.seminars.push({"client_id": this.client.ID, "seminar_id": this.selectedOpenSeminar.ID});
-        this.client.wait_seminar =false;
+        this.client.wait_seminar = false;
       }
       if (this.clientId) {
         await this.updateClient();
@@ -570,7 +577,10 @@ export default {
           return;
         }
         this.toast.info("Uspešno kreiran klijent.");
-        router.push("/clients");
+        var location = this.selectedLocation ? this.selectedLocation.address.place : "";
+        var seminarID = this.selectedOpenSeminar ? this.selectedOpenSeminar.ID : "";
+        var rand = this.makeid(3);
+        router.push("/client?action=add&id=&location=" + location + "&seminar_id=" + seminarID + "&rand=" + rand);
       }, (error) => {
         this.errorToast(error, "/clients/create");
       });
@@ -584,7 +594,10 @@ export default {
           return;
         }
         this.toast.info("Uspešno ažuriran klijent.");
-        router.push("/clients");
+        var location = this.selectedLocation ? this.selectedLocation.address.place : "";
+        var seminarID = this.selectedOpenSeminar ? this.selectedOpenSeminar.ID : "";
+        var rand = this.makeid(3);
+        router.push("/client?action=add&id=&location=" + location + "&seminar_id=" + seminarID + "&rand=" + rand);
       }, (error) => {
         this.errorToast(error, "/clients/update");
       });
@@ -593,17 +606,26 @@ export default {
   setup() {
     const toast = useToast();
     return {toast}
-  },
+  }
+  ,
   async mounted() {
     await this.getAllLocations();
     await this.getSeminarsByStatusCode("OPENED").then(result => this.openedSeminars = result);
     this.filteredAndOpenedSeminars = this.openedSeminars;
     await this.getAllCompanies();
-    if (this.$route.query.id !== '') {
+    if (this.$route.query.id && this.$route.query.id !== '') {
       this.clientId = this.$route.query.id;
-      this.getClientById();
+      await this.getClientById();
     }
     this.action = this.$route.query.action;
+    if (this.$route.query.location && this.$route.query.location !== '') {
+      this.selectedLocation = this.locations.find(s => s.address.place === this.$route.query.location);
+      this.filteredAndOpenedSeminars = this.openedSeminars.filter(s => s.class_room.location.ID === this.selectedLocation.ID);
+    }
+    if (this.selectedLocation && this.$route.query.seminar_id && this.$route.query.seminar_id !== '') {
+      console.log(this.filteredAndOpenedSeminars);
+      this.selectedOpenSeminar = this.filteredAndOpenedSeminars.find(s => s.ID == this.$route.query.seminar_id);
+    }
   }
 }
 </script>
