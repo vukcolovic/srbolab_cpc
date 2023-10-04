@@ -104,7 +104,7 @@
               <text-input
                   v-model.trim="client.cpc_number"
                   :readonly="readonly"
-                  :required=false
+                  :required="cpcRequired"
                   :styleInput=styleInputSmall
                   :styleLabel=styleLabelSmall
                   label="Broj CPC kartice"
@@ -446,6 +446,9 @@ export default {
     readonly() {
       return this.action === 'view';
     },
+    cpcRequired() {
+      return this.selectedOpenSeminar && (this.selectedOpenSeminar.seminar_theme.base_seminar_type.code === "CYCLE" || this.selectedOpenSeminar.seminar_theme.base_seminar_type.code === "ADDITIONAL");
+    }
   },
   data() {
     return {
@@ -612,6 +615,10 @@ export default {
       }
       if (!this.client.educational_profile && (!this.client.cpc_number && this.isDateEmpty(this.client.cpc_date))) {
         return "Obrazovni profil ili podaci o cpc kartici moraju biti popunjeni!";
+      }
+
+      if (this.selectedOpenSeminar && (this.selectedOpenSeminar.seminar_theme.base_seminar_type.code === "CYCLE" || this.selectedOpenSeminar.seminar_theme.base_seminar_type.code === "ADDITIONAL") && !this.client.cpc_number) {
+        return "Za dodatnu i periodičnu obuku broj cpc kartice mora biti popunjen.";
       }
 
       return "";
