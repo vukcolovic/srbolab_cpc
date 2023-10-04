@@ -574,6 +574,7 @@ export default {
           return;
         }
         this.client = JSON.parse(response.data.Data);
+        console.log(this.client);
         this.client.cpc_date = this.getDateInMMDDYYYYFormat(this.client.cpc_date);
         this.client.seminars.forEach(s => {
           s.seminar.type = this.getSeminarFullType(s.seminar.seminar_theme.base_seminar_type, s.seminar.seminar_theme);
@@ -591,6 +592,9 @@ export default {
         }
         if (this.client.seminars == null) {
           this.client.seminars = [];
+        }
+        if (this.client.company) {
+          this.client.company.name_pib = this.client.company.name + "-" + this.client.company.pib;
         }
       }, (error) => {
         this.errorToast(error, "/clients/id");
