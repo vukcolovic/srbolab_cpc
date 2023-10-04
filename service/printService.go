@@ -327,7 +327,12 @@ func (p *printService) PrintConfirmations(seminar *model.Seminar) ([]byte, error
 		pdf.SetFont("Arimo-Regular", "", 11)
 		pdf.CellFormat(wl, ch, "Vrsta CPC", "1", 0, "L", false, 0, "")
 		pdf.SetFont("Arimo-Bold", "", 11)
-		pdf.Circle(97.5, 178.5, 2.5, "")
+		if client.Client.CLicence != nil && *client.Client.CLicence {
+			pdf.Circle(97.5, 178.5, 2.5, "")
+		}
+		if client.Client.DLicence != nil && *client.Client.DLicence {
+			pdf.Circle(128.0, 178.5, 2.5, "")
+		}
 		pdf.CellFormat(wr, ch, "1. prevoz tereta  2. prevoz putnika", "1", 0, "L", false, 0, "")
 		pdf.Ln(20)
 

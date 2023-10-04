@@ -9,7 +9,7 @@ type Person struct {
 	FirstName   string `json:"first_name"`
 	MiddleName  string `json:"middle_name"`
 	LastName    string `json:"last_name"`
-	Email       string `json:"email" gorm:"index:idx_email,unique"`
+	Email       string `json:"email" gorm:"index:idx_email"`
 	PhoneNumber string `json:"phone_number"`
 }
 

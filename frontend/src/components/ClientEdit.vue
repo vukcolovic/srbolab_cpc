@@ -167,13 +167,27 @@
             </text-area-input>
           </div>
 
-          <div class="my-1">
-            <label :style=styleLabelSmall for="verified">Klijent je verifikovan:&nbsp;&nbsp;</label>
-            <input id="verified" v-model="client.verified" :hidden="readonly" type="checkbox"/>
+          <div class="row">
+          <div class="col-sm-6">
+            <div class="my-1">
+              <label :style=styleLabelSmall for="verified">Klijent je verifikovan:&nbsp;&nbsp;</label>
+              <input id="verified" v-model="client.verified" :hidden="readonly" type="checkbox"/>
+            </div>
+            <div class="my-1">
+              <label :style=styleLabelSmall for="wait_seminar">Klijent čeka seminar:&nbsp;&nbsp;</label>
+              <input id="wait_seminar" v-model="client.wait_seminar" :hidden="readonly" type="checkbox"/>
+            </div>
           </div>
-          <div class="my-1">
-            <label :style=styleLabelSmall for="wait_seminar">Klijent čeka seminar:&nbsp;&nbsp;</label>
-            <input id="wait_seminar" v-model="client.wait_seminar" :hidden="readonly" type="checkbox"/>
+          <div class="col-sm-6">
+            <div class="my-1">
+              <label :style=styleLabelSmall for="c_licence">C Kategorija:&nbsp;&nbsp;</label>
+              <input id="c_licence" v-model="client.c_licence" :hidden="readonly" type="checkbox"/>
+            </div>
+            <div class="my-1">
+              <label :style=styleLabelSmall for="d_licence">D Kategorija:&nbsp;&nbsp;</label>
+              <input id="d_licence" v-model="client.d_licence" :hidden="readonly" type="checkbox"/>
+            </div>
+          </div>
           </div>
         </div>
 
@@ -360,8 +374,44 @@
               :options="filteredAndOpenedSeminars"
               :style="styleInputSmall"
               label="base_info"
-              placeholder="Traži">
+              placeholder="Traži"
+              @option:selected="onOpenedSeminarChange">
           </v-select>
+
+          <div v-if="selectedOpenSeminar">
+            <div class="row my-1">
+              <div class="col-sm-2">
+                <div class="my-1">
+                  <label :style=styleLabelSmall for="payed">Plaćeno:&nbsp;</label>
+                  <input id="payed" v-model="selectedOpenSeminar.payed" :hidden="readonly" type="checkbox"/>
+                </div>
+              </div>
+              <div class="col-sm-6" v-if="selectedOpenSeminar.payed">
+                <text-input
+                    v-model.trim="selectedOpenSeminar.payed_by"
+                    :required=false
+                    :styleInput=styleInputSmall
+                    :styleLabel=styleLabelSmall
+                    label="Platio"
+                    name="payed_by"
+                    type="text">
+                </text-input>
+              </div>
+              <div class="col-sm-4" v-if="selectedOpenSeminar.payed">
+                <text-input
+                    v-model.trim="selectedOpenSeminar.payed_date"
+                    :readonly="readonly"
+                    :required=false
+                    :styleInput=styleInputSmall
+                    :styleLabel=styleLabelSmall
+                    label="Datum plaćanja"
+                    name="payed_date"
+                    type="date">
+                </text-input>
+              </div>
+            </div>
+          </div>
+
         </div>
         <div>
           <input v-if="this.action === 'add'" class="btn btn-primary m-2" type="submit" value="Snimi">
@@ -415,7 +465,9 @@ export default {
         verified: true,
         initial_completed_seminars: 0,
         wait_seminar: true,
-        seminars: []
+        seminars: [],
+        c_licence: true,
+        d_licence: false,
       },
       showNote: false,
       finishedSeminars: [],
@@ -430,6 +482,11 @@ export default {
     }
   },
   methods: {
+    onOpenedSeminarChange() {
+      if(this.selectedOpenSeminar) {
+        this.selectedOpenSeminar.payed_by = this.client.person.first_name + " " + this.client.person.last_name;
+      }
+    },
     onJmbgFocusOut() {
       const errMsg = this.jmbgValidation();
       if (errMsg) {
