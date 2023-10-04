@@ -51,14 +51,14 @@ type ClientFilter struct {
 
 type ClientSeminar struct {
 	gorm.Model
-	ClientID  uint      `json:"client_id"`
-	Client    Client    `json:"client"`
-	SeminarID uint      `json:"seminar_id"`
-	Seminar   Seminar   `json:"seminar"`
-	Payed     *bool     `json:"payed"`
-	Pass      *bool     `json:"pass"`
-	PayedBy   string    `json:"payed_by"`
-	PayDate   time.Time `json:"pay_date"`
+	ClientID  uint       `json:"client_id"`
+	Client    Client     `json:"client"`
+	SeminarID uint       `json:"seminar_id"`
+	Seminar   Seminar    `json:"seminar"`
+	Payed     *bool      `json:"payed"`
+	Pass      *bool      `json:"pass"`
+	PayedBy   *string    `json:"payed_by"`
+	PayDate   *time.Time `json:"pay_date"`
 }
 
 type ClientPresence struct {

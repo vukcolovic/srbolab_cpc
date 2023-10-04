@@ -8,7 +8,7 @@ export const dateMixin = {
             if (this.isDateEmpty(date)) {
                 return null;
             }
-            return date + "T12:05:05.576147+02:00"
+            return date + "T12:05:05.576147+02:00";
         },
         getBackendFormatWithTime(date, time) {
             if (this.isDateEmpty(date)) {

@@ -100,10 +100,13 @@
             <table class="styled-table">
               <thead>
               <tr class="bg-primary text-white">
-                <td style="width: 35%;">Ime i prezime</td>
-                <td style="width: 20%;">JMBG</td>
-                <td style="width: 35%;">Firma</td>
-                <td style="width: 10%;">Plaćeno</td>
+                <td style="width: 30%;">Ime i prezime</td>
+                <td style="width: 15%;">JMBG</td>
+                <td style="width: 30%;">Firma</td>
+                <td style="width: 5%;">Plaćeno</td>
+                <td style="width: 10%;">Platio</td>
+                <td style="width: 5%;">Datum plaćanja</td>
+                <td style="width: 5%;">Snimi</td>
               </tr>
               </thead>
               <tbody>
@@ -113,7 +116,16 @@
                 <td class="p-1">{{ trainee.client.company.name }}</td>
                 <td :class="[trainee.payed ? 'bg-success' : 'bg-danger']" style="text-align: center">
                   <input id="payed" v-model="trainee.payed" :hidden="readonly" type="checkbox"
-                         @change="updateClientSeminar(trainee)"/>
+                         @change="onPayedChange(trainee)"/>
+                </td>
+                <td>
+                  <input id="payed_by" v-model="trainee.payed_by" :hidden="readonly" type="text"/>
+                </td>
+                <td>
+                  <input id="payed_by" v-model="trainee.pay_date" :hidden="readonly" type="date"/>
+                </td>
+                <td>
+                  <button type="button" @click="updateClientSeminar(trainee)" class="iconBtn">s</button>
                 </td>
               </tr>
               </tbody>
@@ -403,12 +415,25 @@ export default {
         this.errorToast(error, "/class-rooms/location");
       });
     },
+    onPayedChange(traine) {
+      if (traine.payed) {
+        traine.payed_by = traine.client.person.first_name + " " + traine.client.person.first_name;
+      } else {
+        traine.payed_by = "";
+        traine.pay_date = this.getBackendFormat(null);
+      }
+    },
     async updateClientSeminar(trainee) {
+      trainee.pay_date = this.getBackendFormat(trainee.pay_date);
+      console.log(trainee.pay_date);
       await axios.post('/client-seminar/update', JSON.stringify(trainee)).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;
         }
+        console.log(trainee.pay_date);
+        trainee.pay_date = this.getDateInMMDDYYYYFormat(trainee.pay_date);
+        this.toast.info("Uspešno ažuriranje");
       }, (error) => {
         this.errorToast(error, "/client-seminar/update");
       });
@@ -431,6 +456,7 @@ export default {
         if (this.seminar.trainees == null) {
           this.seminar.trainees = [];
         }
+        this.seminar.trainees.forEach(t => t.pay_date = this.getDateInMMDDYYYYFormat(t.pay_date));
         if (this.seminar.documents == null) {
           this.seminar.documents = [];
         }

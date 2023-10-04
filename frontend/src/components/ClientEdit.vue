@@ -348,10 +348,13 @@
                 <button class="iconBtn" title="Obriši" @click.prevent="removeSeminar(seminarClient)">
                   <i class="fa fa-remove"></i>
                 </button>
-                <span v-if="seminarClient.payed" class="bg-success">Plaćeno</span><span v-if="!seminarClient.payed"
-                                                                                        class="bg-warning">Nije plaćeno</span>{{
-                  seminarClient.seminar.ID
-                }}:
+                <span v-if="seminarClient.payed" class="bg-success">
+                  Plaćeno {{ getDateInMMDDYYYYFormat(seminarClient.pay_date) }}
+                </span>
+                <span v-if="!seminarClient.payed" class="bg-warning">
+                  Nije plaćeno
+                </span>
+                | ID: {{seminarClient.seminar.ID }}:
                 {{ seminarClient.seminar.type }} {{ getDateInMMDDYYYYFormat(seminarClient.seminar.start_date) }}
               </li>
             </ul>
@@ -399,13 +402,13 @@
               </div>
               <div class="col-sm-4" v-if="selectedOpenSeminar.payed">
                 <text-input
-                    v-model.trim="selectedOpenSeminar.payed_date"
+                    v-model.trim="selectedOpenSeminar.pay_date"
                     :readonly="readonly"
                     :required=false
                     :styleInput=styleInputSmall
                     :styleLabel=styleLabelSmall
                     label="Datum plaćanja"
-                    name="payed_date"
+                    name="pay_date"
                     type="date">
                 </text-input>
               </div>
@@ -620,7 +623,11 @@ export default {
         return;
       }
       if (this.selectedOpenSeminar) {
-        this.client.seminars.push({"client_id": this.client.ID, "seminar_id": this.selectedOpenSeminar.ID});
+        var payDate = null;
+        if (this.selectedOpenSeminar.pay_date) {
+          payDate = this.getBackendFormat(this.selectedOpenSeminar.pay_date);
+        }
+        this.client.seminars.push({"client_id": this.client.ID, "seminar_id": this.selectedOpenSeminar.ID, payed: this.selectedOpenSeminar.payed, payed_by: this.selectedOpenSeminar.payed_by, pay_date: payDate});
         this.client.wait_seminar = false;
       }
       if (this.clientId) {
