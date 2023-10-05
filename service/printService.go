@@ -364,9 +364,23 @@ func (p *printService) PrintConfirmationReceives(seminar *model.Seminar) ([]byte
 	pdf.AddFont("Arimo-Bold", "", "Arimo-Bold.json")
 	latTr := pdf.UnicodeTranslatorFromDescriptor("iso-8859-16")
 
-	pdf.SetMargins(marginLeft, 20, marginRight)
+	pdf.SetMargins(15, 20, marginRight)
+
+	companyClientsMap := map[string][]model.ClientSeminar{}
 
 	for _, client := range seminar.Trainees {
+		if client.Client.Company.ID > 0 {
+			val, ok := companyClientsMap[client.Client.Company.Name]
+			if ok {
+				val = append(val, client)
+			} else {
+				val = []model.ClientSeminar{client}
+			}
+			companyClientsMap[client.Client.Company.Name] = val
+
+			continue
+		}
+
 		pdf.AddPage()
 
 		createSimpleHeader(pdf, latTr)
@@ -404,6 +418,73 @@ func (p *printService) PrintConfirmationReceives(seminar *model.Seminar) ([]byte
 		pdf.Ln(10)
 		pdf.Line(15, pdf.GetY(), 60, pdf.GetY())
 		pdf.Ln(8)
+		pdf.Text(15, pdf.GetY(), "Dana: ")
+		pdf.SetFont("Arimo-Bold", "", 11)
+		pdf.Line(26, pdf.GetY(), 48, pdf.GetY())
+		pdf.Text(27, pdf.GetY()-1, time.Now().Format("02.01.2006"))
+		pdf.SetFont("Arimo-Regular", "", 11)
+		pdf.Text(50, pdf.GetY(), "godine.")
+	}
+
+	for company, clients := range companyClientsMap {
+		pdf.AddPage()
+
+		createSimpleHeader(pdf, latTr)
+
+		pdf.SetFont("Arimo-Bold", "", 12)
+		pdf.Text(40, pdf.GetY(), latTr("Izjava o preuzimanju potvrde i završenoj periodičnoj obuci"))
+		pdf.Ln(5)
+		pdf.Text(60, pdf.GetY(), latTr("na obaveznim seminarima unapređenja znanja"))
+		pdf.Ln(20)
+
+		pdf.SetFont("Arimo-Regular", "", 11)
+		pdf.Text(15, pdf.GetY(), "Dana")
+		pdf.Line(27, pdf.GetY(), 57, pdf.GetY())
+		pdf.SetFont("Arimo-Bold", "", 11)
+		pdf.Text(30, pdf.GetY()-1, latTr(time.Now().Format("02.01.2006.")))
+		pdf.SetFont("Arimo-Regular", "", 11)
+		pdf.Text(60, pdf.GetY(), "godine, ")
+		pdf.Line(75, pdf.GetY(), 135, pdf.GetY())
+		pdf.Text(135, pdf.GetY(), "(ime i prezime), zaposlen u")
+		pdf.Ln(6)
+		pdf.Text(15, pdf.GetY(), latTr("u firmi"))
+		pdf.SetFont("Arimo-Bold", "", 11)
+		pdf.Text(30, pdf.GetY()-1, latTr(company))
+		pdf.Line(28, pdf.GetY(), 178, pdf.GetY())
+		pdf.SetFont("Arimo-Regular", "", 11)
+		pdf.Text(180, pdf.GetY(), ",")
+		pdf.Ln(6)
+		pdf.Text(15, pdf.GetY(), latTr("JMBG"))
+		pdf.Line(28, pdf.GetY(), 70, pdf.GetY())
+		pdf.Text(70, pdf.GetY(), latTr(", je preuzeo potvrde o završenoj periodičnoj obuci na"))
+		pdf.Ln(6)
+		pdf.Text(15, pdf.GetY(), latTr("obaveznim seminarima unapređenja znanja za sledeća lica:"))
+		pdf.Ln(10)
+
+		ch := 5.0
+		pdf.CellFormat(10, ch, "RB", "1", 0, "L", false, 0, "")
+		pdf.CellFormat(40, ch, "Ime", "1", 0, "L", false, 0, "")
+		pdf.CellFormat(40, ch, "Prezime", "1", 0, "L", false, 0, "")
+		pdf.CellFormat(35, ch, "JMBG", "1", 0, "L", false, 0, "")
+		pdf.CellFormat(50, ch, "Broj potvrde", "1", 0, "L", false, 0, "")
+
+		for i, client := range clients {
+			pdf.Ln(ch)
+			pdf.CellFormat(10, ch, strconv.Itoa(i+1), "1", 0, "L", false, 0, "")
+			pdf.CellFormat(40, ch, client.Client.Person.FirstName, "1", 0, "L", false, 0, "")
+			pdf.CellFormat(40, ch, client.Client.Person.LastName, "1", 0, "L", false, 0, "")
+			pdf.CellFormat(35, ch, *client.Client.JMBG, "1", 0, "L", false, 0, "")
+			pdf.CellFormat(50, ch, "???????", "1", 0, "L", false, 0, "")
+		}
+
+		pdf.Ln(20)
+		pdf.Text(15, pdf.GetY(), "Potvrdu preuzeo: ")
+		pdf.Ln(10)
+		pdf.Line(15, pdf.GetY(), 70, pdf.GetY())
+		pdf.Ln(6)
+		pdf.Text(15, pdf.GetY(), "Broj LK:")
+		pdf.Line(30, pdf.GetY(), 70, pdf.GetY())
+		pdf.Ln(6)
 		pdf.Text(15, pdf.GetY(), "Dana: ")
 		pdf.SetFont("Arimo-Bold", "", 11)
 		pdf.Line(26, pdf.GetY(), 48, pdf.GetY())
