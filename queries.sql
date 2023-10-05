@@ -18,3 +18,5 @@ INSERT INTO seminar_themes (base_seminar_type_id, name, code, number_of_days) VA
 
 INSERT INTO roles (id, name, code, created_at, updated_at) VALUES (1, 'Administrator', 'ADMINISTRATOR', now(), now()) ON CONFLICT DO NOTHING;
 INSERT INTO roles (id, name, code, created_at, updated_at) VALUES (2, 'Predavač', 'PREDAVAC', now(), now()) ON CONFLICT DO NOTHING;
+
+ALTER TABLE client_seminars ADD UNIQUE (client_id, seminar_id);

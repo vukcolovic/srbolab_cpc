@@ -94,6 +94,9 @@
       <div class="col-sm-2">
         <button class="btn btn-secondary text-white" @click="printTestResults()">Rezultati testova</button>
       </div>
+      <div class="col-sm-2">
+        <button class="btn btn-secondary text-white" @click="printListTrainees()">Spisak polaznika</button>
+      </div>
     </div>
     <hr>
     <div>
@@ -182,6 +185,21 @@ export default {
             const link = document.createElement('a')
             link.href = URL.createObjectURL(blob)
             link.download = "Evidencija_pregledanih_vozila.xlsx"
+            link.click()
+            URL.revokeObjectURL(link.href)
+            //FIXME add notie
+          }).catch(console.error)
+    },
+    printListTrainees() {
+      axios.get('/excel/list_trainees/' + this.seminarDayId)
+          .then(response => {
+            var fileContent = JSON.parse(response.data.Data);
+            var sampleArr = this.base64ToArrayBuffer(fileContent);
+            const blob = new Blob([sampleArr], { type: 'application/xlsx' })
+
+            const link = document.createElement('a')
+            link.href = URL.createObjectURL(blob)
+            link.download = "Spisak_polaznika.xlsx"
             link.click()
             URL.revokeObjectURL(link.href)
             //FIXME add notie

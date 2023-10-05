@@ -23,6 +23,7 @@ type seminarServiceInterface interface {
 	UpdateSeminar(seminar model.Seminar) (*model.Seminar, error)
 	DeleteSeminarClient(clientSeminar model.ClientSeminar) error
 	UpdateSeminarStatusIfNeed(seminarID int) error
+	GetClientSeminarBySeminarIDAndClientID(seminarID, clientID uint) (*model.ClientSeminar, error)
 }
 
 func (c *seminarService) GetAllSeminars(skip, take int) ([]model.Seminar, error) {
@@ -171,4 +172,13 @@ func (c *seminarService) UpdateSeminarStatusIfNeed(seminarID int) error {
 	}
 
 	return nil
+}
+
+func (c *seminarService) GetClientSeminarBySeminarIDAndClientID(seminarID, clientID uint) (*model.ClientSeminar, error) {
+	var clientSeminar *model.ClientSeminar
+	if err := db.Client.Where("client_id = ? AND seminar_id = ?", clientID, seminarID).First(&clientSeminar).Error; err != nil {
+		return nil, err
+	}
+
+	return clientSeminar, nil
 }

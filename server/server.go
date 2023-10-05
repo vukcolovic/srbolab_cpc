@@ -121,6 +121,7 @@ func RunServer(host string) {
 
 	s = r.PathPrefix("/api/excel").Subrouter()
 	s.HandleFunc("/client-tests/{seminar-day}", handlers.PrintClientTestsBySeminarDay).Methods("GET")
+	s.HandleFunc("/list_trainees/{seminar-day}", handlers.PrintListTraineesBySeminarDay).Methods("GET")
 
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{"*"}, // All origins

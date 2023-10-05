@@ -41,3 +41,36 @@ func PrintClientTestsBySeminarDay(w http.ResponseWriter, r *http.Request) {
 
 	SetSuccessResponse(w, excel)
 }
+
+func PrintListTraineesBySeminarDay(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	seminarDayIDParam, ok := vars["seminar-day"]
+	if !ok {
+		logoped.ErrorLog.Println("missing parameter seminar-day")
+		SetErrorResponse(w, NewMissingRequestParamError("SeminarDayID"))
+		return
+	}
+
+	seminarDayID, err := strconv.Atoi(seminarDayIDParam)
+	if err != nil {
+		logoped.ErrorLog.Println(err.Error())
+		SetErrorResponse(w, NewWrongParamFormatErrorError("SeminarDayID", seminarDayIDParam))
+		return
+	}
+
+	seminarDay, err := service.SeminarDayService.GetSeminarDayByID(seminarDayID)
+	if err != nil {
+		logoped.ErrorLog.Println(err.Error())
+		SetErrorResponse(w, errors.New("Greška prilikom štampanja Excel izveštaja za spisak polaznika: "+err.Error()))
+		return
+	}
+
+	excel, err := service.ExcelService.CreateListClientsBySeminarDayReport(seminarDay)
+	if err != nil {
+		logoped.ErrorLog.Println(err.Error())
+		SetErrorResponse(w, errors.New("Greška prilikom štampanja Excel izveštaja za spisak polaznika: "+err.Error()))
+		return
+	}
+
+	SetSuccessResponse(w, excel)
+}
