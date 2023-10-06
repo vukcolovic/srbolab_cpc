@@ -21,6 +21,15 @@
           </text-input>
 
           <text-input
+              v-model.trim="location.code"
+              label="Skraćeni kod"
+              type="text"
+              name="post_code"
+              :required=true
+              :readonly="readonly">
+          </text-input>
+
+          <text-input
               v-model.trim="location.address.street"
               label="Ulica"
               type="text"
@@ -76,7 +85,7 @@ export default {
   },
   data() {
     return {
-      location: {ID: 0, address: {place:"", street: "", house_number: "", post_code: ""}},
+      location: {ID: 0, code: "", address: {place:"", street: "", house_number: "", post_code: ""}},
       action: "",
     }
   },

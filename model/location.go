@@ -12,6 +12,7 @@ type Address struct {
 type Location struct {
 	gorm.Model
 	Address Address `json:"address" gorm:"embedded"`
+	Code    string  `json:"code"`
 }
 
 type ClassRoom struct {

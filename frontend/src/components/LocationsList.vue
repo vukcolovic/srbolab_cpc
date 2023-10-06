@@ -63,6 +63,11 @@ export default {
           width: '20%',
         },
         {
+          label: 'Kod',
+          field: 'code',
+          width: '20%',
+        },
+        {
           label: 'Ulica i broj',
           field: 'address_street_and_number',
           width: '50%',
