@@ -160,7 +160,7 @@ func (p *printService) PrintConfirmationStatements(seminar *model.Seminar) ([]by
 		pdf.Text(15, pdf.GetY(), latTr("vozača, podaci o stručnoj spremi, za potrebe slanja obaveštenja i informacija."))
 		pdf.Ln(15)
 
-		pdf.Text(15, pdf.GetY(), latTr("Takođe izjavljujem da sam od AMSS-CMV primio/la sva neophodna obaveštenja, predviđena članom 23"))
+		pdf.Text(15, pdf.GetY(), latTr("Takođe izjavljujem da sam od Srbolab d.o.o. primio/la sva neophodna obaveštenja, predviđena članom 23"))
 		pdf.Ln(5)
 		pdf.Text(15, pdf.GetY(), latTr("Zakona o zaštiti podataka o ličnosti, kao i obaveštenje da u svakom trenutku mogu opozvati dat"))
 		pdf.Ln(5)
@@ -242,7 +242,7 @@ func (p *printService) PrintConfirmations(seminar *model.Seminar) ([]byte, error
 		pdf.Text(30, pdf.GetY(), latTr(seminar.ClassRoom.Location.Address.Place))
 		pdf.Ln(15)
 
-		pdf.Text(80, pdf.GetY(), "POTVRDA")
+		pdf.Text(95, pdf.GetY(), "POTVRDA")
 		pdf.Ln(10)
 
 		pdf.SetFont("Arimo-Regular", "", 11)
@@ -318,7 +318,7 @@ func (p *printService) PrintConfirmations(seminar *model.Seminar) ([]byte, error
 		pdf.SetFont("Arimo-Regular", "", 11)
 		pdf.CellFormat(wl, ch-1, latTr("Mesto pohađanja"), "LRT", 0, "L", false, 0, "")
 		pdf.SetFont("Arimo-Bold", "", 11)
-		pdf.CellFormat(wr, ch-1, latTr(client.Client.Address.Place+", "+client.Client.Address.Street+" "+client.Client.Address.HouseNumber), "LRT", 0, "L", false, 0, "")
+		pdf.CellFormat(wr, ch-1, latTr(seminar.ClassRoom.Location.Address.Place+", "+seminar.ClassRoom.Location.Address.Street+" "+seminar.ClassRoom.Location.Address.HouseNumber), "LRT", 0, "L", false, 0, "")
 		pdf.Ln(ch - 1)
 		pdf.SetFont("Arimo-Regular", "", 11)
 		pdf.CellFormat(wl, ch-1, latTr("periodične obuke"), "LRB", 0, "L", false, 0, "")
@@ -668,14 +668,24 @@ func (p *printService) PrintCheckIn(seminar *model.Seminar) ([]byte, error) {
 		pdf.SetFont("Arimo-Regular", "", fontSize)
 		pdf.CellFormat(70, ch, latTr("Rok važenja kartice:"), "1", 0, "L", false, 0, "")
 		pdf.SetFont("Arimo-Bold", "", fontSize)
-		pdf.CellFormat(110, ch, client.Client.CPCDate.Format("02.01.2006."), "1", 0, "L", false, 0, "")
+		cpcDate := ""
+		if client.Client.CPCDate != nil {
+			cpcDate = client.Client.CPCDate.Format("02.01.2006.")
+		}
+		pdf.CellFormat(110, ch, cpcDate, "1", 0, "L", false, 0, "")
 
 		pdf.Ln(17)
 		pdf.SetFont("Arimo-Bold", "", fontSize)
 		pdf.Text(15, pdf.GetY(), latTr("VRSTA PREVOZA (zaokruženi broj ispred vrste prevoza)"))
 		pdf.Ln(1)
 		pdf.SetFont("Arimo-Regular", "", fontSize)
-		pdf.Circle(18, 157, 2.5, "")
+		if client.Client.CLicence != nil && *client.Client.CLicence {
+			pdf.Circle(18, 157, 2.5, "")
+		}
+		if client.Client.DLicence != nil && *client.Client.DLicence {
+			pdf.Circle(107.5, 157, 2.5, "")
+		}
+
 		pdf.CellFormat(90, ch, latTr("1. Prevoz tereta"), "1", 0, "L", false, 0, "")
 		pdf.CellFormat(90, ch, latTr("2. Prevoz putnika"), "1", 0, "L", false, 0, "")
 

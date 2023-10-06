@@ -85,8 +85,8 @@
 
     <hr>
     <div class="row">
-      <div class="col-sm-1">
-        <button class="btn btn-secondary text-white" @click="printMuster()">Prozivka</button>
+      <div class="col-sm-2">
+        <button class="btn btn-secondary text-white" @click="printMuster()">Prozivnik polaznika</button>
       </div>
       <div class="col-sm-2">
         <button class="btn btn-secondary text-white" @click="printTeacherEvidence()">Dnevnik predavača</button>
@@ -95,7 +95,7 @@
         <button class="btn btn-secondary text-white" @click="printTestResults()">Rezultati testova</button>
       </div>
       <div class="col-sm-2">
-        <button class="btn btn-secondary text-white" @click="printListTrainees()">Spisak polaznika</button>
+        <button class="btn btn-secondary text-white" @click="printListTrainees()">Registracioni list</button>
       </div>
     </div>
     <hr>
@@ -199,7 +199,7 @@ export default {
 
             const link = document.createElement('a')
             link.href = URL.createObjectURL(blob)
-            link.download = "Spisak_polaznika.xlsx"
+            link.download = "Registracioni_list.xlsx"
             link.click()
             URL.revokeObjectURL(link.href)
             //FIXME add notie

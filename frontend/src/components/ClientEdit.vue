@@ -120,7 +120,7 @@
                   :required=false
                   :styleInput=styleInputSmall
                   :styleLabel=styleLabelSmall
-                  label="CPC datum izdavanja"
+                  label="CPC datum isticanja"
                   name="cpc_date"
                   type="date">
               </text-input>
