@@ -138,16 +138,16 @@
               type="number">
           </text-input>
 
-          <text-input
-              v-model.trim="client.drive_licence"
-              :readonly="readonly"
-              :required=true
-              :styleInput=styleInputSmall
-              :styleLabel=styleLabelSmall
-              label="Broj vozačke"
-              name="drive_licence"
-              type="text">
-          </text-input>
+<!--          <text-input-->
+<!--              v-model.trim="client.drive_licence"-->
+<!--              :readonly="readonly"-->
+<!--              :required=true-->
+<!--              :styleInput=styleInputSmall-->
+<!--              :styleLabel=styleLabelSmall-->
+<!--              label="Broj vozačke"-->
+<!--              name="drive_licence"-->
+<!--              type="text">-->
+<!--          </text-input>-->
 
           <div class="form-check form-switch">
             <input id="flexSwitchCheckDefault" v-model="showNote" class="form-check-input" role="switch"
@@ -456,7 +456,7 @@ export default {
         person: {first_name: "", last_name: "", email: "", phone_number: ""},
         jmbg: "",
         address: {place: "", street: "", house_number: ""},
-        drive_licence: "",
+        // drive_licence: "",
         place_birth: "",
         country_birth: "Srbija",
         documents: [],
@@ -470,7 +470,7 @@ export default {
         educational_profile: "",
         verified: true,
         initial_completed_seminars: 0,
-        wait_seminar: true,
+        wait_seminar: false,
         seminars: [],
         c_licence: true,
         d_licence: false,
