@@ -97,6 +97,9 @@
       <div class="col-sm-2">
         <button class="btn btn-secondary text-white" @click="printListTrainees()">Registracioni list</button>
       </div>
+      <div class="col-sm-2">
+        <button class="btn btn-secondary text-white" @click="printPlanOfTreningRealization()">Plan realizacije obuke</button>
+      </div>
     </div>
     <hr>
     <div>
@@ -204,6 +207,27 @@ export default {
             URL.revokeObjectURL(link.href)
             //FIXME add notie
           }).catch(console.error)
+    },
+    async printPlanOfTreningRealization() {
+      await axios.get('/print/seminar-day/training-realization/' + this.seminarDayId).then((response) => {
+        if (response.data === null || response.data.Status === 'error') {
+          this.toast.error(response.data != null ? response.data.ErrorMessage : "");
+          return;
+        }
+        var fileContent = JSON.parse(response.data.Data);
+        var sampleArr = this.base64ToArrayBuffer(fileContent);
+        const blob = new Blob([sampleArr], {type: 'application/pdf'});
+
+        var iframe = document.createElement('iframe');
+        iframe.src = URL.createObjectURL(blob);
+        document.body.appendChild(iframe);
+
+        URL.revokeObjectURL(iframe.src);
+        iframe.contentWindow.print();
+        iframe.setAttribute("hidden", "hidden");
+      }, (error) => {
+        this.errorToast(error, "/print/seminar-day/training-realization");
+      });
     },
     downloadFile(i) {
       const arr = this.seminarDay.documents[i].content.split(',')

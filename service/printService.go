@@ -37,6 +37,7 @@ type printServiceInterface interface {
 	PrintCheckIn(seminar *model.Seminar) ([]byte, error)
 	PrintSeminarEvidence(day *model.SeminarDay) ([]byte, error)
 	PrintTestBarcode(day *model.SeminarDay) ([]byte, error)
+	PrintPlanTreningRealization(day *model.SeminarDay) ([]byte, error)
 }
 
 func (p *printService) PrintSeminarStudentList(seminar *model.Seminar) ([]byte, error) {
@@ -837,6 +838,174 @@ func (p *printService) PrintTestBarcode(day *model.SeminarDay) ([]byte, error) {
 	var buf bytes.Buffer
 
 	err := qrCode.Write(500, &buf)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return buf.Bytes(), nil
+}
+
+func (p *printService) PrintPlanTreningRealization(day *model.SeminarDay) ([]byte, error) {
+	pwd, err := os.Getwd()
+	if err != nil {
+		logoped.ErrorLog.Println("Error getting pwd: ", err)
+		return []byte{}, err
+	}
+	pdf := fpdf.New("P", "mm", "A4", filepath.Join(pwd, "font"))
+	pdf.AddFont("Arimo-Regular", "", "Arimo-Regular.json")
+	pdf.AddFont("Arimo-Bold", "", "Arimo-Bold.json")
+	latTr := pdf.UnicodeTranslatorFromDescriptor("iso-8859-16")
+
+	pdf.SetMargins(15.0, marginTop, marginRight)
+	pdf.AddPage()
+
+	pdf.Ln(30)
+	pdf.SetFont("Arimo-Bold", "", 14)
+	pdf.Text(38, pdf.GetY(), latTr("Plan realizacije nastave za periodičnu obuku - 7 časova"))
+	pdf.Ln(5)
+
+	pdf.SetFont("Arimo-Bold", "", 11)
+	ch := 8.0
+	chs := 5.0
+	cw1 := 12.0
+	cw2 := 69.0
+	cw3 := 53.0
+	cw4 := 23.0
+	cw5 := 23.0
+	pdf.CellFormat(180, ch, util.GetDaySerbian(day.Date)+" "+day.Date.Format("01.02.2006"), "1", 0, "C", false, 0, "")
+	pdf.Ln(ch)
+	pdf.SetFillColor(180, 197, 231)
+	pdf.CellFormat(cw1, ch, latTr("R.br"), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(cw2, ch, latTr("Naziv časa"), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(cw3, ch, latTr("Predavač"), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(cw4, ch, latTr("Početak"), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(cw5, ch, latTr("Kraj"), "1", 0, "C", true, 0, "")
+	pdf.SetFont("Arimo-Regular", "", 10)
+	pdf.Ln(ch)
+	pdf.CellFormat(cw1, chs*2.0, "", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw2, chs*2.0, latTr("Prijava i evidentiranje polaznika"), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw3, chs*2.0, "", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw4, chs*2.0, "", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw5, chs*2.0, "", "1", 0, "C", false, 0, "")
+
+	pdf.Ln(chs * 2.0)
+	pdf.CellFormat(cw1, chs*3.0, "1", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw2, chs*3.0, "", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw3, chs*3.0, "", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw4, chs*3.0, "", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw5, chs*3.0, "", "1", 0, "C", false, 0, "")
+
+	pdf.SetFont("Arimo-Bold", "", 11)
+	pdf.Ln(chs * 3.0)
+	pdf.SetFillColor(180, 197, 231)
+	pdf.CellFormat(cw1, chs*2, latTr(""), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(cw2, chs*2, latTr("Pauza za kafu"), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(cw3, chs*2, latTr("Predavač"), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(cw4, chs*2, latTr("10"), "LTB", 0, "R", true, 0, "")
+	pdf.CellFormat(cw5, chs*2, latTr("minuta"), "TBR", 0, "L", true, 0, "")
+
+	pdf.SetFont("Arimo-Regular", "", 10)
+	pdf.Ln(chs * 2.0)
+	pdf.CellFormat(cw1, chs*2.0, "2", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw2, chs*2.0, latTr("Prijava i evidentiranje polaznika"), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw3, chs*2.0, "", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw4, chs*2.0, "", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw5, chs*2.0, "", "1", 0, "C", false, 0, "")
+
+	pdf.SetFont("Arimo-Bold", "", 11)
+	pdf.Ln(chs * 2.0)
+	pdf.SetFillColor(180, 197, 231)
+	pdf.CellFormat(cw1, chs*2, latTr(""), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(cw2, chs*2, latTr("Pauza"), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(cw3, chs*2, latTr(""), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(cw4, chs*2, latTr("5"), "LTB", 0, "R", true, 0, "")
+	pdf.CellFormat(cw5, chs*2, latTr("minuta"), "TBR", 0, "L", true, 0, "")
+
+	pdf.SetFont("Arimo-Regular", "", 10)
+	pdf.Ln(chs * 2.0)
+	pdf.CellFormat(cw1, chs*2.0, "3", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw2, chs*2.0, latTr("Prijava i evidentiranje polaznika"), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw3, chs*2.0, "", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw4, chs*2.0, "", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw5, chs*2.0, "", "1", 0, "C", false, 0, "")
+
+	pdf.SetFont("Arimo-Bold", "", 11)
+	pdf.Ln(chs * 2.0)
+	pdf.SetFillColor(180, 197, 231)
+	pdf.CellFormat(cw1, chs*2, latTr(""), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(cw2, chs*2, latTr("Pauza za doručak"), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(cw3, chs*2, latTr(""), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(cw4, chs*2, latTr("25"), "LTB", 0, "R", true, 0, "")
+	pdf.CellFormat(cw5, chs*2, latTr("minuta"), "TBR", 0, "L", true, 0, "")
+
+	pdf.SetFont("Arimo-Regular", "", 10)
+	pdf.Ln(chs * 2.0)
+	pdf.CellFormat(cw1, chs*2.0, "4", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw2, chs*2.0, latTr("Prijava i evidentiranje polaznika"), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw3, chs*2.0, "", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw4, chs*2.0, "", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw5, chs*2.0, "", "1", 0, "C", false, 0, "")
+
+	pdf.SetFont("Arimo-Bold", "", 11)
+	pdf.Ln(chs * 2.0)
+	pdf.SetFillColor(180, 197, 231)
+	pdf.CellFormat(cw1, chs*2, latTr(""), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(cw2, chs*2, latTr("Pauza"), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(cw3, chs*2, latTr(""), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(cw4, chs*2, latTr("5"), "LTB", 0, "R", true, 0, "")
+	pdf.CellFormat(cw5, chs*2, latTr("minuta"), "TBR", 0, "L", true, 0, "")
+
+	pdf.SetFont("Arimo-Regular", "", 10)
+	pdf.Ln(chs * 2.0)
+	pdf.CellFormat(cw1, chs*2.0, "5", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw2, chs*2.0, latTr("Prijava i evidentiranje polaznika"), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw3, chs*2.0, "", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw4, chs*2.0, "", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw5, chs*2.0, "", "1", 0, "C", false, 0, "")
+
+	pdf.SetFont("Arimo-Bold", "", 11)
+	pdf.Ln(chs * 2.0)
+	pdf.SetFillColor(180, 197, 231)
+	pdf.CellFormat(cw1, chs*2, latTr(""), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(cw2, chs*2, latTr("Pauza za kafu"), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(cw3, chs*2, latTr(""), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(cw4, chs*2, latTr("15"), "LTB", 0, "R", true, 0, "")
+	pdf.CellFormat(cw5, chs*2, latTr("minuta"), "TBR", 0, "L", true, 0, "")
+
+	pdf.SetFont("Arimo-Regular", "", 10)
+	pdf.Ln(chs * 2.0)
+	pdf.CellFormat(cw1, chs*2.0, "6", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw2, chs*2.0, latTr("Prijava i evidentiranje polaznika"), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw3, chs*2.0, "", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw4, chs*2.0, "", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw5, chs*2.0, "", "1", 0, "C", false, 0, "")
+
+	pdf.SetFont("Arimo-Bold", "", 11)
+	pdf.Ln(chs * 2.0)
+	pdf.SetFillColor(180, 197, 231)
+	pdf.CellFormat(cw1, chs*2, latTr(""), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(cw2, chs*2, latTr("Pauza"), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(cw3, chs*2, latTr(""), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(cw4, chs*2, latTr("5"), "LTB", 0, "R", true, 0, "")
+	pdf.CellFormat(cw5, chs*2, latTr("minuta"), "TBR", 0, "L", true, 0, "")
+
+	pdf.SetFont("Arimo-Regular", "", 10)
+	pdf.Ln(chs * 2.0)
+	pdf.CellFormat(cw1, chs*2.0, "7", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw2, chs*2.0, latTr("Prijava i evidentiranje polaznika"), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw3, chs*2.0, "", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw4, chs*2.0, "", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw5, chs*2.0, "", "1", 0, "C", false, 0, "")
+
+	pdf.Ln(chs * 2.0)
+	pdf.CellFormat(cw1, chs*2.0, "", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw2, chs*2.0, latTr("Prijava i evidentiranje polaznika"), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw3, chs*2.0, "", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw4, chs*2.0, "", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw5, chs*2.0, "", "1", 0, "C", false, 0, "")
+
+	var buf bytes.Buffer
+	err = pdf.Output(&buf)
 	if err != nil {
 		return []byte{}, err
 	}
