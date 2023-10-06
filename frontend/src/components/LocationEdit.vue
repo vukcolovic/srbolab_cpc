@@ -24,7 +24,7 @@
               v-model.trim="location.code"
               label="Skraćeni kod"
               type="text"
-              name="post_code"
+              name="code"
               :required=true
               :readonly="readonly">
           </text-input>

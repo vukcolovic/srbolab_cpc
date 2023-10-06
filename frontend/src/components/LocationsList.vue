@@ -60,7 +60,7 @@ export default {
         {
           label: 'Mesto',
           field: 'address_place',
-          width: '20%',
+          width: '27%',
         },
         {
           label: 'Kod',
