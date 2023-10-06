@@ -20,6 +20,8 @@
                   :styleInput=styleInputSmall
                   :styleLabel=styleLabelSmall
                   label="JMBG"
+                  min="13"
+                  max="13"
                   name="jmbg"
                   type="text"
                   @focusout="onJmbgFocusOut">
@@ -50,7 +52,7 @@
               <text-input
                   v-model.trim="client.person.middle_name"
                   :readonly="readonly"
-                  :required=true
+                  :required=false
                   :styleInput=styleInputSmall
                   :styleLabel=styleLabelSmall
                   label="Ime jednog roditelja"
@@ -104,6 +106,8 @@
               <text-input
                   v-model.trim="client.cpc_number"
                   :readonly="readonly"
+                  :min=6
+                  :max=6
                   :required="cpcRequired"
                   :styleInput=styleInputSmall
                   :styleLabel=styleLabelSmall
@@ -195,7 +199,7 @@
           <text-input
               v-model.trim="client.address.place"
               :readonly="readonly"
-              :required=true
+              :required=false
               :styleInput=styleInputSmall
               :styleLabel=styleLabelSmall
               label="Mesto"
@@ -208,7 +212,7 @@
               <text-input
                   v-model.trim="client.address.street"
                   :readonly="readonly"
-                  :required=true
+                  :required=false
                   :styleInput=styleInputSmall
                   :styleLabel=styleLabelSmall
                   label="Ulica"
@@ -220,7 +224,7 @@
               <text-input
                   v-model.trim="client.address.house_number"
                   :readonly="readonly"
-                  :required=true
+                  :required=false
                   :styleInput=styleInputSmall
                   :styleLabel=styleLabelSmall
                   label="Broj"
@@ -233,7 +237,7 @@
           <text-input
               v-model.trim="client.place_birth"
               :readonly="readonly"
-              :required=true
+              :required=false
               :styleInput=styleInputSmall
               :styleLabel=styleLabelSmall
               label="Mesto rođenja"
@@ -244,7 +248,7 @@
           <text-input
               v-model.trim="client.country_birth"
               :readonly="readonly"
-              :required=true
+              :required=false
               :styleInput=styleInputSmall
               :styleLabel=styleLabelSmall
               label="Država rođenja"
@@ -532,7 +536,11 @@ export default {
           return;
         }
         var foundClient = JSON.parse(response.data.Data);
-        router.push("/client?action=update&id=" + foundClient.ID.toString());
+        var location = this.selectedLocation ? this.selectedLocation.address.place : "";
+        var seminarID = this.selectedOpenSeminar ? this.selectedOpenSeminar.ID : "";
+        var rand = "";
+        rand += Math.random();
+        router.push("/client?action=update&id=" + foundClient.ID.toString() + "&location=" + location + "&seminar_id=" + seminarID + "&rand=" + rand);
       }, (error) => {
         this.errorToast(error, "/clients/jmbg");
       });
@@ -613,9 +621,12 @@ export default {
       if (this.client.jmbg.length != 13) {
         return "Jmbg mora imati 13 cifara!";
       }
-      if (!this.client.educational_profile && (!this.client.cpc_number && this.isDateEmpty(this.client.cpc_date))) {
-        return "Obrazovni profil ili podaci o cpc kartici moraju biti popunjeni!";
+      if (this.client.cpc_number.length > 0 && this.client.cpc_number.length != 6) {
+        return "Broj cpc kartice mora imati 6 cifara!";
       }
+      // if (!this.client.educational_profile && (!this.client.cpc_number && this.isDateEmpty(this.client.cpc_date))) {
+      //   return "Obrazovni profil ili podaci o cpc kartici moraju biti popunjeni!";
+      // }
 
       if (this.selectedOpenSeminar && (this.selectedOpenSeminar.seminar_theme.base_seminar_type.code === "CYCLE" || this.selectedOpenSeminar.seminar_theme.base_seminar_type.code === "ADDITIONAL") && !this.client.cpc_number) {
         return "Za dodatnu i periodičnu obuku broj cpc kartice mora biti popunjen.";
@@ -654,7 +665,8 @@ export default {
         this.toast.info("Uspešno kreiran klijent.");
         var location = this.selectedLocation ? this.selectedLocation.address.place : "";
         var seminarID = this.selectedOpenSeminar ? this.selectedOpenSeminar.ID : "";
-        var rand = this.makeid(3);
+        var rand = "";
+        rand += Math.random();
         router.push("/client?action=add&id=&location=" + location + "&seminar_id=" + seminarID + "&rand=" + rand);
       }, (error) => {
         this.errorToast(error, "/clients/create");
@@ -671,7 +683,8 @@ export default {
         this.toast.info("Uspešno ažuriran klijent.");
         var location = this.selectedLocation ? this.selectedLocation.address.place : "";
         var seminarID = this.selectedOpenSeminar ? this.selectedOpenSeminar.ID : "";
-        var rand = this.makeid(3);
+        var rand = "";
+        rand += Math.random();
         router.push("/client?action=add&id=&location=" + location + "&seminar_id=" + seminarID + "&rand=" + rand);
       }, (error) => {
         this.errorToast(error, "/clients/update");

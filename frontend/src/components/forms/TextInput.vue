@@ -10,8 +10,8 @@
             :readonly="readonly"
             :required="required"
             :step= "step"
-            :min="min"
-            :max="max"
+            :min=min
+            :max=max
             :value="modelValue"
             :autocomplete="name + '-new'"
             @input="$emit('update:modelValue', $event.target.value)"
@@ -30,8 +30,8 @@ export default {
         label: String,
         placeholder: String,
         required: Boolean,
-        min: String,
-        max: String,
+        min: Number,
+        max: Number,
         step: String,
         modelValue: String,
         readonly: Boolean,
