@@ -256,7 +256,7 @@ export default {
       this.seminarDay.documents.splice(i, 1);
     },
     async printBarcode() {
-      await axios.get('/print/seminar-day/test/barcode/' + this.seminarDayId).then((response) => {
+      await axios.get('/print/seminar-day/test/barcode').then((response) => {
         if (response.data === null || response.data.Status === 'error') {
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;

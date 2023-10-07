@@ -36,7 +36,7 @@ type printServiceInterface interface {
 	PrintMuster(day *model.SeminarDay) ([]byte, error)
 	PrintCheckIn(seminar *model.Seminar) ([]byte, error)
 	PrintSeminarEvidence(day *model.SeminarDay) ([]byte, error)
-	PrintTestBarcode(day *model.SeminarDay) ([]byte, error)
+	PrintTestBarcode() ([]byte, error)
 	PrintPlanTreningRealization(day *model.SeminarDay) ([]byte, error)
 }
 
@@ -832,8 +832,8 @@ func (p *printService) PrintSeminarEvidence(day *model.SeminarDay) ([]byte, erro
 	return buf.Bytes(), nil
 }
 
-func (p *printService) PrintTestBarcode(day *model.SeminarDay) ([]byte, error) {
-	url := fmt.Sprintf("%s/api/v1/seminar-day/%d/test/%d", Domain, day.ID, day.Test.ID)
+func (p *printService) PrintTestBarcode() ([]byte, error) {
+	url := fmt.Sprintf("%s/do-test")
 	qrCode, _ := qrcode.New(url, qrcode.Medium)
 	var buf bytes.Buffer
 

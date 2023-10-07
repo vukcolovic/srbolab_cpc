@@ -488,6 +488,7 @@ export default {
       });
     },
     async updateSeminar() {
+      this.seminar.trainees.forEach(t => t.pay_date = this.getBackendFormat(t.pay_date))
       this.seminar.start_date = this.getBackendFormat(this.seminar.start_date);
       await axios.post('/seminars/update', JSON.stringify(this.seminar)).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
@@ -495,6 +496,7 @@ export default {
           return;
         }
         this.seminar.start_date = this.getDateInMMDDYYYYFormat(this.seminar.start_date);
+        this.seminar.trainees.forEach(t => t.pay_date = this.getDateInMMDDYYYYFormat(t.pay_date))
         this.toast.info("Uspešno ažuriran seminar!");
       }, (error) => {
         this.errorToast(error, "/seminars/update");

@@ -60,6 +60,7 @@ func RunServer(host string) {
 	s.HandleFunc("/update", handlers.UpdateSeminarDay).Methods("POST")
 	s.HandleFunc("/list/{seminar_id}", handlers.ListSeminarDays).Methods("GET")
 	s.HandleFunc("/id/{id}", handlers.GetSeminarDayByID).Methods("GET")
+	s.HandleFunc("/jmbg/{jmbg}", handlers.GetSeminarDayWithTestByJMBG).Methods("GET")
 	//s.HandleFunc("/delete/{id}", handlers.DeleteSeminarDay).Methods("GET")
 
 	s = r.PathPrefix("/api/companies").Subrouter()
@@ -100,7 +101,7 @@ func RunServer(host string) {
 	s.HandleFunc("/seminar/muster/{seminar_day_id}", handlers.PrintMuster).Methods("GET")
 	s.HandleFunc("/seminar/check-in/{seminar_id}", handlers.PrintCheckIn).Methods("GET")
 	s.HandleFunc("/seminar/teacher-evidence/{seminar_day_id}", handlers.PrintSeminarEvidence).Methods("GET")
-	s.HandleFunc("/seminar-day/test/barcode/{seminar_day_id}", handlers.PrintTestBarcode).Methods("GET")
+	s.HandleFunc("/seminar-day/test/barcode", handlers.PrintTestBarcode).Methods("GET")
 	s.HandleFunc("/seminar-day/training-realization/{seminar_day_id}", handlers.PrintPlanTreningRealization).Methods("GET")
 
 	s = r.PathPrefix("/api/questions").Subrouter()

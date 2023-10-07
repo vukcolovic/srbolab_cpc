@@ -9,6 +9,7 @@ import (
 	"srbolab_cpc/model"
 	"srbolab_cpc/service"
 	"strconv"
+	"time"
 )
 
 func GetSeminarDayByID(w http.ResponseWriter, req *http.Request) {
@@ -124,4 +125,73 @@ func CreateAllSeminarDaysForSeminar(w http.ResponseWriter, r *http.Request) {
 	}
 
 	SetSuccessResponse(w, seminarDays)
+}
+
+func GetSeminarDayWithTestByJMBG(w http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	jmbg, ok := vars["jmbg"]
+	if !ok {
+		logoped.ErrorLog.Println("missing parameter jmbg")
+		SetErrorResponse(w, NewMissingRequestParamError("jmbg"))
+		return
+	}
+
+	client, err := service.ClientService.GetClientByJMBGWithSeminars(jmbg)
+	if err != nil {
+		logoped.ErrorLog.Println(err.Error())
+		SetErrorResponse(w, errors.New("Greška prilikom povlačenja klijenta: "+err.Error()))
+		return
+	}
+
+	seminarInProgress := model.Seminar{}
+	for _, cs := range client.Seminars {
+		if cs.Seminar.SeminarStatusID == model.SEMINAR_STATUS_IN_PROGRESS {
+			seminarInProgress = cs.Seminar
+			break
+		}
+	}
+
+	if seminarInProgress.ID == 0 {
+		SetErrorResponse(w, errors.New("Vozač sa upisanim jmbg-om nije na nekom od aktulenih seminara."))
+		return
+	}
+
+	for _, day := range seminarInProgress.Days {
+		if day.Date.Day() != time.Now().Day() || day.Date.Month() != time.Now().Month() || day.Date.Year() != time.Now().Year() {
+			continue
+		}
+		if *day.TestID == 0 {
+			SetErrorResponse(w, errors.New("Seminar dan nema izabran test."))
+			return
+		}
+
+		tests, err := service.TestService.GetClientTestBySeminarDayIDAndJMBG(int(day.ID), jmbg)
+		if err != nil {
+			SetErrorResponse(w, err)
+			return
+		}
+
+		if len(tests) > 1 {
+			SetErrorResponse(w, errors.New("Ovaj test nije dozvoljeno, klijent je već odradio dva testa u toku dana."))
+			return
+		}
+
+		if len(tests) == 1 {
+			if !tests[0].CreatedAt.Add(2 * time.Hour).Before(time.Now()) {
+				SetErrorResponse(w, errors.New("Nije dozvoljeno snimiti test, rađen je skoro."))
+				return
+			}
+		}
+
+		fullSeminarDay, err := service.SeminarDayService.GetSeminarDayByID(int(day.ID))
+		if err != nil {
+			SetErrorResponse(w, err)
+			return
+		}
+
+		SetSuccessResponse(w, fullSeminarDay)
+		return
+	}
+
+	SetErrorResponse(w, errors.New("Danas nije predviđen dan seminara."))
 }

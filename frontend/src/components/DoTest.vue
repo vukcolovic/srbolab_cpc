@@ -1,5 +1,18 @@
 <template>
   <div class="container">
+    <div v-if="!allowed">
+      <br>
+      <text-input
+          v-model="client_test.jmbg"
+          :required=true
+          label="Upišite vaš JMBG"
+          name="jmbg"
+          type="text">
+      </text-input>
+      <br>
+      <button type="button" @click="sendJmbg()" class="btn btn-primary">Pošalji</button>
+    </div>
+
     <form-tag v-if="allowed" event="formEvent" name="myForm" @formEvent="submitHandler">
       <div class="row">
         <div class="col-sm-11 mx-auto">
@@ -7,13 +20,13 @@
           <hr>
         </div>
         <div class="col-sm-12">
-          <text-input
-              v-model="client_test.jmbg"
-              :required=true
-              label="Upišite vaš JMBG"
-              name="jmbg"
-              type="text">
-          </text-input>
+<!--          <text-input-->
+<!--              v-model="client_test.jmbg"-->
+<!--              :required=true-->
+<!--              label="Upišite vaš JMBG"-->
+<!--              name="jmbg"-->
+<!--              type="text">-->
+<!--          </text-input>-->
           <hr>
           <h6>Pitanja</h6>
           <div v-for="(question, index) in questions" :key="question.ID" class="row" style="margin-bottom: 5px">
@@ -36,7 +49,7 @@
         <input class="btn btn-primary m-2" type="submit" value="Snimi">
       </div>
     </form-tag>
-    <h2 v-else>Test nije dozvoljen, obratite se rukovodiocu kursa.</h2>
+<!--    <h2 v-else>Test nije dozvoljen, obratite se rukovodiocu kursa.</h2>-->
   </div>
 </template>
 
@@ -78,18 +91,18 @@ export default {
     }
   },
   methods: {
-    async getSeminarDayById() {
-      await axios.get('/seminar-days/id/' + this.seminarDayId).then((response) => {
+    async sendJmbg() {
+      await axios.get('/seminar-days/jmbg/' + this.client_test.jmbg).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;
         }
+        console.log(response);
         this.seminarDay = JSON.parse(response.data.Data);
-        var date = this.getDateInMMDDYYYYFormat(this.seminarDay.date);
-        this.seminarDay.date = date;
+        this.seminarDay.date= this.getDateInMMDDYYYYFormat(this.seminarDay.date);
 
         if (!this.isToday(new Date(this.seminarDay.date))) {
-          this.toast.error("Ovaj test danas nije dozvoljen!");
+          this.toast.warning("Ovaj test danas nije dozvoljen!");
           return;
         }
         if (this.seminarDay.seminar.seminar_status_id != this.SEMINAR_STATUSES.IN_PROGRESS) {
@@ -109,7 +122,7 @@ export default {
         })
 
       }, (error) => {
-        this.errorToast(error, "/seminar-days/id");
+        this.errorToast(error, "/seminar-days/jmbg");
       });
     },
     async submitHandler() {
@@ -143,12 +156,7 @@ export default {
     return {toast}
   },
   async mounted() {
-    if (this.$route.query.seminar_day_id === '') {
-      this.toast.error("URL nije validan!");
-      return;
-    }
-    this.seminarDayId = this.$route.query.seminar_day_id;
-    await this.getSeminarDayById();
+
   }
 }
 </script>
