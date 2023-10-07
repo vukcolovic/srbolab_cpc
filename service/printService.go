@@ -365,7 +365,7 @@ func (p *printService) PrintConfirmationReceives(seminar *model.Seminar) ([]byte
 	pdf.AddFont("Arimo-Bold", "", "Arimo-Bold.json")
 	latTr := pdf.UnicodeTranslatorFromDescriptor("iso-8859-16")
 
-	pdf.SetMargins(15, 20, marginRight)
+	pdf.SetMargins(15.0, 20, 15.0)
 
 	companyClientsMap := map[string][]model.ClientSeminar{}
 
@@ -393,38 +393,38 @@ func (p *printService) PrintConfirmationReceives(seminar *model.Seminar) ([]byte
 		pdf.Ln(20)
 
 		pdf.SetFont("Arimo-Regular", "", 11)
-		pdf.Text(15, pdf.GetY(), "Dana")
-		pdf.Line(27, pdf.GetY(), 57, pdf.GetY())
+		pdf.Text(20, pdf.GetY(), "Dana")
+		pdf.Line(33, pdf.GetY(), 60, pdf.GetY())
 		pdf.SetFont("Arimo-Bold", "", 11)
-		pdf.Text(30, pdf.GetY()-1, latTr(time.Now().Format("02.01.2006.")))
+		pdf.Text(33, pdf.GetY()-1, latTr(time.Now().Format("02.01.2006.")))
 		pdf.SetFont("Arimo-Regular", "", 11)
-		pdf.Text(60, pdf.GetY(), "godine, ")
-		pdf.Line(75, pdf.GetY(), 135, pdf.GetY())
+		pdf.Text(62, pdf.GetY(), "godine, ")
+		pdf.Line(77, pdf.GetY(), 135, pdf.GetY())
 		pdf.SetFont("Arimo-Bold", "", 11)
 		pdf.Text(80, pdf.GetY()-1, latTr(client.Client.Person.FullName()))
 		pdf.SetFont("Arimo-Regular", "", 11)
-		pdf.Text(135, pdf.GetY(), "(ime i prezime), JMBG")
+		pdf.Text(137, pdf.GetY(), "(ime i prezime), JMBG")
 		pdf.Ln(6)
-		pdf.Line(15, pdf.GetY(), 50, pdf.GetY())
+		pdf.Line(20, pdf.GetY(), 55, pdf.GetY())
 		pdf.SetFont("Arimo-Bold", "", 11)
-		pdf.Text(20, pdf.GetY()-1, *client.Client.JMBG)
+		pdf.Text(25, pdf.GetY()-1, *client.Client.JMBG)
 		pdf.SetFont("Arimo-Regular", "", 11)
-		pdf.Text(55, pdf.GetY(), latTr("je preuzeo potvrdu o završenoj periodičnoj obuci na"))
+		pdf.Text(55, pdf.GetY(), latTr("je preuzeo potvrdu o završenoj periodičnoj obuci na obaveznim"))
 		pdf.Ln(6)
-		pdf.Text(15, pdf.GetY(), latTr("obaveznim seminarima unapređenja znanja."))
+		pdf.Text(20, pdf.GetY(), latTr("seminarima unapređenja znanja."))
 
 		pdf.Ln(80)
 
-		pdf.Text(15, pdf.GetY(), "Potvrdu preuzeo: ")
+		pdf.Text(20, pdf.GetY(), "Potvrdu preuzeo: ")
 		pdf.Ln(10)
-		pdf.Line(15, pdf.GetY(), 60, pdf.GetY())
+		pdf.Line(20, pdf.GetY(), 60, pdf.GetY())
 		pdf.Ln(8)
-		pdf.Text(15, pdf.GetY(), "Dana: ")
+		pdf.Text(20, pdf.GetY(), "Dana: ")
 		pdf.SetFont("Arimo-Bold", "", 11)
-		pdf.Line(26, pdf.GetY(), 48, pdf.GetY())
-		pdf.Text(27, pdf.GetY()-1, time.Now().Format("02.01.2006"))
+		pdf.Line(31, pdf.GetY(), 58, pdf.GetY())
+		pdf.Text(32, pdf.GetY()-1, time.Now().Format("02.01.2006"))
 		pdf.SetFont("Arimo-Regular", "", 11)
-		pdf.Text(50, pdf.GetY(), "godine.")
+		pdf.Text(60, pdf.GetY(), "godine.")
 	}
 
 	for company, clients := range companyClientsMap {
