@@ -87,3 +87,12 @@ type SeminarClass struct {
 	SeminarDayID uint       `json:"seminar_day_id"`
 	SeminarDay   SeminarDay `json:"seminar_day"`
 }
+
+type SeminarClassName struct {
+	gorm.Model
+	SeminarThemeID uint         `json:"seminar_theme_id"`
+	SeminarTheme   SeminarTheme `json:"seminar_theme"`
+	DayNumber      int          `json:"day_number"`
+	ClassNumber    int          `json:"class_number"`
+	ClassName      string       `json:"class_name"`
+}

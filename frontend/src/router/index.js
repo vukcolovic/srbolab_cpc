@@ -22,6 +22,8 @@ import TestsList from '../components/TestsList.vue'
 import TestEdit from '../components/TestEdit.vue'
 import ClientEditNoCorporate from '../components/ClientEditNoCorporate.vue'
 import DoTest from '../components/DoTest.vue'
+import ClassNamesList from '../components/ClassNamesList.vue'
+import ClassNameEdit from '../components/ClassNameEdit.vue'
 
 const routes = [
   {
@@ -147,6 +149,17 @@ const routes = [
     path: '/test',
     name: 'TestEdit',
     component: TestEdit,
+    props: true,
+  },
+  {
+    path: '/class-names',
+    name: 'ClassNames',
+    component: ClassNamesList,
+  },
+  {
+    path: '/class-name',
+    name: 'ClassNameEdit',
+    component: ClassNameEdit,
     props: true,
   },
 ]

@@ -34,6 +34,7 @@ func Connect(conf config.Config) error {
 		&model.Answer{},
 		&model.Test{},
 		&model.ClientTest{},
+		&model.SeminarClassName{},
 	)
 	if err != nil {
 		return err
