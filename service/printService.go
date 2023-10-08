@@ -525,7 +525,7 @@ func (p *printService) PrintMuster(day *model.SeminarDay) ([]byte, error) {
 	pdf.Text(27, pdf.GetY(), day.Seminar.ClassRoom.Location.Address.Place)
 	pdf.Ln(5)
 	pdf.Text(15, pdf.GetY(), latTr("Šifra obuke: "))
-	pdf.Text(30, pdf.GetY(), day.Seminar.GetCode())
+	pdf.Text(35, pdf.GetY(), day.Seminar.GetCode())
 	pdf.Ln(5)
 	pdf.Text(15, pdf.GetY(), "Datum: ")
 	dayInWeek := util.GetDaySerbian(day.Date)
@@ -737,8 +737,9 @@ func createSimpleHeader(pdf *fpdf.Fpdf, tr func(string) string) {
 	pdf.SetFont("Arimo-Regular", "", 10)
 	pdf.Image("./images/srbolab_logo.png", 15, 10, 30, 10, false, "png", 0, "")
 	pdf.CellFormat(35, 10, "", "0", 0, "C", false, 0, "")
-	pdf.Text(100, 14, "SRBOLAB D.O.O.")
-	pdf.Text(60, 18, tr("SEKTOR ZA STRUČNO USAVRŠAVANJE, RAZVOJ I BEZBEDNOST SAOBRAĆAJA"))
+	pdf.Text(95, 14, "SRBOLAB D.O.O.")
+	pdf.Text(80, 18, tr("Centar za edukaciju i razvoj Srbolab"))
+	pdf.Image("./images/cers_logo.png", 170, 10, 20, 10, false, "png", 0, "")
 	pdf.Ln(15)
 }
 
