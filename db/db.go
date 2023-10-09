@@ -35,6 +35,7 @@ func Connect(conf config.Config) error {
 		&model.Test{},
 		&model.ClientTest{},
 		&model.SeminarClassName{},
+		&model.SeminarDayThemeName{},
 	)
 	if err != nil {
 		return err

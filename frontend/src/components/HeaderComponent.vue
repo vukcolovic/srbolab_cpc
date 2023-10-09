@@ -67,6 +67,9 @@
               <li>
                 <router-link class="dropdown-item" to="/class-names">Nazivi časova</router-link>
               </li>
+              <li>
+                <router-link class="dropdown-item" to="/theme-names">Nazivi tema</router-link>
+              </li>
             </ul>
           </li>
           <li class="nav-item">

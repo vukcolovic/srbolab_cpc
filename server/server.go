@@ -69,6 +69,12 @@ func RunServer(host string) {
 	s.HandleFunc("/list", handlers.ListSeminarClassNames).Methods("GET")
 	s.HandleFunc("/id/{id}", handlers.GetSeminarClassNameByID).Methods("GET")
 
+	s = r.PathPrefix("/api/theme-names").Subrouter()
+	s.HandleFunc("/create", handlers.CreateSeminarDayThemeName).Methods("POST")
+	s.HandleFunc("/update", handlers.UpdateSeminarDayThemeName).Methods("POST")
+	s.HandleFunc("/list", handlers.ListSeminarDayThemeNames).Methods("GET")
+	s.HandleFunc("/id/{id}", handlers.GetSeminarDayThemeNameByID).Methods("GET")
+
 	s = r.PathPrefix("/api/companies").Subrouter()
 	s.HandleFunc("/create", handlers.CreateCompany).Methods("POST")
 	s.HandleFunc("/update", handlers.UpdateCompany).Methods("POST")

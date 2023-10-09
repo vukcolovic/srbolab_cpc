@@ -24,6 +24,8 @@ import ClientEditNoCorporate from '../components/ClientEditNoCorporate.vue'
 import DoTest from '../components/DoTest.vue'
 import ClassNamesList from '../components/ClassNamesList.vue'
 import ClassNameEdit from '../components/ClassNameEdit.vue'
+import ThemeNamesList from '../components/ThemeNamesList.vue'
+import ThemeNameEdit from '../components/ThemeNameEdit.vue'
 
 const routes = [
   {
@@ -160,6 +162,17 @@ const routes = [
     path: '/class-name',
     name: 'ClassNameEdit',
     component: ClassNameEdit,
+    props: true,
+  },
+  {
+    path: '/theme-names',
+    name: 'ThemeNames',
+    component: ThemeNamesList,
+  },
+  {
+    path: '/theme-name',
+    name: 'ThemeNameEdit',
+    component: ThemeNameEdit,
     props: true,
   },
 ]
