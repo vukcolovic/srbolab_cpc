@@ -287,13 +287,17 @@ func (p *printService) PrintConfirmations(seminar *model.Seminar) ([]byte, error
 			completedSeminars = *client.Client.InitialCompletedSeminars
 		}
 
-		completedInSrbolab := 0
-		for _, s := range client.Client.Seminars {
-			if s.Pass != nil && *s.Pass {
-				completedInSrbolab++
-			}
+		//changed after consulatition with Marko Jovanovic
+		//completedInSrbolab := 0
+		//for _, s := range client.Client.Seminars {
+		//	if s.Pass != nil && *s.Pass {
+		//		completedInSrbolab++
+		//	}
+		//}
+		seminarNumber := completedSeminars
+		if seminarNumber > 5 {
+			seminarNumber = 5
 		}
-		seminarNumber := completedSeminars + completedInSrbolab
 		cx := 89.5 + float64(seminarNumber)*7
 		if seminarNumber == 1 {
 			cx = cx + 1
