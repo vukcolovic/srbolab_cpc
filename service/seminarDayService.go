@@ -91,6 +91,11 @@ func (c *seminarDayService) CreateAllSeminarDaysForSeminar(seminarID int) ([]mod
 		return []model.SeminarDay{}, errors.New("Greška prilikom pravljenja dana za seminar, seminar već ima dane!")
 	}
 
+	seminarDayThemesMap, err := SeminarThemeService.GetSeminarThemeNamesBySeminarThemeAsMap(seminar.SeminarThemeID)
+	if err != nil {
+		return []model.SeminarDay{}, err
+	}
+
 	seminarDays := []model.SeminarDay{}
 	dateForDay := util.IfWeekendGetFirstWorkDay(seminar.Start)
 	dateForDay = time.Date(dateForDay.Year(), dateForDay.Month(), dateForDay.Day(), 8, 0, 0, 0, dateForDay.Location())
@@ -101,11 +106,17 @@ func (c *seminarDayService) CreateAllSeminarDaysForSeminar(seminarID int) ([]mod
 			presences = append(presences, model.ClientPresence{ClientID: client.ClientID, Presence: &presence})
 		}
 
+		seminarClassesMap, err := SeminarClassService.GetSeminarClassesNamesBySeminarThemeAndDayNumberAsMap(seminar.SeminarThemeID, i)
+		if err != nil {
+			return []model.SeminarDay{}, err
+		}
+
 		classes := []model.SeminarClass{}
 		for j := 1; j <= 7; j++ {
-			classes = append(classes, model.SeminarClass{Number: j})
+			classes = append(classes, model.SeminarClass{Number: j, Name: seminarClassesMap[j]})
 		}
-		day := model.SeminarDay{SeminarID: seminar.ID, Date: dateForDay, Number: i, Presence: presences, Classes: classes}
+		theme, _ := seminarDayThemesMap[i]
+		day := model.SeminarDay{SeminarID: seminar.ID, Date: dateForDay, Number: i, Presence: presences, Classes: classes, Name: theme}
 		result := db.Client.Create(&day)
 		if result.Error != nil {
 			return []model.SeminarDay{}, result.Error

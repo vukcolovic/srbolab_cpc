@@ -18,6 +18,7 @@ type seminarClassServiceInterface interface {
 	GetAllSeminarClassNames() ([]model.SeminarClassName, error)
 	CreateSeminarClassName(seminarClassName model.SeminarClassName) (*model.SeminarClassName, error)
 	UpdateSeminarClassName(seminarClassName model.SeminarClassName) (*model.SeminarClassName, error)
+	GetSeminarClassesNamesBySeminarThemeAndDayNumberAsMap(seminarThemeID uint, seminarDayNumber int) (map[int]string, error)
 }
 
 func (c *seminarClassService) GetSeminarClassNameByID(seminarClassNameID int) (*model.SeminarClassName, error) {
@@ -53,4 +54,18 @@ func (c *seminarClassService) UpdateSeminarClassName(seminarClassName model.Semi
 	}
 
 	return &seminarClassName, nil
+}
+
+func (c *seminarClassService) GetSeminarClassesNamesBySeminarThemeAndDayNumberAsMap(seminarThemeID uint, seminarDayNumber int) (map[int]string, error) {
+	var classes []model.SeminarClassName
+	if err := db.Client.Where("seminar_theme_id = ? AND day_number = ?", seminarThemeID, seminarDayNumber).Find(&classes).Error; err != nil {
+		return nil, err
+	}
+
+	mapClasses := map[int]string{}
+	for _, c := range classes {
+		mapClasses[c.ClassNumber] = c.ClassName
+	}
+
+	return mapClasses, nil
 }

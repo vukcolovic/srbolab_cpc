@@ -18,6 +18,7 @@ type seminarThemeServiceInterface interface {
 	GetAllSeminarDayThemeNames() ([]model.SeminarDayThemeName, error)
 	CreateSeminarDayThemeName(seminarDayThemeName model.SeminarDayThemeName) (*model.SeminarDayThemeName, error)
 	UpdateSeminarDayThemeName(seminarDayThemeName model.SeminarDayThemeName) (*model.SeminarDayThemeName, error)
+	GetSeminarThemeNamesBySeminarThemeAsMap(seminarThemeID uint) (map[int]string, error)
 }
 
 func (c *seminarThemeService) GetSeminarDayThemeNameByID(seminarDayThemeNameID int) (*model.SeminarDayThemeName, error) {
@@ -53,4 +54,18 @@ func (c *seminarThemeService) UpdateSeminarDayThemeName(seminarDayThemeName mode
 	}
 
 	return &seminarDayThemeName, nil
+}
+
+func (c *seminarThemeService) GetSeminarThemeNamesBySeminarThemeAsMap(seminarThemeID uint) (map[int]string, error) {
+	var themes []model.SeminarDayThemeName
+	if err := db.Client.Where("seminar_theme_id", seminarThemeID).Find(&themes).Error; err != nil {
+		return nil, err
+	}
+
+	mapThemes := map[int]string{}
+	for _, t := range themes {
+		mapThemes[t.DayNumber] = t.ThemeName
+	}
+
+	return mapThemes, nil
 }
