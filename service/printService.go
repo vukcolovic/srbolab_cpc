@@ -12,6 +12,7 @@ import (
 	"srbolab_cpc/util"
 	"strconv"
 	"time"
+	"unicode"
 )
 
 var (
@@ -24,6 +25,47 @@ const (
 	marginTop   = 15.0
 	marginRight = 10.0
 )
+
+type translationDetails struct {
+	pdf             *fpdf.Fpdf
+	cirilicFont     string
+	latinicFont     string
+	defaultFontSize float64
+	latinicFunc     func(string) string
+	cirilicFunc     func(string) string
+}
+
+func newTranslationDetails(pdf *fpdf.Fpdf, cirilicFont, latinicFont string, defaultFontSize float64, latinicFunc, cirilicFunc func(string) string) *translationDetails {
+	return &translationDetails{
+		pdf:             pdf,
+		cirilicFont:     cirilicFont,
+		latinicFont:     latinicFont,
+		defaultFontSize: defaultFontSize,
+		latinicFunc:     latinicFunc,
+		cirilicFunc:     cirilicFunc,
+	}
+}
+
+// method for automatic choose translate on latinic or cirilic
+// font size is nessesary because of custom solution of changing font family on changing translations
+// if font size is same as default set number less then 1
+func (t *translationDetails) translate(input string, fontSize float64) string {
+	if fontSize < 1 {
+		fontSize = t.defaultFontSize
+	}
+	for _, r := range input {
+		if unicode.Is(unicode.Cyrillic, r) {
+			t.pdf.SetFont(t.cirilicFont, "", fontSize)
+			return t.cirilicFunc(input)
+		}
+	}
+	t.pdf.SetFont(t.latinicFont, "", fontSize)
+	return t.latinicFunc(input)
+}
+
+func (t *translationDetails) translDef(input string) string {
+	return t.translate(input, -1)
+}
 
 type printService struct {
 }
@@ -48,41 +90,44 @@ func (p *printService) PrintSeminarStudentList(seminar *model.Seminar) ([]byte, 
 	}
 	pdf := fpdf.New("L", "mm", "A4", filepath.Join(pwd, "font"))
 	pdf.AddFont("Arimo-Regular", "", "Arimo-Regular.json")
-	//pdf.AddFont("Arimo-Bold", "", "Arimo-Bold.json")
+	pdf.AddFont("Arimo-Bold", "", "Arimo-Bold.json")
+	pdf.AddFont("Helvetica", "", "helvetica_1251.json")
 	latTr := pdf.UnicodeTranslatorFromDescriptor("iso-8859-16")
+	cirTr := pdf.UnicodeTranslatorFromDescriptor("cp1251")
+	trObj := newTranslationDetails(pdf, "Helvetica", "Arimo-Regular", 8, latTr, cirTr)
 
 	pdf.SetMargins(marginLeft, marginTop, marginRight)
 	pdf.AddPage()
 
-	pdf.SetFont("Arimo-Regular", "", 8)
-	createSimpleHeader(pdf, latTr)
+	pdf.SetFont("Helvetica", "", 8)
+	createSimpleHeader(pdf, cirTr)
 
 	pdf.Ln(5)
-	pdf.Text(15, pdf.GetY(), "Broj dokumenta: ")
+	pdf.Text(15, pdf.GetY(), trObj.translDef("Број документа: "))
 	pdf.Text(35, pdf.GetY(), "")
 	pdf.Ln(5)
-	pdf.Text(15, pdf.GetY(), latTr("Šifra obuke: "))
-	pdf.Text(35, pdf.GetY(), seminar.GetCode())
+	pdf.Text(15, pdf.GetY(), trObj.translDef(("Шифра обуке: ")))
+	pdf.Text(35, pdf.GetY(), trObj.translDef(seminar.GetCode()))
 	pdf.Ln(5)
-	pdf.Text(15, pdf.GetY(), "Mesto: ")
-	pdf.Text(27, pdf.GetY(), seminar.ClassRoom.Location.Address.Place)
+	pdf.Text(15, pdf.GetY(), trObj.translDef("Место: "))
+	pdf.Text(27, pdf.GetY(), trObj.translDef(seminar.ClassRoom.Location.Address.Place))
 	pdf.Ln(5)
-	pdf.Text(15, pdf.GetY(), "Registracioni list - spisak polaznika za "+seminar.SeminarTheme.Name)
-	pdf.Text(140, pdf.GetY(), "Datum: "+time.Now().Format("01.02.2006"))
+	pdf.Text(15, pdf.GetY(), trObj.translDef("Регистрациони лист - списак полазника за "+seminar.SeminarTheme.Name))
+	pdf.Text(140, pdf.GetY(), trObj.translDef("Datum: "+time.Now().Format("01.02.2006")))
 
 	ch := 8.0
 	pdf.Ln(ch)
-	pdf.CellFormat(20, ch, "Redni broj", "1", 0, "C", false, 0, "")
-	pdf.CellFormat(75, ch, "Ime i prezime", "1", 0, "C", false, 0, "")
-	pdf.CellFormat(35, ch, "JMBG", "1", 0, "C", false, 0, "")
-	pdf.CellFormat(55, ch, "Firma u kojoj ste zaposleni", "1", 0, "C", false, 0, "")
-	pdf.CellFormat(35, ch, "Telefon", "1", 0, "C", false, 0, "")
-	pdf.CellFormat(60, ch, "Potpis", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(20, ch, trObj.translDef("Редни број"), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(75, ch, trObj.translDef("Име и презиме"), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(35, ch, trObj.translDef("ЈМБГ"), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(55, ch, trObj.translDef("Фирма у којој сте запослени"), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(35, ch, trObj.translDef("Телефон"), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(60, ch, trObj.translDef("Потпис"), "1", 0, "C", false, 0, "")
 
 	for i, cs := range seminar.Trainees {
 		pdf.Ln(ch)
 		pdf.CellFormat(20, ch, strconv.Itoa(i+1), "1", 0, "C", false, 0, "")
-		pdf.CellFormat(75, ch, cs.Client.Person.FullName(), "1", 0, "C", false, 0, "")
+		pdf.CellFormat(75, ch, trObj.translDef(cs.Client.Person.FullName()), "1", 0, "C", false, 0, "")
 		pdf.CellFormat(35, ch, *cs.Client.JMBG, "1", 0, "C", false, 0, "")
 		pdf.CellFormat(55, ch, "", "1", 0, "C", false, 0, "")
 		pdf.CellFormat(35, ch, "", "1", 0, "C", false, 0, "")
@@ -107,7 +152,10 @@ func (p *printService) PrintConfirmationStatements(seminar *model.Seminar) ([]by
 	pdf := fpdf.New("P", "mm", "A4", filepath.Join(pwd, "font"))
 	pdf.AddFont("Arimo-Regular", "", "Arimo-Regular.json")
 	pdf.AddFont("Arimo-Bold", "", "Arimo-Bold.json")
+	pdf.AddFont("Helvetica", "", "helvetica_1251.json")
 	latTr := pdf.UnicodeTranslatorFromDescriptor("iso-8859-16")
+	cirTr := pdf.UnicodeTranslatorFromDescriptor("cp1251")
+	trObj := newTranslationDetails(pdf, "Helvetica", "Arimo-Regular", 11, latTr, cirTr)
 
 	pdf.SetMargins(marginLeft, 40, marginRight)
 
@@ -129,50 +177,51 @@ func (p *printService) PrintConfirmationStatements(seminar *model.Seminar) ([]by
 		pdf.SetFont("Arimo-Regular", "", 11)
 
 		pdf.Ln(5)
-		pdf.Text(15, pdf.GetY(), latTr("U skladu sa članom 6. i članom 7. uredbe EU 2016/679 od 27. aprila 2016. godine i članom 12. i članom"))
+		pdf.Text(10, pdf.GetY(), trObj.translDef("У складу са чланом 6. и чланом 7. уредбе ЕУ 2016/679 од 27. априла 2016. године и чланом 12. и чланом"))
 		pdf.Ln(5)
-		pdf.Text(15, pdf.GetY(), latTr("15. Zakona o zaštiti podataka o ličnosti (Sl. Glasnik RS“, br. 87/2018 od 13/11/2018) dajem pristanak za"))
+		pdf.Text(10, pdf.GetY(), trObj.translDef("15. Закона о заштити пдатака о личности (СЛ. Гласник РС“, бр. 87/2018 од 13/11/2018) дајем пристанак за"))
 		pdf.Ln(5)
-		pdf.Text(15, pdf.GetY(), latTr("davanje i obradu podataka o ličnosti, gde je rukovalac obrade Srbolab."))
+		pdf.Text(10, pdf.GetY(), trObj.translDef("давање и обраду података о личности, где је руковалац обраде Срболаб."))
 		pdf.Ln(20)
 
 		pdf.SetFont("Arimo-Bold", "", 11)
-		pdf.Text(80, pdf.GetY(), "IZJAVA O PRISTANKU")
+		pdf.Text(80, pdf.GetY(), trObj.translDef("ИЗЈАВА О ПРИСТАНКУ"))
 		pdf.Ln(20)
 
 		pdf.SetFont("Arimo-Regular", "", 11)
-		pdf.Text(15, pdf.GetY(), "Ja")
-		pdf.Line(20, pdf.GetY(), 80, pdf.GetY())
+		pdf.Text(10, pdf.GetY(), trObj.translDef("Ја"))
+		pdf.Line(17, pdf.GetY(), 77, pdf.GetY())
 		pdf.SetFont("Arimo-Bold", "", 11)
-		pdf.Text(25, pdf.GetY()-1, latTr(client.Client.Person.FullName()))
+		pdf.Text(18, pdf.GetY()-1, trObj.translDef(client.Client.Person.FullName()))
 		pdf.SetFont("Arimo-Regular", "", 11)
-		pdf.Text(82, pdf.GetY(), "(ime i prezime),")
-		pdf.Line(110, pdf.GetY(), 170, pdf.GetY())
+		pdf.Text(77, pdf.GetY(), trObj.translDef("(име и презиме),"))
+		pdf.Line(108, pdf.GetY(), 165, pdf.GetY())
 		pdf.SetFont("Arimo-Bold", "", 11)
-		pdf.Text(115, pdf.GetY()-1, latTr(*client.Client.JMBG))
+		pdf.Text(110, pdf.GetY()-1, trObj.translDef(*client.Client.JMBG))
 		pdf.SetFont("Arimo-Regular", "", 11)
-		pdf.Text(172, pdf.GetY(), "(JMBG),")
+		pdf.Text(167, pdf.GetY(), trObj.translDef("(ЈМБГ),"))
 
 		pdf.Ln(5)
-		pdf.Text(15, pdf.GetY(), latTr("pristajem na davanje i obradu sledećih svojih podataka o ličnosti: podaci iz lične karte/pasoša, podaci iz"))
+		pdf.SetFont("Arimo-Regular", "", 10)
+		pdf.Text(10, pdf.GetY(), trObj.translate("пристајем на давање и обраду следећих својих података о личности: подаци из личне карте/пасоша, подаци из", 10))
 		pdf.Ln(5)
-		pdf.Text(15, pdf.GetY(), latTr("nacionalne vozačke dozvole, podaci iz kvalifikacione kartice vozača, elektronsku adresu, kontakt telefon"))
+		pdf.Text(10, pdf.GetY(), trObj.translate("националне возачке дозволе, подаци из квалификационе картице возача, електронску адресу, контакт телефон", 10))
 		pdf.Ln(5)
-		pdf.Text(15, pdf.GetY(), latTr("vozača, podaci o stručnoj spremi, za potrebe slanja obaveštenja i informacija."))
+		pdf.Text(10, pdf.GetY(), trObj.translate("возача, подаци о стручној спреми, за потребе слања обавештења и информација.", 10))
 		pdf.Ln(15)
 
-		pdf.Text(15, pdf.GetY(), latTr("Takođe izjavljujem da sam od Srbolab d.o.o. primio/la sva neophodna obaveštenja, predviđena članom 23"))
+		pdf.Text(10, pdf.GetY(), trObj.translate("Такође изјављујем да сам од Срболаб д.о.о. примио/ла сва неопходна обавештења, предвиђена чланом 23", 10))
 		pdf.Ln(5)
-		pdf.Text(15, pdf.GetY(), latTr("Zakona o zaštiti podataka o ličnosti, kao i obaveštenje da u svakom trenutku mogu opozvati dat"))
+		pdf.Text(10, pdf.GetY(), trObj.translate("Закона о заштити података о личности, као и обавештење да у сваком тренутку могу опозвати дат", 10))
 		pdf.Ln(5)
-		pdf.Text(15, pdf.GetY(), latTr("pristanak, s tim da opoziv pristanka ne utiče na dopuštenost obrade koja je vršena na osnovu pristanka"))
+		pdf.Text(10, pdf.GetY(), trObj.translate("пристанак, с тим да опозив пристанка не утиче на допуштеност обраде која је вршена на основу пристанка", 10))
 		pdf.Ln(5)
-		pdf.Text(15, pdf.GetY(), latTr("pre opoziva, kao i da nisam u obavezi da dam podatke o ličnosti koji nisu predviđeni kao obavezni"))
+		pdf.Text(10, pdf.GetY(), trObj.translate("пре опозива, као и да нисам у обавези да дам податке о личности који нису предвиђени као обавезни", 10))
 		pdf.Ln(5)
-		pdf.Text(15, pdf.GetY(), latTr("zakonskim i podzakonskim aktima i da isto neće biti od uticaja na pružanje usluga od strane rukovaoca."))
+		pdf.Text(10, pdf.GetY(), trObj.translate("законским и подзаконсим актима и да исто неће бити од утицаја на прижање услуга од стране руковаоца.", 10))
 		pdf.Ln(25)
 
-		pdf.Text(15, pdf.GetY(), "Datum: ")
+		pdf.Text(15, pdf.GetY(), trObj.translDef("Датум: "))
 		pdf.Line(30, pdf.GetY(), 70, pdf.GetY())
 		pdf.SetFont("Arimo-Bold", "", 11)
 		pdf.Text(35, pdf.GetY()-1, time.Now().Format("02.01.2006"))
@@ -180,7 +229,7 @@ func (p *printService) PrintConfirmationStatements(seminar *model.Seminar) ([]by
 
 		pdf.Ln(15)
 
-		pdf.Text(15, pdf.GetY(), "Potpis: ")
+		pdf.Text(15, pdf.GetY(), trObj.translDef("Потпис: "))
 		pdf.Line(30, pdf.GetY(), 70, pdf.GetY())
 	}
 
@@ -202,7 +251,10 @@ func (p *printService) PrintConfirmations(seminar *model.Seminar) ([]byte, error
 	pdf := fpdf.New("P", "mm", "A4", filepath.Join(pwd, "font"))
 	pdf.AddFont("Arimo-Regular", "", "Arimo-Regular.json")
 	pdf.AddFont("Arimo-Bold", "", "Arimo-Bold.json")
+	pdf.AddFont("Helvetica", "", "helvetica_1251.json")
 	latTr := pdf.UnicodeTranslatorFromDescriptor("iso-8859-16")
+	cirTr := pdf.UnicodeTranslatorFromDescriptor("cp1251")
+	trObj := newTranslationDetails(pdf, "Helvetica", "Arimo-Regular", 11, latTr, cirTr)
 
 	pdf.SetMargins(15, 40, marginRight)
 
@@ -230,57 +282,57 @@ func (p *printService) PrintConfirmations(seminar *model.Seminar) ([]byte, error
 		pdf.SetFont("Arimo-Regular", "", 11)
 
 		pdf.Ln(5)
-		pdf.Text(15, pdf.GetY(), "Broj:")
-		pdf.Text(30, pdf.GetY(), seminar.GetCode())
+		pdf.Text(15, pdf.GetY(), trObj.translDef("Број:"))
+		pdf.Text(30, pdf.GetY(), trObj.translDef(seminar.GetCode()))
 		pdf.Ln(5)
 		pdf.SetFont("Arimo-Regular", "", 11)
-		pdf.Text(15, pdf.GetY(), "Dana:")
+		pdf.Text(15, pdf.GetY(), trObj.translDef("Дана:"))
 		pdf.SetFont("Arimo-Bold", "", 11)
 		pdf.Text(30, pdf.GetY(), time.Now().Format("02.01.2006."))
 		pdf.Ln(5)
 		pdf.SetFont("Arimo-Regular", "", 11)
-		pdf.Text(15, pdf.GetY(), "Mesto:")
+		pdf.Text(15, pdf.GetY(), trObj.translDef("Место:"))
 		pdf.SetFont("Arimo-Bold", "", 11)
-		pdf.Text(30, pdf.GetY(), latTr(seminar.ClassRoom.Location.Address.Place))
+		pdf.Text(30, pdf.GetY(), trObj.translDef(seminar.ClassRoom.Location.Address.Place))
 		pdf.Ln(15)
 
-		pdf.Text(95, pdf.GetY(), "POTVRDA")
+		pdf.Text(95, pdf.GetY(), trObj.translDef("ПОТВРДА"))
 		pdf.Ln(10)
 
 		pdf.SetFont("Arimo-Regular", "", 11)
-		pdf.Text(25, pdf.GetY(), latTr(fmt.Sprintf("o završenoj %s obuci na obaveznim seminarima unapređenja znanja", seminar.SeminarTheme.BaseSeminarType.GetSeminarTypeForSentence())))
+		pdf.Text(25, pdf.GetY(), trObj.translDef(fmt.Sprintf("о завршеној %s обуци на обавезним семинарима унапређења знања", seminar.SeminarTheme.BaseSeminarType.GetSeminarTypeForSentence())))
 		pdf.Ln(10)
 
 		ch := 9.0
 		wl := 80.0
 		wr := 100.0
 
-		pdf.CellFormat(wl, ch-1, "Ime, ime jednog", "LRT", 0, "L", false, 0, "")
+		pdf.CellFormat(wl, ch-1, trObj.translDef("Име, име једног"), "LRT", 0, "L", false, 0, "")
 		pdf.SetFont("Arimo-Bold", "", 11)
-		pdf.CellFormat(wr, ch-1, latTr(client.Client.Person.FirstName+" ("+client.Client.Person.MiddleName+") "+client.Client.Person.LastName), "LRT", 0, "L", false, 0, "")
+		pdf.CellFormat(wr, ch-1, trObj.translDef(client.Client.Person.FirstName+" ("+client.Client.Person.MiddleName+") "+client.Client.Person.LastName), "LRT", 0, "L", false, 0, "")
 		pdf.Ln(ch - 1)
 		pdf.SetFont("Arimo-Regular", "", 11)
-		pdf.CellFormat(wl, ch-1, "roditelja, prezime", "LRB", 0, "L", false, 0, "")
+		pdf.CellFormat(wl, ch-1, trObj.translDef("родитеља, презиме"), "LRB", 0, "L", false, 0, "")
 		pdf.CellFormat(wr, ch-1, "", "LRB", 0, "L", false, 0, "")
 		pdf.Ln(ch - 1)
-		pdf.CellFormat(wl, ch, "JMBG", "1", 0, "L", false, 0, "")
+		pdf.CellFormat(wl, ch, trObj.translDef("ЈМБГ"), "1", 0, "L", false, 0, "")
 		pdf.SetFont("Arimo-Bold", "", 11)
-		for _, l := range *client.Client.JMBG {
+		for _, l := range trObj.translDef(*client.Client.JMBG) {
 			pdf.CellFormat(wr/13, ch, string(l), "1", 0, "C", false, 0, "")
 		}
 		pdf.Ln(ch)
 		pdf.SetFont("Arimo-Regular", "", 11)
-		pdf.CellFormat(wl, ch, latTr("Mesto prebivališta"), "1", 0, "L", false, 0, "")
+		pdf.CellFormat(wl, ch, trObj.translDef("Место прбивалишта"), "1", 0, "L", false, 0, "")
 		pdf.SetFont("Arimo-Bold", "", 11)
-		pdf.CellFormat(wr, ch, latTr(client.Client.Address.Place), "1", 0, "L", false, 0, "")
+		pdf.CellFormat(wr, ch, trObj.translDef(client.Client.Address.Place), "1", 0, "L", false, 0, "")
 		pdf.Ln(ch)
 		pdf.SetFont("Arimo-Regular", "", 11)
-		pdf.CellFormat(wl, ch, latTr("Adresa prebivališta"), "1", 0, "L", false, 0, "")
+		pdf.CellFormat(wl, ch, trObj.translDef("Адреса прбивалишта"), "1", 0, "L", false, 0, "")
 		pdf.SetFont("Arimo-Bold", "", 11)
-		pdf.CellFormat(wr, ch, latTr(client.Client.Address.Street+" "+client.Client.Address.HouseNumber), "1", 0, "L", false, 0, "")
+		pdf.CellFormat(wr, ch, trObj.translDef(client.Client.Address.Street+" "+client.Client.Address.HouseNumber), "1", 0, "L", false, 0, "")
 		pdf.Ln(ch)
 		pdf.SetFont("Arimo-Regular", "", 11)
-		pdf.CellFormat(wl, ch, "Redni broj seminara", "1", 0, "L", false, 0, "")
+		pdf.CellFormat(wl, ch, trObj.translDef("Редни број семинара"), "1", 0, "L", false, 0, "")
 		pdf.SetFont("Arimo-Bold", "", 11)
 		//fixme just closed seminars and passed
 		completedSeminars := 0
@@ -312,26 +364,34 @@ func (p *printService) PrintConfirmations(seminar *model.Seminar) ([]byte, error
 		pdf.CellFormat(wr, ch, " I    II    III    IV    V", "1", 0, "L", false, 0, "")
 		pdf.Ln(ch)
 		pdf.SetFont("Arimo-Regular", "", 11)
-		pdf.CellFormat(wl, ch-1, latTr("Datum pohađanja"), "LRT", 0, "L", false, 0, "")
+		pdf.CellFormat(wl, ch-1, trObj.translDef("Датум похађања"), "LRT", 0, "L", false, 0, "")
 		pdf.SetFont("Arimo-Bold", "", 11)
 		pdf.CellFormat(wr, ch-1, "od "+startSeminar.Format("02.01.2006"), "LRT", 0, "L", false, 0, "")
 		pdf.Ln(ch - 1)
 		pdf.SetFont("Arimo-Regular", "", 11)
-		pdf.CellFormat(wl, ch-1, latTr("periodične obuke"), "LRB", 0, "L", false, 0, "")
+		seminarType := "периодичне"
+		if seminar.SeminarTheme.BaseSeminarType.Code == "ADDITIONAL" {
+			seminarType = "додатне"
+		}
+		if seminar.SeminarTheme.BaseSeminarType.Code == "BASE" {
+			seminarType = "основне"
+		}
+		pdf.CellFormat(wl, ch-1, trObj.translDef(fmt.Sprintf("%s обуке", seminarType)), "LRB", 0, "L", false, 0, "")
 		pdf.SetFont("Arimo-Bold", "", 11)
 		pdf.CellFormat(wr, ch-1, "do "+endSeminar.Format("02.01.2006"), "LRB", 0, "L", false, 0, "")
 		pdf.Ln(ch - 1)
 		pdf.SetFont("Arimo-Regular", "", 11)
-		pdf.CellFormat(wl, ch-1, latTr("Mesto pohađanja"), "LRT", 0, "L", false, 0, "")
+		pdf.CellFormat(wl, ch-1, trObj.translDef("Место похађања"), "LRT", 0, "L", false, 0, "")
 		pdf.SetFont("Arimo-Bold", "", 11)
-		pdf.CellFormat(wr, ch-1, latTr(seminar.ClassRoom.Location.Address.Place+", "+seminar.ClassRoom.Location.Address.Street+" "+seminar.ClassRoom.Location.Address.HouseNumber), "LRT", 0, "L", false, 0, "")
+		pdf.CellFormat(wr, ch-1, trObj.translDef(seminar.ClassRoom.Location.Address.Place+", "+seminar.ClassRoom.Location.Address.Street+" "+seminar.ClassRoom.Location.Address.HouseNumber), "LRT", 0, "L", false, 0, "")
 		pdf.Ln(ch - 1)
 		pdf.SetFont("Arimo-Regular", "", 11)
-		pdf.CellFormat(wl, ch-1, latTr("periodične obuke"), "LRB", 0, "L", false, 0, "")
+
+		pdf.CellFormat(wl, ch-1, trObj.translDef(fmt.Sprintf("%s обуке", seminarType)), "LRB", 0, "L", false, 0, "")
 		pdf.CellFormat(wr, ch-1, "", "LRB", 0, "L", false, 0, "")
 		pdf.Ln(ch - 1)
 		pdf.SetFont("Arimo-Regular", "", 11)
-		pdf.CellFormat(wl, ch, "Vrsta CPC", "1", 0, "L", false, 0, "")
+		pdf.CellFormat(wl, ch, trObj.translDef("Врста ЦПЦ"), "1", 0, "L", false, 0, "")
 		pdf.SetFont("Arimo-Bold", "", 11)
 		if client.Client.CLicence != nil && *client.Client.CLicence {
 			pdf.Circle(97.5, 178.5, 2.5, "")
@@ -339,15 +399,29 @@ func (p *printService) PrintConfirmations(seminar *model.Seminar) ([]byte, error
 		if client.Client.DLicence != nil && *client.Client.DLicence {
 			pdf.Circle(128.0, 178.5, 2.5, "")
 		}
-		pdf.CellFormat(wr, ch, "1. prevoz tereta  2. prevoz putnika", "1", 0, "L", false, 0, "")
+		pdf.CellFormat(wr, ch, trObj.translDef("1. превоз терета  2. превоз путника"), "1", 0, "L", false, 0, "")
 		pdf.Ln(20)
 
 		pdf.SetFont("Arimo-Bold", "", 11)
-		pdf.Text(15, pdf.GetY(), "NAPOMENA:")
+		pdf.Text(15, pdf.GetY(), trObj.translDef("НАПОМЕНА:"))
 		pdf.SetFont("Arimo-Regular", "", 11)
-		pdf.Text(50, pdf.GetY(), latTr("Ova potvrda se izdaje na osnovu odslušane obavezne periodične obuke"))
+		seminarType = "периодичне"
+		if seminar.SeminarTheme.BaseSeminarType.Code == "ADDITIONAL" {
+			seminarType = "додатне"
+		}
+		if seminar.SeminarTheme.BaseSeminarType.Code == "BASE" {
+			seminarType = "основне"
+		}
+		pdf.Text(50, pdf.GetY(), trObj.translDef(fmt.Sprintf("Ова потврда се издаје на основу одслушане обавезне %s обуке", seminarType)))
 		pdf.Ln(5)
-		pdf.Text(15, pdf.GetY(), latTr("za potrebe sticanja periodičnog CPC i ne može se koristiti u druge svrhe."))
+		seminarType = "периодичног"
+		if seminar.SeminarTheme.BaseSeminarType.Code == "ADDITIONAL" {
+			seminarType = "додатног"
+		}
+		if seminar.SeminarTheme.BaseSeminarType.Code == "BASE" {
+			seminarType = "основног"
+		}
+		pdf.Text(15, pdf.GetY(), trObj.translDef(fmt.Sprintf("за потребе стицања %s ЦПЦ и не може се користити у друге сврхе.", seminarType)))
 	}
 
 	var buf bytes.Buffer
@@ -368,7 +442,10 @@ func (p *printService) PrintConfirmationReceives(seminar *model.Seminar) ([]byte
 	pdf := fpdf.New("P", "mm", "A4", filepath.Join(pwd, "font"))
 	pdf.AddFont("Arimo-Regular", "", "Arimo-Regular.json")
 	pdf.AddFont("Arimo-Bold", "", "Arimo-Bold.json")
+	pdf.AddFont("Helvetica", "", "helvetica_1251.json")
 	latTr := pdf.UnicodeTranslatorFromDescriptor("iso-8859-16")
+	cirTr := pdf.UnicodeTranslatorFromDescriptor("cp1251")
+	trObj := newTranslationDetails(pdf, "Helvetica", "Arimo-Regular", 11, latTr, cirTr)
 
 	pdf.SetMargins(15.0, 20, 15.0)
 
@@ -389,114 +466,114 @@ func (p *printService) PrintConfirmationReceives(seminar *model.Seminar) ([]byte
 
 		pdf.AddPage()
 
-		createSimpleHeader(pdf, latTr)
+		createSimpleHeader(pdf, cirTr)
 
 		pdf.SetFont("Arimo-Bold", "", 12)
-		pdf.Text(40, pdf.GetY(), latTr("Izjava o preuzimanju potvrde i završenoj periodičnoj obuci"))
+		pdf.Text(40, pdf.GetY(), trObj.translate(fmt.Sprintf("Изјава о преузимању потврде и завршеној %s обуци", seminar.SeminarTheme.BaseSeminarType.GetSeminarTypeForSentence()), 12))
 		pdf.Ln(5)
-		pdf.Text(60, pdf.GetY(), latTr("na obaveznim seminarima unapređenja znanja"))
+		pdf.Text(60, pdf.GetY(), trObj.translate("на обавезним семинарима унапређења знања", 12))
 		pdf.Ln(20)
 
 		pdf.SetFont("Arimo-Regular", "", 11)
-		pdf.Text(20, pdf.GetY(), "Dana")
+		pdf.Text(20, pdf.GetY(), trObj.translDef("Дана"))
 		pdf.Line(33, pdf.GetY(), 60, pdf.GetY())
 		pdf.SetFont("Arimo-Bold", "", 11)
 		pdf.Text(33, pdf.GetY()-1, latTr(time.Now().Format("02.01.2006.")))
 		pdf.SetFont("Arimo-Regular", "", 11)
-		pdf.Text(62, pdf.GetY(), "godine, ")
+		pdf.Text(62, pdf.GetY(), trObj.translDef("године, "))
 		pdf.Line(77, pdf.GetY(), 135, pdf.GetY())
 		pdf.SetFont("Arimo-Bold", "", 11)
-		pdf.Text(80, pdf.GetY()-1, latTr(client.Client.Person.FullName()))
+		pdf.Text(80, pdf.GetY()-1, trObj.translDef(client.Client.Person.FullName()))
 		pdf.SetFont("Arimo-Regular", "", 11)
-		pdf.Text(137, pdf.GetY(), "(ime i prezime), JMBG")
+		pdf.Text(137, pdf.GetY(), trObj.translDef("(име и презиме), ЈМБГ"))
 		pdf.Ln(6)
 		pdf.Line(20, pdf.GetY(), 55, pdf.GetY())
 		pdf.SetFont("Arimo-Bold", "", 11)
 		pdf.Text(25, pdf.GetY()-1, *client.Client.JMBG)
 		pdf.SetFont("Arimo-Regular", "", 11)
-		pdf.Text(55, pdf.GetY(), latTr("je preuzeo potvrdu o završenoj periodičnoj obuci na obaveznim"))
+		pdf.Text(55, pdf.GetY(), trObj.translDef(fmt.Sprintf("је преузео потврду о завршеној %s обуци на обавезним", seminar.SeminarTheme.BaseSeminarType.GetSeminarTypeForSentence())))
 		pdf.Ln(6)
-		pdf.Text(20, pdf.GetY(), latTr("seminarima unapređenja znanja."))
+		pdf.Text(20, pdf.GetY(), trObj.translDef("семинарима унапређења знања."))
 
 		pdf.Ln(80)
 
-		pdf.Text(20, pdf.GetY(), "Potvrdu preuzeo: ")
+		pdf.Text(20, pdf.GetY(), trObj.translDef("Потврду преузео: "))
 		pdf.Ln(10)
 		pdf.Line(20, pdf.GetY(), 60, pdf.GetY())
 		pdf.Ln(8)
-		pdf.Text(20, pdf.GetY(), "Dana: ")
+		pdf.Text(20, pdf.GetY(), trObj.translDef("Дана: "))
 		pdf.SetFont("Arimo-Bold", "", 11)
 		pdf.Line(31, pdf.GetY(), 58, pdf.GetY())
 		pdf.Text(32, pdf.GetY()-1, time.Now().Format("02.01.2006"))
 		pdf.SetFont("Arimo-Regular", "", 11)
-		pdf.Text(60, pdf.GetY(), "godine.")
+		pdf.Text(60, pdf.GetY(), trObj.translDef("године."))
 	}
 
 	for company, clients := range companyClientsMap {
 		pdf.AddPage()
 
-		createSimpleHeader(pdf, latTr)
+		createSimpleHeader(pdf, cirTr)
 
 		pdf.SetFont("Arimo-Bold", "", 12)
-		pdf.Text(40, pdf.GetY(), latTr("Izjava o preuzimanju potvrde i završenoj periodičnoj obuci"))
+		pdf.Text(40, pdf.GetY(), trObj.translate(fmt.Sprintf("Изјава о преузимању потврде и завршеној %s обуци", seminar.SeminarTheme.BaseSeminarType.GetSeminarTypeForSentence()), 12))
 		pdf.Ln(5)
-		pdf.Text(60, pdf.GetY(), latTr("na obaveznim seminarima unapređenja znanja"))
+		pdf.Text(60, pdf.GetY(), trObj.translate("на обавезним семинарима унапређења знања", 12))
 		pdf.Ln(20)
 
 		pdf.SetFont("Arimo-Regular", "", 11)
-		pdf.Text(15, pdf.GetY(), "Dana")
+		pdf.Text(15, pdf.GetY(), trObj.translDef("Дана"))
 		pdf.Line(27, pdf.GetY(), 57, pdf.GetY())
 		pdf.SetFont("Arimo-Bold", "", 11)
-		pdf.Text(30, pdf.GetY()-1, latTr(time.Now().Format("02.01.2006.")))
+		pdf.Text(30, pdf.GetY()-1, trObj.translDef(time.Now().Format("02.01.2006.")))
 		pdf.SetFont("Arimo-Regular", "", 11)
-		pdf.Text(60, pdf.GetY(), "godine, ")
+		pdf.Text(60, pdf.GetY(), trObj.translDef("године, "))
 		pdf.Line(75, pdf.GetY(), 135, pdf.GetY())
-		pdf.Text(135, pdf.GetY(), "(ime i prezime), zaposlen u")
+		pdf.Text(135, pdf.GetY(), trObj.translDef("(име и презиме), запослен у"))
 		pdf.Ln(6)
-		pdf.Text(15, pdf.GetY(), latTr("u firmi"))
+		pdf.Text(15, pdf.GetY(), trObj.translDef("у фирми"))
 		pdf.SetFont("Arimo-Bold", "", 11)
-		pdf.Text(30, pdf.GetY()-1, latTr(company))
+		pdf.Text(30, pdf.GetY()-1, trObj.translDef(company))
 		pdf.Line(28, pdf.GetY(), 178, pdf.GetY())
 		pdf.SetFont("Arimo-Regular", "", 11)
 		pdf.Text(180, pdf.GetY(), ",")
 		pdf.Ln(6)
-		pdf.Text(15, pdf.GetY(), latTr("JMBG"))
+		pdf.Text(15, pdf.GetY(), trObj.translDef(("ЈМБГ")))
 		pdf.Line(28, pdf.GetY(), 70, pdf.GetY())
-		pdf.Text(70, pdf.GetY(), latTr(", je preuzeo potvrde o završenoj periodičnoj obuci na"))
+		pdf.Text(70, pdf.GetY(), trObj.translDef(fmt.Sprintf(", је преузеп потврде о завршеној %s обуци на", seminar.SeminarTheme.BaseSeminarType.GetSeminarTypeForSentence())))
 		pdf.Ln(6)
-		pdf.Text(15, pdf.GetY(), latTr("obaveznim seminarima unapređenja znanja za sledeća lica:"))
+		pdf.Text(15, pdf.GetY(), trObj.translDef("обавезним семинарима унапређења знања за следећа лица:"))
 		pdf.Ln(10)
 
 		ch := 5.0
-		pdf.CellFormat(10, ch, "RB", "1", 0, "L", false, 0, "")
-		pdf.CellFormat(40, ch, "Ime", "1", 0, "L", false, 0, "")
-		pdf.CellFormat(40, ch, "Prezime", "1", 0, "L", false, 0, "")
-		pdf.CellFormat(35, ch, "JMBG", "1", 0, "L", false, 0, "")
-		pdf.CellFormat(50, ch, "Broj potvrde", "1", 0, "L", false, 0, "")
+		pdf.CellFormat(10, ch, trObj.translDef("РБ"), "1", 0, "L", false, 0, "")
+		pdf.CellFormat(40, ch, trObj.translDef("Име"), "1", 0, "L", false, 0, "")
+		pdf.CellFormat(40, ch, trObj.translDef("Презиме"), "1", 0, "L", false, 0, "")
+		pdf.CellFormat(35, ch, trObj.translDef("ЈМБГ"), "1", 0, "L", false, 0, "")
+		pdf.CellFormat(50, ch, trObj.translDef("Број потврде"), "1", 0, "L", false, 0, "")
 
 		for i, client := range clients {
 			pdf.Ln(ch)
 			pdf.CellFormat(10, ch, strconv.Itoa(i+1), "1", 0, "L", false, 0, "")
-			pdf.CellFormat(40, ch, client.Client.Person.FirstName, "1", 0, "L", false, 0, "")
-			pdf.CellFormat(40, ch, client.Client.Person.LastName, "1", 0, "L", false, 0, "")
+			pdf.CellFormat(40, ch, trObj.translDef(client.Client.Person.FirstName), "1", 0, "L", false, 0, "")
+			pdf.CellFormat(40, ch, trObj.translDef(client.Client.Person.LastName), "1", 0, "L", false, 0, "")
 			pdf.CellFormat(35, ch, *client.Client.JMBG, "1", 0, "L", false, 0, "")
 			pdf.CellFormat(50, ch, seminar.GetCode()+"/"+strconv.Itoa(int(client.ClientID)), "1", 0, "L", false, 0, "")
 		}
 
 		pdf.Ln(20)
-		pdf.Text(15, pdf.GetY(), "Potvrdu preuzeo: ")
+		pdf.Text(15, pdf.GetY(), trObj.translDef("Потврду преузео: "))
 		pdf.Ln(10)
 		pdf.Line(15, pdf.GetY(), 70, pdf.GetY())
 		pdf.Ln(6)
-		pdf.Text(15, pdf.GetY(), "Broj LK:")
+		pdf.Text(15, pdf.GetY(), trObj.translDef("Број ЛК:"))
 		pdf.Line(30, pdf.GetY(), 70, pdf.GetY())
 		pdf.Ln(6)
-		pdf.Text(15, pdf.GetY(), "Dana: ")
+		pdf.Text(15, pdf.GetY(), trObj.translDef("Дана: "))
 		pdf.SetFont("Arimo-Bold", "", 11)
 		pdf.Line(26, pdf.GetY(), 48, pdf.GetY())
 		pdf.Text(27, pdf.GetY()-1, time.Now().Format("02.01.2006"))
 		pdf.SetFont("Arimo-Regular", "", 11)
-		pdf.Text(50, pdf.GetY(), "godine.")
+		pdf.Text(50, pdf.GetY(), trObj.translDef("година."))
 	}
 
 	var buf bytes.Buffer
@@ -516,46 +593,49 @@ func (p *printService) PrintMuster(day *model.SeminarDay) ([]byte, error) {
 	}
 	pdf := fpdf.New("L", "mm", "A4", filepath.Join(pwd, "font"))
 	pdf.AddFont("Arimo-Regular", "", "Arimo-Regular.json")
-	//pdf.AddFont("Arimo-Bold", "", "Arimo-Bold.json")
+	pdf.AddFont("Arimo-Bold", "", "Arimo-Bold.json")
+	pdf.AddFont("Helvetica", "", "helvetica_1251.json")
 	latTr := pdf.UnicodeTranslatorFromDescriptor("iso-8859-16")
+	cirTr := pdf.UnicodeTranslatorFromDescriptor("cp1251")
+	trObj := newTranslationDetails(pdf, "Helvetica", "Arimo-Regular", 8, latTr, cirTr)
 
 	pdf.SetMargins(marginLeft, marginTop, marginRight)
 	pdf.AddPage()
 
 	pdf.SetFont("Arimo-Regular", "", 8)
-	createSimpleHeader(pdf, latTr)
+	createSimpleHeader(pdf, cirTr)
 
 	pdf.Ln(5)
-	pdf.Text(15, pdf.GetY(), "Mesto: ")
-	pdf.Text(27, pdf.GetY(), day.Seminar.ClassRoom.Location.Address.Place)
+	pdf.Text(15, pdf.GetY(), trObj.translDef("Mesto: "))
+	pdf.Text(27, pdf.GetY(), trObj.translDef(day.Seminar.ClassRoom.Location.Address.Place))
 	pdf.Ln(5)
-	pdf.Text(15, pdf.GetY(), latTr("Šifra obuke: "))
+	pdf.Text(15, pdf.GetY(), trObj.translDef("Šifra obuke: "))
 	pdf.Text(35, pdf.GetY(), day.Seminar.GetCode())
 	pdf.Ln(5)
-	pdf.Text(15, pdf.GetY(), "Datum: ")
+	pdf.Text(15, pdf.GetY(), trObj.translDef("Datum: "))
 	dayInWeek := util.GetDaySerbian(day.Date)
-	pdf.Text(27, pdf.GetY(), dayInWeek+" "+day.Date.Format("02.01.2006."))
+	pdf.Text(27, pdf.GetY(), trObj.translDef(dayInWeek)+" "+day.Date.Format("02.01.2006."))
 	pdf.Ln(5)
-	pdf.Text(15, pdf.GetY(), latTr(fmt.Sprintf("Prozivnik polaznika seminara unapređenja znanja na %s obuci profesionalnih vozača", day.Seminar.SeminarTheme.BaseSeminarType.GetSeminarTypeForSentence())))
+	pdf.Text(15, pdf.GetY(), trObj.translDef(fmt.Sprintf("Прозивник полазника семинара унапређења знања на %s обуци професионалних возача", day.Seminar.SeminarTheme.BaseSeminarType.GetSeminarTypeForSentence())))
 
 	ch := 14.0
 	pdf.Ln(2)
-	pdf.CellFormat(10, ch, "R.B.", "1", 0, "C", false, 0, "")
-	pdf.CellFormat(45, ch, "Ime i prezime / JMBG", "1", 0, "C", false, 0, "")
-	pdf.CellFormat(27, ch, latTr("1. čas"), "1", 0, "C", false, 0, "")
-	pdf.CellFormat(27, ch, latTr("2. čas"), "1", 0, "C", false, 0, "")
-	pdf.CellFormat(27, ch, latTr("3. čas"), "1", 0, "C", false, 0, "")
-	pdf.CellFormat(27, ch, latTr("4. čas"), "1", 0, "C", false, 0, "")
-	pdf.CellFormat(27, ch, latTr("5. čas"), "1", 0, "C", false, 0, "")
-	pdf.CellFormat(27, ch, latTr("6. čas"), "1", 0, "C", false, 0, "")
-	pdf.CellFormat(27, ch, latTr("7. čas"), "1", 0, "C", false, 0, "")
-	pdf.CellFormat(31, ch, "Napomena", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(10, ch, trObj.translDef("Р.Б."), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(45, ch, trObj.translDef("Име и презиме / ЈМБГ"), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(27, ch, trObj.translDef("1. час"), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(27, ch, trObj.translDef("2. час"), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(27, ch, trObj.translDef("3. час"), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(27, ch, trObj.translDef("4. час"), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(27, ch, trObj.translDef("5. час"), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(27, ch, trObj.translDef("6. час"), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(27, ch, trObj.translDef("7. час"), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(31, ch, trObj.translDef("Напомена"), "1", 0, "C", false, 0, "")
 
 	for i, cs := range day.Presence {
 		pdf.Ln(ch)
 		pdf.CellFormat(10, ch, strconv.Itoa(i+1), "1", 0, "C", false, 0, "")
 		pdf.CellFormat(45, ch, "", "1", 0, "C", false, 0, "")
-		pdf.Text(25, 71+float64(i*14), cs.Client.Person.FullName())
+		pdf.Text(25, 71+float64(i*14), trObj.translDef(cs.Client.Person.FullName()))
 		pdf.Text(25, 76+float64(i*14), *cs.Client.JMBG)
 		pdf.CellFormat(27, ch, "", "1", 0, "C", false, 0, "")
 		pdf.CellFormat(27, ch, "", "1", 0, "C", false, 0, "")
@@ -585,7 +665,10 @@ func (p *printService) PrintCheckIn(seminar *model.Seminar) ([]byte, error) {
 	pdf := fpdf.New("P", "mm", "A4", filepath.Join(pwd, "font"))
 	pdf.AddFont("Arimo-Regular", "", "Arimo-Regular.json")
 	pdf.AddFont("Arimo-Bold", "", "Arimo-Bold.json")
+	pdf.AddFont("Helvetica", "", "helvetica_1251.json")
 	latTr := pdf.UnicodeTranslatorFromDescriptor("iso-8859-16")
+	cirTr := pdf.UnicodeTranslatorFromDescriptor("cp1251")
+	trObj := newTranslationDetails(pdf, "Helvetica", "Arimo-Regular", 11, latTr, cirTr)
 
 	pdf.SetMargins(15, 20, marginRight)
 	fontSize := 11.0
@@ -596,83 +679,83 @@ func (p *printService) PrintCheckIn(seminar *model.Seminar) ([]byte, error) {
 		pdf.AddPage()
 
 		pdf.SetFont("Arimo-Bold", "", 15)
-		pdf.Text(85, pdf.GetY(), latTr("P R I J A V A*"))
+		pdf.Text(85, pdf.GetY(), trObj.translate("П Р И Ј А В А*", 15))
 
 		pdf.SetFont("Arimo-Regular", "", fontSize)
 		pdf.Ln(10)
-		pdf.Text(70, pdf.GetY(), latTr("za pohađanje obaveznog seminara"))
+		pdf.Text(70, pdf.GetY(), trObj.translDef("за похађање обавезног семинара"))
 		pdf.Ln(5)
-		pdf.Text(87, pdf.GetY(), latTr("unapređenje znanja"))
+		pdf.Text(87, pdf.GetY(), trObj.translDef("унапређења знања"))
 		pdf.Ln(10)
 
 		pdf.SetFont("Arimo-Bold", "", fontSize)
-		pdf.Text(15, pdf.GetY(), latTr("LIČNI PODACI"))
+		pdf.Text(15, pdf.GetY(), trObj.translDef("ЛИЧНИ ПОДАЦИ"))
 		pdf.Ln(1)
 		pdf.SetFont("Arimo-Regular", "", fontSize)
-		pdf.CellFormat(70, ch, latTr("Ime (ime jednog roditelja) prezime:"), "1", 0, "L", false, 0, "")
+		pdf.CellFormat(70, ch, trObj.translDef("Име (име једног родитеља) презиме:"), "1", 0, "L", false, 0, "")
 		pdf.SetFont("Arimo-Bold", "", fontSize)
-		pdf.CellFormat(110, ch, client.Client.Person.FullNameWithMiddleName(), "1", 0, "L", false, 0, "")
+		pdf.CellFormat(110, ch, trObj.translDef(client.Client.Person.FullNameWithMiddleName()), "1", 0, "L", false, 0, "")
 		pdf.Ln(ch)
 		pdf.SetFont("Arimo-Regular", "", fontSize)
-		pdf.CellFormat(70, ch, "JMBG:", "1", 0, "L", false, 0, "")
+		pdf.CellFormat(70, ch, trObj.translDef("ЈМБГ:"), "1", 0, "L", false, 0, "")
 		pdf.SetFont("Arimo-Bold", "", fontSize)
 		pdf.CellFormat(110, ch, *client.Client.JMBG, "1", 0, "L", false, 0, "")
 		pdf.Ln(ch)
 		pdf.SetFont("Arimo-Regular", "", fontSize)
-		pdf.CellFormat(70, ch, latTr("Datum rođenja:"), "1", 0, "L", false, 0, "")
+		pdf.CellFormat(70, ch, trObj.translDef("Датум рођења:"), "1", 0, "L", false, 0, "")
 		pdf.SetFont("Arimo-Bold", "", fontSize)
 		pdf.CellFormat(110, ch, client.Client.GetBirthDate(), "1", 0, "L", false, 0, "")
 		pdf.Ln(ch)
 		pdf.SetFont("Arimo-Regular", "", fontSize)
-		pdf.CellFormat(70, ch, latTr("Mesto rođenja, država:"), "1", 0, "L", false, 0, "")
+		pdf.CellFormat(70, ch, trObj.translDef("Место рођења, држава:"), "1", 0, "L", false, 0, "")
 		pdf.SetFont("Arimo-Bold", "", fontSize)
-		pdf.CellFormat(110, ch, latTr(*client.Client.PlaceBirth+", "+*client.Client.CountryBirth), "1", 0, "L", false, 0, "")
+		pdf.CellFormat(110, ch, trObj.translDef(*client.Client.PlaceBirth+", "+*client.Client.CountryBirth), "1", 0, "L", false, 0, "")
 
 		pdf.Ln(17)
 		pdf.SetFont("Arimo-Bold", "", fontSize)
-		pdf.Text(15, pdf.GetY(), latTr("PODACI O PREBIVALIŠTU/BORAVIŠTU"))
+		pdf.Text(15, pdf.GetY(), trObj.translDef("ПОДАЦИ О ПРЕБИВАЛИШТУ/БОРАВИШТУ"))
 		pdf.Ln(1)
 		pdf.SetFont("Arimo-Regular", "", fontSize)
-		pdf.CellFormat(70, ch, latTr("Mesto:"), "1", 0, "L", false, 0, "")
+		pdf.CellFormat(70, ch, trObj.translDef("Место:"), "1", 0, "L", false, 0, "")
 		pdf.SetFont("Arimo-Bold", "", fontSize)
-		pdf.CellFormat(110, ch, client.Client.Address.Place, "1", 0, "L", false, 0, "")
+		pdf.CellFormat(110, ch, trObj.translDef(client.Client.Address.Place), "1", 0, "L", false, 0, "")
 		pdf.Ln(ch)
 		pdf.SetFont("Arimo-Regular", "", fontSize)
-		pdf.CellFormat(70, ch, latTr("Poštanski broj:"), "1", 0, "L", false, 0, "")
+		pdf.CellFormat(70, ch, trObj.translDef("Поштански број:"), "1", 0, "L", false, 0, "")
 		pdf.SetFont("Arimo-Bold", "", fontSize)
-		pdf.CellFormat(110, ch, client.Client.Address.PostCode, "1", 0, "L", false, 0, "")
+		pdf.CellFormat(110, ch, trObj.translDef(client.Client.Address.PostCode), "1", 0, "L", false, 0, "")
 		pdf.Ln(ch)
 		pdf.SetFont("Arimo-Regular", "", fontSize)
-		pdf.CellFormat(70, ch, latTr("Ulica i kućni broj:"), "1", 0, "L", false, 0, "")
+		pdf.CellFormat(70, ch, trObj.translDef("Улица и кућни број:"), "1", 0, "L", false, 0, "")
 		pdf.SetFont("Arimo-Bold", "", fontSize)
-		pdf.CellFormat(110, ch, client.Client.Address.GetStreetWithNumber(), "1", 0, "L", false, 0, "")
+		pdf.CellFormat(110, ch, trObj.translDef(client.Client.Address.GetStreetWithNumber()), "1", 0, "L", false, 0, "")
 		pdf.Ln(ch)
 		pdf.SetFont("Arimo-Regular", "", fontSize)
-		pdf.CellFormat(70, ch, latTr("Telefon/Mobilni:"), "1", 0, "L", false, 0, "")
+		pdf.CellFormat(70, ch, trObj.translDef("Телефон/Мобилни:"), "1", 0, "L", false, 0, "")
 		pdf.SetFont("Arimo-Bold", "", fontSize)
-		pdf.CellFormat(110, ch, client.Client.Person.PhoneNumber, "1", 0, "L", false, 0, "")
+		pdf.CellFormat(110, ch, trObj.translDef(client.Client.Person.PhoneNumber), "1", 0, "L", false, 0, "")
 		pdf.Ln(ch)
 		pdf.SetFont("Arimo-Regular", "", fontSize)
-		pdf.CellFormat(70, ch, latTr("e-mail:"), "1", 0, "L", false, 0, "")
+		pdf.CellFormat(70, ch, trObj.translDef("е-маил:"), "1", 0, "L", false, 0, "")
 		pdf.SetFont("Arimo-Bold", "", fontSize)
-		pdf.CellFormat(110, ch, client.Client.Person.Email, "1", 0, "L", false, 0, "")
+		pdf.CellFormat(110, ch, trObj.translDef(client.Client.Person.Email), "1", 0, "L", false, 0, "")
 
 		pdf.Ln(17)
 		pdf.SetFont("Arimo-Bold", "", fontSize)
-		pdf.Text(15, pdf.GetY(), latTr("PODACI O KVALIFIKACIONOJ KARTICI VOZAČA"))
+		pdf.Text(15, pdf.GetY(), trObj.translDef("ПОДАЦИ О КВАЛИФИКАЦИОНОЈ КАРТИЦИ ВОЗАЧА"))
 		pdf.Ln(1)
 		pdf.SetFont("Arimo-Regular", "", fontSize)
-		pdf.CellFormat(70, ch, latTr("Broj kartice(SRB broj)*:"), "1", 0, "L", false, 0, "")
+		pdf.CellFormat(70, ch, trObj.translDef("Број картице(СРБ број)*:"), "1", 0, "L", false, 0, "")
 		pdf.SetFont("Arimo-Bold", "", fontSize)
 		pdf.CellFormat(110, ch, *client.Client.CPCNumber, "1", 0, "L", false, 0, "")
 		pdf.Ln(ch)
 		pdf.SetFont("Arimo-Regular", "", fontSize)
-		pdf.CellFormat(70, ch, latTr("Serijski broj kartice(SRB broj):"), "1", 0, "L", false, 0, "")
+		pdf.CellFormat(70, ch, trObj.translDef("Серијски број картице(СРБ број):"), "1", 0, "L", false, 0, "")
 		pdf.SetFont("Arimo-Bold", "", fontSize)
 		pdf.CellFormat(110, ch, "", "1", 0, "L", false, 0, "")
 		pdf.Ln(ch)
 		pdf.SetFont("Arimo-Regular", "", fontSize)
-		pdf.CellFormat(70, ch, latTr("Rok važenja kartice:"), "1", 0, "L", false, 0, "")
+		pdf.CellFormat(70, ch, trObj.translDef("Рок важења картице:"), "1", 0, "L", false, 0, "")
 		pdf.SetFont("Arimo-Bold", "", fontSize)
 		cpcDate := ""
 		if client.Client.CPCDate != nil {
@@ -682,7 +765,7 @@ func (p *printService) PrintCheckIn(seminar *model.Seminar) ([]byte, error) {
 
 		pdf.Ln(17)
 		pdf.SetFont("Arimo-Bold", "", fontSize)
-		pdf.Text(15, pdf.GetY(), latTr("VRSTA PREVOZA (zaokruženi broj ispred vrste prevoza)"))
+		pdf.Text(15, pdf.GetY(), trObj.translDef("ВРСТА ПРЕВОЗА (заокружени број испред врсте превоза)"))
 		pdf.Ln(1)
 		pdf.SetFont("Arimo-Regular", "", fontSize)
 		if client.Client.CLicence != nil && *client.Client.CLicence {
@@ -692,41 +775,41 @@ func (p *printService) PrintCheckIn(seminar *model.Seminar) ([]byte, error) {
 			pdf.Circle(107.5, 157, 2.5, "")
 		}
 
-		pdf.CellFormat(90, ch, latTr("1. Prevoz tereta"), "1", 0, "L", false, 0, "")
-		pdf.CellFormat(90, ch, latTr("2. Prevoz putnika"), "1", 0, "L", false, 0, "")
+		pdf.CellFormat(90, ch, trObj.translDef("1. Превоз терета"), "1", 0, "L", false, 0, "")
+		pdf.CellFormat(90, ch, trObj.translDef("2. Превоз путника"), "1", 0, "L", false, 0, "")
 
 		pdf.Ln(15)
-		pdf.Text(10, pdf.GetY(), latTr("Uz popunjen obrazac Prijave za pohađanje seminara, prilaže se:"))
+		pdf.Text(10, pdf.GetY(), trObj.translDef("Уз попуњен образац Пријаве за похађање семинара, прилаже се:"))
 		pdf.Ln(5)
-		pdf.Text(20, pdf.GetY(), latTr("- dokaz o uplati troškova za pohađanje seminara, po važećoj tarifi"))
+		pdf.Text(20, pdf.GetY(), trObj.translDef("- докаж о уплати трошкова за похађање семинара, по важећој тарифи"))
 
 		pdf.Ln(20)
 		pdf.Text(18, pdf.GetY(), "U ")
 		pdf.SetFont("Arimo-Bold", "", fontSize)
-		pdf.Text(23, pdf.GetY(), latTr(seminar.ClassRoom.Location.Address.Place))
+		pdf.Text(23, pdf.GetY(), trObj.translDef(seminar.ClassRoom.Location.Address.Place))
 		pdf.Line(23, pdf.GetY()+1, 65, pdf.GetY()+1)
 		pdf.SetFont("Arimo-Regular", "", fontSize)
-		pdf.Text(65.5, pdf.GetY(), ", dana")
+		pdf.Text(65.5, pdf.GetY(), trObj.translDef(", дана"))
 		pdf.SetFont("Arimo-Bold", "", fontSize)
 		pdf.Line(78, pdf.GetY()+1, 110, pdf.GetY()+1)
 		pdf.Text(80, pdf.GetY(), time.Now().Format("02.01.2006."))
 		pdf.SetFont("Arimo-Regular", "", fontSize)
-		pdf.Text(110.5, pdf.GetY(), ", godine")
+		pdf.Text(110.5, pdf.GetY(), trObj.translDef(", године"))
 
 		pdf.Ln(30)
-		pdf.Text(135, pdf.GetY(), "Potpis podnosioca prijave: ")
+		pdf.Text(135, pdf.GetY(), trObj.translDef("Потпис подносиоца пријаве: "))
 		pdf.Ln(15)
 		pdf.Line(135, pdf.GetY(), 190, pdf.GetY())
 		pdf.Ln(10)
 
 		pdf.SetFont("Arimo-Regular", "", 9)
-		pdf.Text(15, pdf.GetY(), latTr("*Obrazac prijave popuniti čitko đtampanim slovima"))
+		pdf.Text(15, pdf.GetY(), trObj.translDef("*Образац пријаве попунити читко штампаним словима"))
 		pdf.Ln(5)
-		pdf.Text(15, pdf.GetY(), latTr("*Upisati broj kartice (SRB broj) ili broj „Potvrde o prijemu zahteva za izdavanje sertifikata o stručnoj"))
+		pdf.Text(15, pdf.GetY(), trObj.translDef("*Уписати број картице (СРБ број) или број „Потврде о пријему захтева за издавање сертификата о стручној"))
 		pdf.Ln(4)
-		pdf.Text(17, pdf.GetY(), latTr("kompetenciji i kvalifikacione kartice vozača„, ukoliko ste pokrenuli postupak izdavanja"))
+		pdf.Text(17, pdf.GetY(), trObj.translDef("компетенцији и квалификационе картице возача, уколико сте покренули поступак издавања"))
 		pdf.Ln(4)
-		pdf.Text(17, pdf.GetY(), latTr("kvalifikacione kartice i sertifikata"))
+		pdf.Text(17, pdf.GetY(), trObj.translDef("квалификаионе картице и сертификата"))
 	}
 
 	var buf bytes.Buffer
@@ -739,11 +822,11 @@ func (p *printService) PrintCheckIn(seminar *model.Seminar) ([]byte, error) {
 }
 
 func createSimpleHeader(pdf *fpdf.Fpdf, tr func(string) string) {
-	pdf.SetFont("Arimo-Regular", "", 10)
+	pdf.SetFont("Helvetica", "", 10)
 	pdf.Image("./images/srbolab_logo.png", 15, 10, 30, 10, false, "png", 0, "")
 	pdf.CellFormat(35, 10, "", "0", 0, "C", false, 0, "")
-	pdf.Text(95, 14, "SRBOLAB D.O.O.")
-	pdf.Text(80, 18, tr("Centar za edukaciju i razvoj Srbolab"))
+	pdf.Text(95, 14, tr("СРБОЛАБ Д.О.О."))
+	pdf.Text(80, 18, tr("Центар за едукацију и развој Срболаб"))
 	pdf.Image("./images/cers_logo.png", 170, 10, 20, 10, false, "png", 0, "")
 	pdf.Ln(15)
 }
@@ -757,37 +840,40 @@ func (p *printService) PrintSeminarEvidence(day *model.SeminarDay) ([]byte, erro
 	pdf := fpdf.New("L", "mm", "A4", filepath.Join(pwd, "font"))
 	pdf.AddFont("Arimo-Regular", "", "Arimo-Regular.json")
 	pdf.AddFont("Arimo-Bold", "", "Arimo-Bold.json")
+	pdf.AddFont("Helvetica", "", "helvetica_1251.json")
 	latTr := pdf.UnicodeTranslatorFromDescriptor("iso-8859-16")
+	cirTr := pdf.UnicodeTranslatorFromDescriptor("cp1251")
+	trObj := newTranslationDetails(pdf, "Helvetica", "Arimo-Regular", 9, latTr, cirTr)
 
 	pdf.SetMargins(marginLeft, marginTop, marginRight)
 	pdf.AddPage()
 
 	pdf.SetFont("Arimo-Regular", "", 9)
-	createSimpleHeader(pdf, latTr)
+	createSimpleHeader(pdf, cirTr)
 
 	pdf.Ln(5)
 	pdf.SetFont("Arimo-Bold", "", 9)
-	pdf.Text(15, pdf.GetY(), latTr("Dnevnik predavača seminara unapređenja znanja na periodičnoj obuci profesionalnih vozača"))
+	pdf.Text(15, pdf.GetY(), trObj.translDef(fmt.Sprintf("Дневник предавача семинара унапређења знања на %s обуци професионалних возача", day.Seminar.SeminarTheme.BaseSeminarType.GetSeminarTypeForSentence())))
 	pdf.Ln(5)
 	pdf.SetFont("Arimo-Regular", "", 9)
-	pdf.Text(15, pdf.GetY(), latTr("Datum održavanja seminara"))
+	pdf.Text(15, pdf.GetY(), trObj.translDef("Датум одржавања семинара"))
 	pdf.Text(80, pdf.GetY(), day.Date.Format("02.01.2006."))
 	pdf.Ln(5)
-	pdf.Text(15, pdf.GetY(), latTr(day.Seminar.ClassRoom.Location.Address.Place))
+	pdf.Text(15, pdf.GetY(), trObj.translDef(day.Seminar.ClassRoom.Location.Address.Place))
 	pdf.Ln(2)
 
 	ch := 10.0
 
 	pdf.CellFormat(20, ch, "", "1", 0, "TC", false, 0, "")
-	pdf.Text(13, pdf.GetY()+3.5, latTr("Redni broj"))
-	pdf.Text(17, pdf.GetY()+8.5, latTr("časa"))
-	pdf.CellFormat(40, ch, latTr("Vreme održavanja časa"), "1", 0, "C", false, 0, "")
-	pdf.CellFormat(90, ch, latTr("Nastavni čas"), "1", 0, "C", false, 0, "")
+	pdf.Text(13, pdf.GetY()+3.5, trObj.translDef("Редни број"))
+	pdf.Text(17, pdf.GetY()+8.5, trObj.translDef("часа"))
+	pdf.CellFormat(40, ch, trObj.translDef("Време одржавања часа"), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(90, ch, trObj.translDef("Наставни час"), "1", 0, "C", false, 0, "")
 	pdf.CellFormat(70, ch, "", "1", 0, "TC", false, 0, "")
-	pdf.Text(178, pdf.GetY()+3.5, latTr("Ime i prezime predavača"))
+	pdf.Text(178, pdf.GetY()+3.5, trObj.translDef("Име и презиме предавача"))
 	pdf.Line(160, pdf.GetY()+5, 230, pdf.GetY()+5)
-	pdf.Text(182, pdf.GetY()+8.5, latTr("Potpis predavača"))
-	pdf.CellFormat(50, ch, latTr("Napomena"), "1", 0, "C", false, 0, "")
+	pdf.Text(182, pdf.GetY()+8.5, trObj.translDef("Потпис предавача"))
+	pdf.CellFormat(50, ch, trObj.translDef("Напомена"), "1", 0, "C", false, 0, "")
 
 	getClassTime := func(d time.Time, i int) string {
 		switch i {
@@ -813,21 +899,21 @@ func (p *printService) PrintSeminarEvidence(day *model.SeminarDay) ([]byte, erro
 		pdf.Ln(ch)
 		pdf.CellFormat(20, ch, strconv.Itoa(i+1), "1", 0, "C", false, 0, "")
 		pdf.CellFormat(40, ch, getClassTime(day.Date, i+1), "1", 0, "C", false, 0, "")
-		pdf.CellFormat(90, ch, day.Classes[i].Name, "1", 0, "C", false, 0, "")
+		pdf.CellFormat(90, ch, trObj.translDef(day.Classes[i].Name), "1", 0, "C", false, 0, "")
 		pdf.CellFormat(70, ch, "", "1", 0, "C", false, 0, "")
 		teacher := ""
 		if day.Classes[i].Teacher != nil {
 			teacher = day.Classes[i].Teacher.Person.FullName()
 		}
-		pdf.Text(178, pdf.GetY()+3.5, teacher)
+		pdf.Text(178, pdf.GetY()+3.5, trObj.translDef(teacher))
 		pdf.Line(160, pdf.GetY()+5, 230, pdf.GetY()+5)
 		pdf.Text(182, pdf.GetY()+8.5, "")
 		pdf.CellFormat(50, ch, "", "1", 0, "C", false, 0, "")
 	}
 
 	pdf.Ln(15)
-	pdf.Text(100, pdf.GetY(), latTr("Šifra obuke:"))
-	pdf.Text(120, pdf.GetY(), day.Seminar.GetCode())
+	pdf.Text(100, pdf.GetY(), trObj.translDef("Шифра обуке:"))
+	pdf.Text(120, pdf.GetY(), trObj.translDef(day.Seminar.GetCode()))
 
 	var buf bytes.Buffer
 	err = pdf.Output(&buf)
@@ -860,14 +946,17 @@ func (p *printService) PrintPlanTreningRealization(day *model.SeminarDay) ([]byt
 	pdf := fpdf.New("P", "mm", "A4", filepath.Join(pwd, "font"))
 	pdf.AddFont("Arimo-Regular", "", "Arimo-Regular.json")
 	pdf.AddFont("Arimo-Bold", "", "Arimo-Bold.json")
+	pdf.AddFont("Helvetica", "", "helvetica_1251.json")
 	latTr := pdf.UnicodeTranslatorFromDescriptor("iso-8859-16")
+	cirTr := pdf.UnicodeTranslatorFromDescriptor("cp1251")
+	trObj := newTranslationDetails(pdf, "Helvetica", "Arimo-Regular", 11, latTr, cirTr)
 
 	pdf.SetMargins(15.0, marginTop, marginRight)
 	pdf.AddPage()
 
 	pdf.Ln(30)
 	pdf.SetFont("Arimo-Bold", "", 14)
-	pdf.Text(38, pdf.GetY(), latTr("Plan realizacije nastave za periodičnu obuku - 7 časova"))
+	pdf.Text(38, pdf.GetY(), trObj.translate(fmt.Sprintf("План реализације наставе за %s обуку - 7 часова", day.Seminar.SeminarTheme.BaseSeminarType.GetSeminarTypeForSentence()), 14))
 	pdf.Ln(5)
 
 	pdf.SetFont("Arimo-Bold", "", 11)
@@ -878,18 +967,18 @@ func (p *printService) PrintPlanTreningRealization(day *model.SeminarDay) ([]byt
 	cw3 := 53.0
 	cw4 := 23.0
 	cw5 := 23.0
-	pdf.CellFormat(180, ch, util.GetDaySerbian(day.Date)+" "+day.Date.Format("01.02.2006"), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(180, ch, trObj.translDef(util.GetDaySerbian(day.Date))+" "+day.Date.Format("01.02.2006"), "1", 0, "C", false, 0, "")
 	pdf.Ln(ch)
 	pdf.SetFillColor(180, 197, 231)
-	pdf.CellFormat(cw1, ch, latTr("R.br"), "1", 0, "C", true, 0, "")
-	pdf.CellFormat(cw2, ch, latTr("Naziv časa"), "1", 0, "C", true, 0, "")
-	pdf.CellFormat(cw3, ch, latTr("Predavač"), "1", 0, "C", true, 0, "")
-	pdf.CellFormat(cw4, ch, latTr("Početak"), "1", 0, "C", true, 0, "")
-	pdf.CellFormat(cw5, ch, latTr("Kraj"), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(cw1, ch, trObj.translDef("Р.бр"), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(cw2, ch, trObj.translDef("Назив часа"), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(cw3, ch, trObj.translDef("Предавач"), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(cw4, ch, trObj.translDef("Почетак"), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(cw5, ch, trObj.translDef("Крај"), "1", 0, "C", true, 0, "")
 	pdf.SetFont("Arimo-Regular", "", 10)
 	pdf.Ln(ch)
 	pdf.CellFormat(cw1, chs*2.0, "", "1", 0, "C", false, 0, "")
-	pdf.CellFormat(cw2, chs*2.0, latTr("Prijava i evidentiranje polaznika"), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw2, chs*2.0, trObj.translate("Prijava i evidentiranje polaznika", 10), "1", 0, "C", false, 0, "")
 	pdf.CellFormat(cw3, chs*2.0, "", "1", 0, "C", false, 0, "")
 	pdf.CellFormat(cw4, chs*2.0, "", "1", 0, "C", false, 0, "")
 	pdf.CellFormat(cw5, chs*2.0, "", "1", 0, "C", false, 0, "")
@@ -905,10 +994,10 @@ func (p *printService) PrintPlanTreningRealization(day *model.SeminarDay) ([]byt
 	pdf.Ln(chs * 3.0)
 	pdf.SetFillColor(180, 197, 231)
 	pdf.CellFormat(cw1, chs*2, latTr(""), "1", 0, "C", true, 0, "")
-	pdf.CellFormat(cw2, chs*2, latTr("Pauza za kafu"), "1", 0, "C", true, 0, "")
-	pdf.CellFormat(cw3, chs*2, latTr("Predavač"), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(cw2, chs*2, trObj.translDef("Pauza za kafu"), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(cw3, chs*2, trObj.translDef("Predavač"), "1", 0, "C", true, 0, "")
 	pdf.CellFormat(cw4, chs*2, latTr("10"), "LTB", 0, "R", true, 0, "")
-	pdf.CellFormat(cw5, chs*2, latTr("minuta"), "TBR", 0, "L", true, 0, "")
+	pdf.CellFormat(cw5, chs*2, trObj.translDef("minuta"), "TBR", 0, "L", true, 0, "")
 
 	pdf.SetFont("Arimo-Regular", "", 10)
 	pdf.Ln(chs * 2.0)

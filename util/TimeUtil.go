@@ -17,19 +17,19 @@ func GetDaySerbian(time time.Time) string {
 	dayInWeek := time.Weekday()
 	switch dayInWeek {
 	case 0:
-		return "Nedelja"
+		return "Недеља"
 	case 1:
-		return "Ponedeljak"
+		return "Понедељал"
 	case 2:
-		return "Utorak"
+		return "Уторак"
 	case 3:
-		return "Sreda"
+		return "Среда"
 	case 4:
-		return "Četvrtak"
+		return "Четвртак"
 	case 5:
-		return "Petak"
+		return "Петак"
 	case 6:
-		return "Subota"
+		return "Субота"
 	}
 
 	return ""

@@ -63,12 +63,12 @@ type BaseSeminarType struct {
 
 func (b BaseSeminarType) GetSeminarTypeForSentence() string {
 	if b.Code == "ADDITIONAL" {
-		return "dodatnoj"
+		return "додатној"
 	}
 	if b.Code == "BASE" {
-		return "osnovnoj"
+		return "основној"
 	}
-	return "periodičnoj"
+	return "периодичној"
 }
 
 type SeminarTheme struct {

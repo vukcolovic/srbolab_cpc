@@ -53,12 +53,12 @@ func (excelService) CreateClientTestsBySeminarDayReport(tests []model.ClientTest
 	exc.SetColWidth("Sheet1", "E", "E", 15.0)
 	exc.SetColWidth("Sheet1", "F", "F", 25.0)
 
-	exc.SetCellValue("Sheet1", "A1", "Ime i prezime")
-	exc.SetCellValue("Sheet1", "B1", "Seminar (tema)")
-	exc.SetCellValue("Sheet1", "C1", "Dan")
-	exc.SetCellValue("Sheet1", "D1", "Vreme testa")
-	exc.SetCellValue("Sheet1", "E1", "Rezultat (%)")
-	exc.SetCellValue("Sheet1", "F1", "Odgovori")
+	exc.SetCellValue("Sheet1", "A1", "Име и презиме")
+	exc.SetCellValue("Sheet1", "B1", "Семинар (тема)")
+	exc.SetCellValue("Sheet1", "C1", "Дан")
+	exc.SetCellValue("Sheet1", "D1", "Време теста")
+	exc.SetCellValue("Sheet1", "E1", "Резултати (%)")
+	exc.SetCellValue("Sheet1", "F1", "Одговори")
 
 	for i, t := range tests {
 		exc.SetCellValue("Sheet1", "A"+strconv.Itoa(i+2), t.Client.Person.FullName())
@@ -123,14 +123,14 @@ func (excelService) CreateListClientsBySeminarDayReport(seminarDay *model.Semina
 	exc.SetColWidth("Sheet1", "H", "H", 15.0)
 	exc.SetColWidth("Sheet1", "I", "I", 30.0)
 
-	exc.SetCellValue("Sheet1", "B3", "Red. br.")
-	exc.SetCellValue("Sheet1", "C3", "Ime (ime jednog roditelja) prezime")
-	exc.SetCellValue("Sheet1", "D3", "JMBG")
-	exc.SetCellValue("Sheet1", "E3", "Naziv Centra za obuku")
-	exc.SetCellValue("Sheet1", "F3", "Naziv teme")
-	exc.SetCellValue("Sheet1", "G3", "Datum seminara")
-	exc.SetCellValue("Sheet1", "H3", "Datum uplate")
-	exc.SetCellValue("Sheet1", "I3", "Pravno lice/fizičko lice")
+	exc.SetCellValue("Sheet1", "B3", "Ред. бр.")
+	exc.SetCellValue("Sheet1", "C3", "Име (име једног родитеља) презиме")
+	exc.SetCellValue("Sheet1", "D3", "ЈМБГ")
+	exc.SetCellValue("Sheet1", "E3", "Назив Центра за обуку")
+	exc.SetCellValue("Sheet1", "F3", "Назив теме")
+	exc.SetCellValue("Sheet1", "G3", "Датум семинара")
+	exc.SetCellValue("Sheet1", "H3", "Датум уплате")
+	exc.SetCellValue("Sheet1", "I3", "Правно лице/физичко лице")
 
 	for i, t := range seminarDay.Presence {
 		exc.SetCellValue("Sheet1", "B"+strconv.Itoa(i+4), strconv.Itoa(i+1))
