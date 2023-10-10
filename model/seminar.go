@@ -15,29 +15,60 @@ const (
 
 type Seminar struct {
 	gorm.Model
-	Start           time.Time       `json:"start_date"`
-	ClassRoomID     uint            `json:"class_room_id"`
-	ClassRoom       ClassRoom       `json:"class_room"`
-	Trainees        []ClientSeminar `json:"trainees"`
-	SeminarThemeID  uint            `json:"seminar_theme_id"`
-	SeminarTheme    SeminarTheme    `json:"seminar_theme"`
-	SeminarStatusID uint            `json:"seminar_status_id"`
-	SeminarStatus   SeminarStatus   `json:"seminar_status"`
-	Days            []SeminarDay    `json:"days"`
-	Documents       []*File         `json:"documents" gorm:"many2many:seminar_file;"`
+	Start                  time.Time       `json:"start_date"`
+	ClassRoomID            uint            `json:"class_room_id"`
+	ClassRoom              ClassRoom       `json:"class_room"`
+	Trainees               []ClientSeminar `json:"trainees"`
+	SeminarThemeID         uint            `json:"seminar_theme_id"`
+	SeminarTheme           SeminarTheme    `json:"seminar_theme"`
+	SeminarStatusID        uint            `json:"seminar_status_id"`
+	SeminarStatus          SeminarStatus   `json:"seminar_status"`
+	Days                   []SeminarDay    `json:"days"`
+	Documents              []*File         `json:"documents" gorm:"many2many:seminar_file;"`
+	SerialNumberByLocation int             `json:"serial_number_by_location"`
 }
 
-// ID-DATE-BASE_ID_TYPE-THEME_ID-LOCATION_ID-CLASSROOM_ID
+// Šifra obuke treba da se generiše automatski po principu: 7.3-226-LA-23-10-06
+// gde je 7 - oznaka za periodičnu obuku (kada je dodatna obuka umesto
+// 7.3 biće 35, kada je osnovna obuka biće 140),
+// 3 je redni broj teme,
+// 226 redni broj seminara u Lazarevcu (svaka lokacija kreće sa
+// računanjem od 1 i broji za sebe),
+// LA oznaka za lokaciju (LA-Lazarevac, BG-Beograd Batajnica,
+// SRB-Srbobran, PO-Požarevac),
+// 23-10-06 datum seminara,
 func (s Seminar) GetCode() string {
-	return strconv.Itoa(int(s.ID)) + "-" + s.Start.Format("02.01.2006.") + "-" +
-		strconv.Itoa(int(s.SeminarTheme.BaseSeminarTypeID)) + "-" + strconv.Itoa(int(s.SeminarThemeID)) +
-		strconv.Itoa(int(s.ClassRoom.LocationID)) + "-" + strconv.Itoa(int(s.ClassRoomID))
+	code := ""
+	if s.SeminarTheme.BaseSeminarType.Code == "BASIC" {
+		code = code + "140"
+	}
+	if s.SeminarTheme.BaseSeminarType.Code == "ADDITIONAL" {
+		code = code + "35"
+	}
+	if s.SeminarTheme.BaseSeminarType.Code == "CYCLE" {
+		code = code + "7" + s.SeminarTheme.Code
+	}
+
+	code = code + "-" + strconv.Itoa(s.SerialNumberByLocation)
+	code = code + "-" + s.ClassRoom.Location.Code
+	code = code + "-" + s.Start.Format("2006-02-01")
+	return code
 }
 
 type BaseSeminarType struct {
 	gorm.Model
 	Code string `json:"code"`
 	Name string `json:"name"`
+}
+
+func (b BaseSeminarType) GetSeminarTypeForSentence() string {
+	if b.Code == "ADDITIONAL" {
+		return "dodatnoj"
+	}
+	if b.Code == "BASE" {
+		return "osnovnoj"
+	}
+	return "periodičnoj"
 }
 
 type SeminarTheme struct {

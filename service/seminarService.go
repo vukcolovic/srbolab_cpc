@@ -69,6 +69,9 @@ func (c *seminarService) DeleteSeminar(id int) error {
 }
 
 func (c *seminarService) CreateSeminar(seminar model.Seminar) (*model.Seminar, error) {
+	countByLocation := 0
+	db.Client.Raw("SELECT COUNT(*) FROM seminars s JOIN class_rooms cr ON s.class_room_id = cr.id WHERE cr.location_id = ?", seminar.ClassRoom.LocationID).Scan(&countByLocation)
+	seminar.SerialNumberByLocation = countByLocation + 1
 	result := db.Client.Create(&seminar)
 	if result.Error != nil {
 		return nil, result.Error

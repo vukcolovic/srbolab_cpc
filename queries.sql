@@ -20,3 +20,6 @@ INSERT INTO roles (id, name, code, created_at, updated_at) VALUES (1, 'Administr
 INSERT INTO roles (id, name, code, created_at, updated_at) VALUES (2, 'Predavač', 'PREDAVAC', now(), now()) ON CONFLICT DO NOTHING;
 
 ALTER TABLE client_seminars ADD UNIQUE (client_id, seminar_id);
+
+ALTER TABLE seminar_class_names ADD CONSTRAINT unique_theme_seminar_day_number_class_number UNIQUE (seminar_theme_id, day_number, class_number);
+ALTER TABLE seminar_day_theme_names ADD CONSTRAINT unique_theme_seminar_day_number UNIQUE (seminar_theme_id, day_number);

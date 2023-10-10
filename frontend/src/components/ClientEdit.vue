@@ -142,16 +142,16 @@
               type="number">
           </text-input>
 
-<!--          <text-input-->
-<!--              v-model.trim="client.drive_licence"-->
-<!--              :readonly="readonly"-->
-<!--              :required=true-->
-<!--              :styleInput=styleInputSmall-->
-<!--              :styleLabel=styleLabelSmall-->
-<!--              label="Broj vozačke"-->
-<!--              name="drive_licence"-->
-<!--              type="text">-->
-<!--          </text-input>-->
+          <text-input
+              v-model.trim="client.drive_licence"
+              :readonly="readonly"
+              :required=true
+              :styleInput=styleInputSmall
+              :styleLabel=styleLabelSmall
+              label="Broj vozačke"
+              name="drive_licence"
+              type="text">
+          </text-input>
 
           <div class="form-check form-switch">
             <input id="flexSwitchCheckDefault" v-model="showNote" class="form-check-input" role="switch"

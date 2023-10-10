@@ -231,6 +231,7 @@ func (p *printService) PrintConfirmations(seminar *model.Seminar) ([]byte, error
 
 		pdf.Ln(5)
 		pdf.Text(15, pdf.GetY(), "Broj:")
+		pdf.Text(30, pdf.GetY(), seminar.GetCode())
 		pdf.Ln(5)
 		pdf.SetFont("Arimo-Regular", "", 11)
 		pdf.Text(15, pdf.GetY(), "Dana:")
@@ -247,7 +248,7 @@ func (p *printService) PrintConfirmations(seminar *model.Seminar) ([]byte, error
 		pdf.Ln(10)
 
 		pdf.SetFont("Arimo-Regular", "", 11)
-		pdf.Text(25, pdf.GetY(), latTr("o završenoj periodičnoj obuci na obaveznim seminarima unapređenja znanja"))
+		pdf.Text(25, pdf.GetY(), latTr(fmt.Sprintf("o završenoj %s obuci na obaveznim seminarima unapređenja znanja", seminar.SeminarTheme.BaseSeminarType.GetSeminarTypeForSentence())))
 		pdf.Ln(10)
 
 		ch := 9.0
@@ -479,7 +480,7 @@ func (p *printService) PrintConfirmationReceives(seminar *model.Seminar) ([]byte
 			pdf.CellFormat(40, ch, client.Client.Person.FirstName, "1", 0, "L", false, 0, "")
 			pdf.CellFormat(40, ch, client.Client.Person.LastName, "1", 0, "L", false, 0, "")
 			pdf.CellFormat(35, ch, *client.Client.JMBG, "1", 0, "L", false, 0, "")
-			pdf.CellFormat(50, ch, "???????", "1", 0, "L", false, 0, "")
+			pdf.CellFormat(50, ch, seminar.GetCode()+"/"+strconv.Itoa(int(client.ClientID)), "1", 0, "L", false, 0, "")
 		}
 
 		pdf.Ln(20)
@@ -535,7 +536,7 @@ func (p *printService) PrintMuster(day *model.SeminarDay) ([]byte, error) {
 	dayInWeek := util.GetDaySerbian(day.Date)
 	pdf.Text(27, pdf.GetY(), dayInWeek+" "+day.Date.Format("02.01.2006."))
 	pdf.Ln(5)
-	pdf.Text(15, pdf.GetY(), latTr("Prozivnik polaznika seminara unapređenja znanja na periodičnoj obuci profesionalnih vozača"))
+	pdf.Text(15, pdf.GetY(), latTr(fmt.Sprintf("Prozivnik polaznika seminara unapređenja znanja na %s obuci profesionalnih vozača", day.Seminar.SeminarTheme.BaseSeminarType.GetSeminarTypeForSentence())))
 
 	ch := 14.0
 	pdf.Ln(2)

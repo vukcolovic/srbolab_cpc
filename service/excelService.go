@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/xuri/excelize/v2"
 	"srbolab_cpc/model"
+	"srbolab_cpc/util"
 	"strconv"
 	"time"
 )
@@ -135,7 +136,7 @@ func (excelService) CreateListClientsBySeminarDayReport(seminarDay *model.Semina
 		exc.SetCellValue("Sheet1", "B"+strconv.Itoa(i+4), strconv.Itoa(i+1))
 		exc.SetCellValue("Sheet1", "C"+strconv.Itoa(i+4), t.Client.Person.FullName())
 		exc.SetCellValue("Sheet1", "D"+strconv.Itoa(i+4), *t.Client.JMBG)
-		exc.SetCellValue("Sheet1", "E"+strconv.Itoa(i+4), "?????")
+		exc.SetCellValue("Sheet1", "E"+strconv.Itoa(i+4), util.CentarForEducationName)
 		exc.SetCellValue("Sheet1", "F"+strconv.Itoa(i+4), seminarDay.Name)
 		exc.SetCellValue("Sheet1", "G"+strconv.Itoa(i+4), t.CreatedAt.Format("02.01.2006"))
 		clientSeminar, _ := SeminarService.GetClientSeminarBySeminarIDAndClientID(seminarDay.SeminarID, t.ClientID)
