@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/xuri/excelize/v2"
+	"sort"
 	"srbolab_cpc/model"
 	"srbolab_cpc/util"
 	"strconv"
@@ -131,6 +132,10 @@ func (excelService) CreateListClientsBySeminarDayReport(seminarDay *model.Semina
 	exc.SetCellValue("Sheet1", "G3", "Датум семинара")
 	exc.SetCellValue("Sheet1", "H3", "Датум уплате")
 	exc.SetCellValue("Sheet1", "I3", "Правно лице/физичко лице")
+
+	sort.Slice(seminarDay.Presence, func(i, j int) bool {
+		return *seminarDay.Presence[i].Client.JMBG < *seminarDay.Presence[j].Client.JMBG
+	})
 
 	for i, t := range seminarDay.Presence {
 		exc.SetCellValue("Sheet1", "B"+strconv.Itoa(i+4), strconv.Itoa(i+1))

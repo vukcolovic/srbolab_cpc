@@ -898,9 +898,15 @@ func (p *printService) PrintSeminarEvidence(day *model.SeminarDay) ([]byte, erro
 
 	for i := 0; i < len(day.Classes); i++ {
 		pdf.Ln(ch)
+		lines, _ := splitLine(day.Classes[i].Name, 90)
+		current := pdf.GetY() + 3.5
+		for i, line := range lines {
+			pdf.Text(72, current+float64(i)*4.0, trObj.translDef(line))
+		}
+		trObj.translDef(day.Classes[i].Name)
 		pdf.CellFormat(20, ch, strconv.Itoa(i+1), "1", 0, "C", false, 0, "")
 		pdf.CellFormat(40, ch, getClassTime(day.Date, i+1), "1", 0, "C", false, 0, "")
-		pdf.CellFormat(90, ch, trObj.translDef(day.Classes[i].Name), "1", 0, "C", false, 0, "")
+		pdf.CellFormat(90, ch, "", "1", 0, "C", false, 0, "")
 		pdf.CellFormat(70, ch, "", "1", 0, "C", false, 0, "")
 		teacher := ""
 		if day.Classes[i].Teacher != nil {
@@ -914,7 +920,7 @@ func (p *printService) PrintSeminarEvidence(day *model.SeminarDay) ([]byte, erro
 
 	pdf.Ln(15)
 	pdf.Text(100, pdf.GetY(), trObj.translDef("Шифра обуке:"))
-	pdf.Text(120, pdf.GetY(), trObj.translDef(day.Seminar.GetCode()))
+	pdf.Text(122, pdf.GetY(), trObj.translDef(day.Seminar.GetCode()))
 
 	var buf bytes.Buffer
 	err = pdf.Output(&buf)
@@ -957,7 +963,14 @@ func (p *printService) PrintPlanTreningRealization(day *model.SeminarDay) ([]byt
 
 	pdf.Ln(30)
 	pdf.SetFont("Arimo-Bold", "", 14)
-	pdf.Text(38, pdf.GetY(), trObj.translate(fmt.Sprintf("План реализације наставе за %s обуку - 7 часова", day.Seminar.SeminarTheme.BaseSeminarType.GetSeminarTypeForSentence()), 14))
+	seminarTypeSentence := "периодичну"
+	if day.Seminar.SeminarTheme.BaseSeminarType.Code == "ADDITIONAL" {
+		seminarTypeSentence = "додатну"
+	}
+	if day.Seminar.SeminarTheme.BaseSeminarType.Code == "BASE" {
+		seminarTypeSentence = "основну"
+	}
+	pdf.Text(38, pdf.GetY(), trObj.translate(fmt.Sprintf("План реализације наставе за %s обуку - 7 часова", seminarTypeSentence), 14))
 	pdf.Ln(5)
 
 	pdf.SetFont("Arimo-Bold", "", 11)
