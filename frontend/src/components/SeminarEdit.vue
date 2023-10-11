@@ -162,7 +162,7 @@
           <h4>Dani seminara</h4>
           <div v-for="day in seminar.days" :key="day.number"
                class="border border-info bg-light d-inline-flex rounded m-2"
-               style="width: 15%; height: 120px" @click="openSeminarDayEdit(day.ID)">
+               style="width: 20%; height: 200px" @click="openSeminarDayEdit(day.ID)">
             <div class="m-1">
               <h6>Dan: {{ day.number }}</h6>
               <p style="font-size: 0.8em">{{ getDateInMMDDYYYYFormat(day.date) }}</p>
@@ -417,7 +417,8 @@ export default {
     },
     onPayedChange(traine) {
       if (traine.payed) {
-        traine.payed_by = traine.client.person.first_name + " " + traine.client.person.first_name;
+        alert("mjau");
+        traine.payed_by = traine.client.person.first_name + " " + traine.client.person.last_name;
       } else {
         traine.payed_by = "";
         traine.pay_date = this.getBackendFormat(null);

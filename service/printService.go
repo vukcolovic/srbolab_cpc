@@ -7,6 +7,7 @@ import (
 	"github.com/skip2/go-qrcode"
 	"os"
 	"path/filepath"
+	"sort"
 	"srbolab_cpc/logoped"
 	"srbolab_cpc/model"
 	"srbolab_cpc/util"
@@ -113,24 +114,35 @@ func (p *printService) PrintSeminarStudentList(seminar *model.Seminar) ([]byte, 
 	pdf.Text(15, pdf.GetY(), trObj.translDef("Место: "))
 	pdf.Text(27, pdf.GetY(), trObj.translDef(seminar.ClassRoom.Location.Address.Place))
 	pdf.Ln(5)
-	pdf.Text(15, pdf.GetY(), trObj.translDef("Регистрациони лист - списак полазника за "+seminar.SeminarTheme.Name))
+	seminarType := "периодичну"
+	if seminar.SeminarTheme.BaseSeminarType.Code == "ADDITIONAL" {
+		seminarType = "додатну"
+	}
+	if seminar.SeminarTheme.BaseSeminarType.Code == "BASE" {
+		seminarType = "основну"
+	}
+	pdf.Text(15, pdf.GetY(), trObj.translDef(fmt.Sprintf("Регистрациони лист - списак полазника за %s обуку", seminarType)))
 	pdf.Text(140, pdf.GetY(), trObj.translDef("Datum: "+time.Now().Format("01.02.2006")))
 
 	ch := 8.0
 	pdf.Ln(ch)
 	pdf.CellFormat(20, ch, trObj.translDef("Редни број"), "1", 0, "C", false, 0, "")
 	pdf.CellFormat(75, ch, trObj.translDef("Име и презиме"), "1", 0, "C", false, 0, "")
-	pdf.CellFormat(35, ch, trObj.translDef("ЈМБГ"), "1", 0, "C", false, 0, "")
-	pdf.CellFormat(55, ch, trObj.translDef("Фирма у којој сте запослени"), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(30, ch, trObj.translDef("ЈМБГ"), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(60, ch, trObj.translDef("Фирма у којој сте запослени"), "1", 0, "C", false, 0, "")
 	pdf.CellFormat(35, ch, trObj.translDef("Телефон"), "1", 0, "C", false, 0, "")
 	pdf.CellFormat(60, ch, trObj.translDef("Потпис"), "1", 0, "C", false, 0, "")
+
+	sort.Slice(seminar.Trainees, func(i, j int) bool {
+		return *seminar.Trainees[i].Client.JMBG < *seminar.Trainees[j].Client.JMBG
+	})
 
 	for i, cs := range seminar.Trainees {
 		pdf.Ln(ch)
 		pdf.CellFormat(20, ch, strconv.Itoa(i+1), "1", 0, "C", false, 0, "")
 		pdf.CellFormat(75, ch, trObj.translDef(cs.Client.Person.FullName()), "1", 0, "C", false, 0, "")
-		pdf.CellFormat(35, ch, *cs.Client.JMBG, "1", 0, "C", false, 0, "")
-		pdf.CellFormat(55, ch, "", "1", 0, "C", false, 0, "")
+		pdf.CellFormat(30, ch, *cs.Client.JMBG, "1", 0, "C", false, 0, "")
+		pdf.CellFormat(60, ch, "", "1", 0, "C", false, 0, "")
 		pdf.CellFormat(35, ch, "", "1", 0, "C", false, 0, "")
 		pdf.CellFormat(60, ch, "", "1", 0, "C", false, 0, "")
 	}

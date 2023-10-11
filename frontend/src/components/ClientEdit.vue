@@ -145,7 +145,7 @@
           <text-input
               v-model.trim="client.drive_licence"
               :readonly="readonly"
-              :required=true
+              :required=false
               :styleInput=styleInputSmall
               :styleLabel=styleLabelSmall
               label="Broj vozačke"

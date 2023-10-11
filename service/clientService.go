@@ -139,6 +139,13 @@ func (c *clientService) CreateClient(client model.Client, userID int) (*model.Cl
 		return nil, result.Error
 	}
 
+	if len(client.Seminars) > 0 {
+		err := SeminarService.UpdateSeminarStatusIfNeed(int(client.Seminars[0].SeminarID))
+		if err != nil {
+			return &client, err
+		}
+	}
+
 	return &client, nil
 }
 
