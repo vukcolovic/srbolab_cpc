@@ -11,6 +11,7 @@ import (
 	"srbolab_cpc/model"
 	"srbolab_cpc/util"
 	"strconv"
+	"strings"
 	"time"
 	"unicode"
 )
@@ -875,26 +876,6 @@ func (p *printService) PrintSeminarEvidence(day *model.SeminarDay) ([]byte, erro
 	pdf.Text(182, pdf.GetY()+8.5, trObj.translDef("Потпис предавача"))
 	pdf.CellFormat(50, ch, trObj.translDef("Напомена"), "1", 0, "C", false, 0, "")
 
-	getClassTime := func(d time.Time, i int) string {
-		switch i {
-		case 1:
-			return d.Format("15:04") + " - " + d.Add(45*time.Minute).Format("15:04")
-		case 2:
-			return d.Add(55*time.Minute).Format("15:04") + " - " + d.Add(100*time.Minute).Format("15:04")
-		case 3:
-			return d.Add(105*time.Minute).Format("15:04") + " - " + d.Add(150*time.Minute).Format("15:04")
-		case 4:
-			return d.Add(175*time.Minute).Format("15:04") + " - " + d.Add(220*time.Minute).Format("15:04")
-		case 5:
-			return d.Add(225*time.Minute).Format("15:04") + " - " + d.Add(270*time.Minute).Format("15:04")
-		case 6:
-			return d.Add(280*time.Minute).Format("15:04") + " - " + d.Add(325*time.Minute).Format("15:04")
-		case 7:
-			return d.Add(330*time.Minute).Format("15:04") + " - " + d.Add(375*time.Minute).Format("15:04")
-		}
-		return ""
-	}
-
 	for i := 0; i < len(day.Classes); i++ {
 		pdf.Ln(ch)
 		pdf.CellFormat(20, ch, strconv.Itoa(i+1), "1", 0, "C", false, 0, "")
@@ -960,13 +941,13 @@ func (p *printService) PrintPlanTreningRealization(day *model.SeminarDay) ([]byt
 	pdf.Ln(5)
 
 	pdf.SetFont("Arimo-Bold", "", 11)
-	ch := 8.0
-	chs := 5.0
+	ch := 10.0
+	chs := 7.0
 	cw1 := 12.0
-	cw2 := 69.0
-	cw3 := 53.0
-	cw4 := 23.0
-	cw5 := 23.0
+	cw2 := 81.0
+	cw3 := 45.0
+	cw4 := 21.0
+	cw5 := 21.0
 	pdf.CellFormat(180, ch, trObj.translDef(util.GetDaySerbian(day.Date))+" "+day.Date.Format("01.02.2006"), "1", 0, "C", false, 0, "")
 	pdf.Ln(ch)
 	pdf.SetFillColor(180, 197, 231)
@@ -975,129 +956,254 @@ func (p *printService) PrintPlanTreningRealization(day *model.SeminarDay) ([]byt
 	pdf.CellFormat(cw3, ch, trObj.translDef("Предавач"), "1", 0, "C", true, 0, "")
 	pdf.CellFormat(cw4, ch, trObj.translDef("Почетак"), "1", 0, "C", true, 0, "")
 	pdf.CellFormat(cw5, ch, trObj.translDef("Крај"), "1", 0, "C", true, 0, "")
+	pdf.SetFont("Arimo-Regular", "", 11)
+	pdf.Ln(ch)
+	splitWidth := 70
+	lines, num := splitLine("Пријава и евидентирање полазника obuke", splitWidth)
+	current := pdf.GetY() + 4.5
+	for i, line := range lines {
+		pdf.Text(30, current+float64(i)*6.0, trObj.translDef(line))
+	}
+	pdf.CellFormat(cw1, chs*num, "", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw2, chs*num, "", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw3, chs*num, "", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw4, chs*num, "", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw5, chs*num, "", "1", 0, "C", false, 0, "")
+
+	pdf.Ln(chs * num)
+	class1 := model.GetSeminarClassByNumber(day.Classes, 1)
+	className := ""
+	teacher := ""
+	timeStart := ""
+	if class1 != nil {
+		className = class1.Name
+		if class1.Teacher != nil {
+			teacher = class1.Teacher.Person.FullName()
+		}
+		timeStart = getClassTime(day.Date, 1)
+	}
+	lines, num = splitLine(className, splitWidth)
+	current = pdf.GetY() + 4.5
+	for i, line := range lines {
+		pdf.Text(30, current+float64(i)*6.0, trObj.translDef(line))
+	}
+	pdf.CellFormat(cw1, chs*num, "1", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw2, chs*num, "", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw3, chs*num, trObj.translDef(teacher), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw4, chs*num, strings.Split(timeStart, "-")[0], "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw5, chs*num, strings.Split(timeStart, "-")[1], "1", 0, "C", false, 0, "")
+
+	//pdf.SetFont("Arimo-Bold", "", 11)
+	pdf.Ln(chs * num)
+	pdf.SetFillColor(180, 197, 231)
+	pdf.CellFormat(cw1, ch, latTr(""), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(cw2, ch, trObj.translDef("Пауза за кафу"), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(cw3, ch, trObj.translDef(""), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(cw4, ch, latTr("10"), "LTB", 0, "R", true, 0, "")
+	pdf.CellFormat(cw5, ch, trObj.translDef("минута"), "TBR", 0, "L", true, 0, "")
+
+	pdf.SetFont("Arimo-Regular", "", 11)
+	pdf.Ln(ch)
+	class2 := model.GetSeminarClassByNumber(day.Classes, 2)
+	className = ""
+	teacher = ""
+	timeStart = ""
+	if class2 != nil {
+		className = class2.Name
+		if class2.Teacher != nil {
+			teacher = class2.Teacher.Person.FullName()
+		}
+		timeStart = getClassTime(day.Date, 2)
+	}
+	lines, num = splitLine(className, splitWidth)
+	current = pdf.GetY() + 4.5
+	for i, line := range lines {
+		pdf.Text(30, current+float64(i)*6.0, trObj.translDef(line))
+	}
+	pdf.CellFormat(cw1, chs*num, "2", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw2, chs*num, "", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw3, chs*num, trObj.translDef(teacher), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw4, chs*num, strings.Split(timeStart, "-")[0], "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw5, chs*num, strings.Split(timeStart, "-")[1], "1", 0, "C", false, 0, "")
+
+	//pdf.SetFont("Arimo-Bold", "", 11)
+	pdf.Ln(chs * num)
+	pdf.SetFillColor(180, 197, 231)
+	pdf.CellFormat(cw1, ch, trObj.translDef(""), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(cw2, ch, trObj.translDef("Пауза"), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(cw3, ch, trObj.translDef(""), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(cw4, ch, trObj.translDef("5"), "LTB", 0, "R", true, 0, "")
+	pdf.CellFormat(cw5, ch, trObj.translDef("минута"), "TBR", 0, "L", true, 0, "")
+
+	pdf.SetFont("Arimo-Regular", "", 11)
+	pdf.Ln(ch)
+	class3 := model.GetSeminarClassByNumber(day.Classes, 3)
+	className = ""
+	teacher = ""
+	timeStart = ""
+	if class3 != nil {
+		className = class3.Name
+		if class3.Teacher != nil {
+			teacher = class3.Teacher.Person.FullName()
+		}
+		timeStart = getClassTime(day.Date, 3)
+	}
+	lines, num = splitLine(className, splitWidth)
+	current = pdf.GetY() + 4.5
+	for i, line := range lines {
+		pdf.Text(30, current+float64(i)*6.0, trObj.translDef(line))
+	}
+	pdf.CellFormat(cw1, chs*num, "3", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw2, chs*num, "", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw3, chs*num, trObj.translDef(teacher), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw4, chs*num, strings.Split(timeStart, "-")[0], "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw5, chs*num, strings.Split(timeStart, "-")[1], "1", 0, "C", false, 0, "")
+
+	//pdf.SetFont("Arimo-Bold", "", 11)
+	pdf.Ln(chs * num)
+	pdf.SetFillColor(180, 197, 231)
+	pdf.CellFormat(cw1, ch, trObj.translDef(""), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(cw2, ch, trObj.translDef("Пауза за доручак"), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(cw3, ch, trObj.translDef(""), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(cw4, ch, trObj.translDef("25"), "LTB", 0, "R", true, 0, "")
+	pdf.CellFormat(cw5, ch, trObj.translDef("минута"), "TBR", 0, "L", true, 0, "")
+
+	pdf.SetFont("Arimo-Regular", "", 11)
+	pdf.Ln(ch)
+	class4 := model.GetSeminarClassByNumber(day.Classes, 4)
+	className = ""
+	teacher = ""
+	timeStart = ""
+	if class4 != nil {
+		className = class4.Name
+		if class4.Teacher != nil {
+			teacher = class4.Teacher.Person.FullName()
+		}
+		timeStart = getClassTime(day.Date, 4)
+	}
+	lines, num = splitLine(className, splitWidth)
+	current = pdf.GetY() + 4.5
+	for i, line := range lines {
+		pdf.Text(30, current+float64(i)*6.0, trObj.translDef(line))
+	}
+	pdf.CellFormat(cw1, chs*num, "4", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw2, chs*num, "", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw3, chs*num, trObj.translDef(teacher), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw4, chs*num, strings.Split(timeStart, "-")[0], "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw5, chs*num, strings.Split(timeStart, "-")[1], "1", 0, "C", false, 0, "")
+
+	//pdf.SetFont("Arimo-Bold", "", 11)
+	pdf.Ln(chs * num)
+	pdf.SetFillColor(180, 197, 231)
+	pdf.CellFormat(cw1, ch, trObj.translDef(""), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(cw2, ch, trObj.translDef("Пауза"), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(cw3, ch, trObj.translDef(""), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(cw4, ch, trObj.translDef("5"), "LTB", 0, "R", true, 0, "")
+	pdf.CellFormat(cw5, ch, trObj.translDef("минута"), "TBR", 0, "L", true, 0, "")
+
+	pdf.SetFont("Arimo-Regular", "", 11)
+	pdf.Ln(ch)
+	class5 := model.GetSeminarClassByNumber(day.Classes, 5)
+	className = ""
+	teacher = ""
+	timeStart = ""
+	if class5 != nil {
+		className = class5.Name
+		if class5.Teacher != nil {
+			teacher = class5.Teacher.Person.FullName()
+		}
+		timeStart = getClassTime(day.Date, 5)
+	}
+	lines, num = splitLine(className, splitWidth)
+	current = pdf.GetY() + 4.5
+	for i, line := range lines {
+		pdf.Text(30, current+float64(i)*6.0, trObj.translDef(line))
+	}
+	pdf.CellFormat(cw1, chs*num, "5", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw2, chs*num, "", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw3, chs*num, trObj.translDef(teacher), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw4, chs*num, strings.Split(timeStart, "-")[0], "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw5, chs*num, strings.Split(timeStart, "-")[1], "1", 0, "C", false, 0, "")
+
+	//pdf.SetFont("Arimo-Bold", "", 11)
+	pdf.Ln(chs * num)
+	pdf.SetFillColor(180, 197, 231)
+	pdf.CellFormat(cw1, ch, trObj.translDef(""), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(cw2, ch, trObj.translDef("Пауза за кафу"), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(cw3, ch, trObj.translDef(""), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(cw4, ch, trObj.translDef("15"), "LTB", 0, "R", true, 0, "")
+	pdf.CellFormat(cw5, ch, trObj.translDef("минута"), "TBR", 0, "L", true, 0, "")
+
+	pdf.SetFont("Arimo-Regular", "", 11)
+	pdf.Ln(ch)
+	class6 := model.GetSeminarClassByNumber(day.Classes, 6)
+	className = ""
+	teacher = ""
+	timeStart = ""
+	if class6 != nil {
+		className = class6.Name
+		if class6.Teacher != nil {
+			teacher = class6.Teacher.Person.FullName()
+		}
+		timeStart = getClassTime(day.Date, 6)
+	}
+	lines, num = splitLine(className, splitWidth)
+	current = pdf.GetY() + 4.5
+	for i, line := range lines {
+		pdf.Text(30, current+float64(i)*6.0, trObj.translDef(line))
+	}
+	pdf.CellFormat(cw1, chs*num, "6", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw2, chs*num, "", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw3, chs*num, trObj.translDef(teacher), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw4, chs*num, strings.Split(timeStart, "-")[0], "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw5, chs*num, strings.Split(timeStart, "-")[1], "1", 0, "C", false, 0, "")
+
+	//pdf.SetFont("Arimo-Bold", "", 11)
+	pdf.Ln(chs * num)
+	pdf.SetFillColor(180, 197, 231)
+	pdf.CellFormat(cw1, ch, trObj.translDef(""), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(cw2, ch, trObj.translDef("Пауза"), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(cw3, ch, trObj.translDef(""), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(cw4, ch, trObj.translDef("5"), "LTB", 0, "R", true, 0, "")
+	pdf.CellFormat(cw5, ch, trObj.translDef("минута"), "TBR", 0, "L", true, 0, "")
+
 	pdf.SetFont("Arimo-Regular", "", 10)
 	pdf.Ln(ch)
-	pdf.CellFormat(cw1, chs*2.0, "", "1", 0, "C", false, 0, "")
-	pdf.CellFormat(cw2, chs*2.0, trObj.translate("Prijava i evidentiranje polaznika", 10), "1", 0, "C", false, 0, "")
-	pdf.CellFormat(cw3, chs*2.0, "", "1", 0, "C", false, 0, "")
-	pdf.CellFormat(cw4, chs*2.0, "", "1", 0, "C", false, 0, "")
-	pdf.CellFormat(cw5, chs*2.0, "", "1", 0, "C", false, 0, "")
+	class7 := model.GetSeminarClassByNumber(day.Classes, 7)
+	className = ""
+	teacher = ""
+	timeStart = ""
+	if class7 != nil {
+		className = class7.Name
+		if class7.Teacher != nil {
+			teacher = class7.Teacher.Person.FullName()
+		}
+		timeStart = getClassTime(day.Date, 7)
+	}
+	lines, num = splitLine(className, splitWidth)
+	current = pdf.GetY() + 4.5
+	for i, line := range lines {
+		pdf.Text(30, current+float64(i)*6.0, trObj.translDef(line))
+	}
+	pdf.CellFormat(cw1, chs*num, "7", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw2, chs*num, "", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw3, chs*num, trObj.translDef(teacher), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw4, chs*num, strings.Split(timeStart, "-")[0], "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw5, chs*num, strings.Split(timeStart, "-")[1], "1", 0, "C", false, 0, "")
 
-	pdf.Ln(chs * 2.0)
-	pdf.CellFormat(cw1, chs*3.0, "1", "1", 0, "C", false, 0, "")
-	pdf.CellFormat(cw2, chs*3.0, "", "1", 0, "C", false, 0, "")
-	pdf.CellFormat(cw3, chs*3.0, "", "1", 0, "C", false, 0, "")
-	pdf.CellFormat(cw4, chs*3.0, "", "1", 0, "C", false, 0, "")
-	pdf.CellFormat(cw5, chs*3.0, "", "1", 0, "C", false, 0, "")
-
-	pdf.SetFont("Arimo-Bold", "", 11)
-	pdf.Ln(chs * 3.0)
-	pdf.SetFillColor(180, 197, 231)
-	pdf.CellFormat(cw1, chs*2, latTr(""), "1", 0, "C", true, 0, "")
-	pdf.CellFormat(cw2, chs*2, trObj.translDef("Pauza za kafu"), "1", 0, "C", true, 0, "")
-	pdf.CellFormat(cw3, chs*2, trObj.translDef("Predavač"), "1", 0, "C", true, 0, "")
-	pdf.CellFormat(cw4, chs*2, latTr("10"), "LTB", 0, "R", true, 0, "")
-	pdf.CellFormat(cw5, chs*2, trObj.translDef("minuta"), "TBR", 0, "L", true, 0, "")
-
-	pdf.SetFont("Arimo-Regular", "", 10)
-	pdf.Ln(chs * 2.0)
-	pdf.CellFormat(cw1, chs*2.0, "2", "1", 0, "C", false, 0, "")
-	pdf.CellFormat(cw2, chs*2.0, latTr("Prijava i evidentiranje polaznika"), "1", 0, "C", false, 0, "")
-	pdf.CellFormat(cw3, chs*2.0, "", "1", 0, "C", false, 0, "")
-	pdf.CellFormat(cw4, chs*2.0, "", "1", 0, "C", false, 0, "")
-	pdf.CellFormat(cw5, chs*2.0, "", "1", 0, "C", false, 0, "")
-
-	pdf.SetFont("Arimo-Bold", "", 11)
-	pdf.Ln(chs * 2.0)
-	pdf.SetFillColor(180, 197, 231)
-	pdf.CellFormat(cw1, chs*2, latTr(""), "1", 0, "C", true, 0, "")
-	pdf.CellFormat(cw2, chs*2, latTr("Pauza"), "1", 0, "C", true, 0, "")
-	pdf.CellFormat(cw3, chs*2, latTr(""), "1", 0, "C", true, 0, "")
-	pdf.CellFormat(cw4, chs*2, latTr("5"), "LTB", 0, "R", true, 0, "")
-	pdf.CellFormat(cw5, chs*2, latTr("minuta"), "TBR", 0, "L", true, 0, "")
-
-	pdf.SetFont("Arimo-Regular", "", 10)
-	pdf.Ln(chs * 2.0)
-	pdf.CellFormat(cw1, chs*2.0, "3", "1", 0, "C", false, 0, "")
-	pdf.CellFormat(cw2, chs*2.0, latTr("Prijava i evidentiranje polaznika"), "1", 0, "C", false, 0, "")
-	pdf.CellFormat(cw3, chs*2.0, "", "1", 0, "C", false, 0, "")
-	pdf.CellFormat(cw4, chs*2.0, "", "1", 0, "C", false, 0, "")
-	pdf.CellFormat(cw5, chs*2.0, "", "1", 0, "C", false, 0, "")
-
-	pdf.SetFont("Arimo-Bold", "", 11)
-	pdf.Ln(chs * 2.0)
-	pdf.SetFillColor(180, 197, 231)
-	pdf.CellFormat(cw1, chs*2, latTr(""), "1", 0, "C", true, 0, "")
-	pdf.CellFormat(cw2, chs*2, latTr("Pauza za doručak"), "1", 0, "C", true, 0, "")
-	pdf.CellFormat(cw3, chs*2, latTr(""), "1", 0, "C", true, 0, "")
-	pdf.CellFormat(cw4, chs*2, latTr("25"), "LTB", 0, "R", true, 0, "")
-	pdf.CellFormat(cw5, chs*2, latTr("minuta"), "TBR", 0, "L", true, 0, "")
-
-	pdf.SetFont("Arimo-Regular", "", 10)
-	pdf.Ln(chs * 2.0)
-	pdf.CellFormat(cw1, chs*2.0, "4", "1", 0, "C", false, 0, "")
-	pdf.CellFormat(cw2, chs*2.0, latTr("Prijava i evidentiranje polaznika"), "1", 0, "C", false, 0, "")
-	pdf.CellFormat(cw3, chs*2.0, "", "1", 0, "C", false, 0, "")
-	pdf.CellFormat(cw4, chs*2.0, "", "1", 0, "C", false, 0, "")
-	pdf.CellFormat(cw5, chs*2.0, "", "1", 0, "C", false, 0, "")
-
-	pdf.SetFont("Arimo-Bold", "", 11)
-	pdf.Ln(chs * 2.0)
-	pdf.SetFillColor(180, 197, 231)
-	pdf.CellFormat(cw1, chs*2, latTr(""), "1", 0, "C", true, 0, "")
-	pdf.CellFormat(cw2, chs*2, latTr("Pauza"), "1", 0, "C", true, 0, "")
-	pdf.CellFormat(cw3, chs*2, latTr(""), "1", 0, "C", true, 0, "")
-	pdf.CellFormat(cw4, chs*2, latTr("5"), "LTB", 0, "R", true, 0, "")
-	pdf.CellFormat(cw5, chs*2, latTr("minuta"), "TBR", 0, "L", true, 0, "")
-
-	pdf.SetFont("Arimo-Regular", "", 10)
-	pdf.Ln(chs * 2.0)
-	pdf.CellFormat(cw1, chs*2.0, "5", "1", 0, "C", false, 0, "")
-	pdf.CellFormat(cw2, chs*2.0, latTr("Prijava i evidentiranje polaznika"), "1", 0, "C", false, 0, "")
-	pdf.CellFormat(cw3, chs*2.0, "", "1", 0, "C", false, 0, "")
-	pdf.CellFormat(cw4, chs*2.0, "", "1", 0, "C", false, 0, "")
-	pdf.CellFormat(cw5, chs*2.0, "", "1", 0, "C", false, 0, "")
-
-	pdf.SetFont("Arimo-Bold", "", 11)
-	pdf.Ln(chs * 2.0)
-	pdf.SetFillColor(180, 197, 231)
-	pdf.CellFormat(cw1, chs*2, latTr(""), "1", 0, "C", true, 0, "")
-	pdf.CellFormat(cw2, chs*2, latTr("Pauza za kafu"), "1", 0, "C", true, 0, "")
-	pdf.CellFormat(cw3, chs*2, latTr(""), "1", 0, "C", true, 0, "")
-	pdf.CellFormat(cw4, chs*2, latTr("15"), "LTB", 0, "R", true, 0, "")
-	pdf.CellFormat(cw5, chs*2, latTr("minuta"), "TBR", 0, "L", true, 0, "")
-
-	pdf.SetFont("Arimo-Regular", "", 10)
-	pdf.Ln(chs * 2.0)
-	pdf.CellFormat(cw1, chs*2.0, "6", "1", 0, "C", false, 0, "")
-	pdf.CellFormat(cw2, chs*2.0, latTr("Prijava i evidentiranje polaznika"), "1", 0, "C", false, 0, "")
-	pdf.CellFormat(cw3, chs*2.0, "", "1", 0, "C", false, 0, "")
-	pdf.CellFormat(cw4, chs*2.0, "", "1", 0, "C", false, 0, "")
-	pdf.CellFormat(cw5, chs*2.0, "", "1", 0, "C", false, 0, "")
-
-	pdf.SetFont("Arimo-Bold", "", 11)
-	pdf.Ln(chs * 2.0)
-	pdf.SetFillColor(180, 197, 231)
-	pdf.CellFormat(cw1, chs*2, latTr(""), "1", 0, "C", true, 0, "")
-	pdf.CellFormat(cw2, chs*2, latTr("Pauza"), "1", 0, "C", true, 0, "")
-	pdf.CellFormat(cw3, chs*2, latTr(""), "1", 0, "C", true, 0, "")
-	pdf.CellFormat(cw4, chs*2, latTr("5"), "LTB", 0, "R", true, 0, "")
-	pdf.CellFormat(cw5, chs*2, latTr("minuta"), "TBR", 0, "L", true, 0, "")
-
-	pdf.SetFont("Arimo-Regular", "", 10)
-	pdf.Ln(chs * 2.0)
-	pdf.CellFormat(cw1, chs*2.0, "7", "1", 0, "C", false, 0, "")
-	pdf.CellFormat(cw2, chs*2.0, latTr("Prijava i evidentiranje polaznika"), "1", 0, "C", false, 0, "")
-	pdf.CellFormat(cw3, chs*2.0, "", "1", 0, "C", false, 0, "")
-	pdf.CellFormat(cw4, chs*2.0, "", "1", 0, "C", false, 0, "")
-	pdf.CellFormat(cw5, chs*2.0, "", "1", 0, "C", false, 0, "")
-
-	pdf.Ln(chs * 2.0)
-	pdf.CellFormat(cw1, chs*2.0, "", "1", 0, "C", false, 0, "")
-	pdf.CellFormat(cw2, chs*2.0, latTr("Prijava i evidentiranje polaznika"), "1", 0, "C", false, 0, "")
-	pdf.CellFormat(cw3, chs*2.0, "", "1", 0, "C", false, 0, "")
-	pdf.CellFormat(cw4, chs*2.0, "", "1", 0, "C", false, 0, "")
-	pdf.CellFormat(cw5, chs*2.0, "", "1", 0, "C", false, 0, "")
+	pdf.Ln(chs * num)
+	lines, num = splitLine("Евалуација наставног процеса и пријем документације", splitWidth)
+	current = pdf.GetY() + 4.5
+	for i, line := range lines {
+		pdf.Text(30, current+float64(i)*6.0, trObj.translDef(line))
+	}
+	start := day.Date.Add(375 * time.Minute).Format("15:04")
+	end := day.Date.Add(390 * time.Minute).Format("15:04")
+	pdf.CellFormat(cw1, chs*num, "", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw2, chs*num, "", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw3, chs*num, "", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw4, chs*num, start, "1", 0, "C", false, 0, "")
+	pdf.CellFormat(cw5, chs*num, end, "1", 0, "C", false, 0, "")
 
 	var buf bytes.Buffer
 	err = pdf.Output(&buf)
@@ -1106,4 +1212,42 @@ func (p *printService) PrintPlanTreningRealization(day *model.SeminarDay) ([]byt
 	}
 
 	return buf.Bytes(), nil
+}
+
+func getClassTime(d time.Time, i int) string {
+	switch i {
+	case 1:
+		return d.Format("15:04") + " - " + d.Add(45*time.Minute).Format("15:04")
+	case 2:
+		return d.Add(55*time.Minute).Format("15:04") + " - " + d.Add(100*time.Minute).Format("15:04")
+	case 3:
+		return d.Add(105*time.Minute).Format("15:04") + " - " + d.Add(150*time.Minute).Format("15:04")
+	case 4:
+		return d.Add(175*time.Minute).Format("15:04") + " - " + d.Add(220*time.Minute).Format("15:04")
+	case 5:
+		return d.Add(225*time.Minute).Format("15:04") + " - " + d.Add(270*time.Minute).Format("15:04")
+	case 6:
+		return d.Add(280*time.Minute).Format("15:04") + " - " + d.Add(325*time.Minute).Format("15:04")
+	case 7:
+		return d.Add(330*time.Minute).Format("15:04") + " - " + d.Add(375*time.Minute).Format("15:04")
+	}
+	return ""
+}
+
+func splitLine(text string, length int) ([]string, float64) {
+	words := strings.Split(text, " ")
+	lineNum := 1.0
+
+	lines := []string{}
+	currentLine := ""
+	for _, word := range words {
+		if len(currentLine)+len(word)+1 > length {
+			lines = append(lines, currentLine)
+			lineNum++
+			currentLine = ""
+		}
+		currentLine = currentLine + " " + word
+	}
+
+	return append(lines, currentLine), lineNum
 }

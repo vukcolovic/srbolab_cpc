@@ -119,6 +119,16 @@ type SeminarClass struct {
 	SeminarDay   SeminarDay `json:"seminar_day"`
 }
 
+func GetSeminarClassByNumber(classes []SeminarClass, number int) *SeminarClass {
+	for _, class := range classes {
+		if class.Number == number {
+			return &class
+		}
+	}
+
+	return nil
+}
+
 type SeminarClassName struct {
 	gorm.Model
 	SeminarThemeID uint         `json:"seminar_theme_id"`
