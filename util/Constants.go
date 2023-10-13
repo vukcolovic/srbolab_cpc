@@ -1,5 +1,5 @@
 package util
 
 const (
-	CentarForEducationName = "Srbolab d.o.o."
+	CentarForEducationName = "Срболаб д.о.о."
 )

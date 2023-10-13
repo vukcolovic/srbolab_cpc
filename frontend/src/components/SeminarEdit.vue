@@ -419,7 +419,6 @@ export default {
     },
     onPayedChange(traine) {
       if (traine.payed) {
-        alert("mjau");
         traine.payed_by = traine.client.person.first_name + " " + traine.client.person.last_name;
       } else {
         traine.payed_by = "";

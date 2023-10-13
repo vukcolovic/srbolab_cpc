@@ -143,7 +143,7 @@ func (excelService) CreateListClientsBySeminarDayReport(seminarDay *model.Semina
 		exc.SetCellValue("Sheet1", "D"+strconv.Itoa(i+4), *t.Client.JMBG)
 		exc.SetCellValue("Sheet1", "E"+strconv.Itoa(i+4), util.CentarForEducationName)
 		exc.SetCellValue("Sheet1", "F"+strconv.Itoa(i+4), seminarDay.Name)
-		exc.SetCellValue("Sheet1", "G"+strconv.Itoa(i+4), t.CreatedAt.Format("02.01.2006"))
+		exc.SetCellValue("Sheet1", "G"+strconv.Itoa(i+4), seminarDay.Date.Format("02.01.2006"))
 		clientSeminar, _ := SeminarService.GetClientSeminarBySeminarIDAndClientID(seminarDay.SeminarID, t.ClientID)
 		payDate := ""
 		if clientSeminar != nil && clientSeminar.PayDate != nil && !clientSeminar.PayDate.Before(time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC)) {
