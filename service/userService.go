@@ -53,6 +53,11 @@ func (s *userService) GetAllUsers(skip, take int) ([]model.User, error) {
 	if err := db.Client.Limit(take).Offset(skip).Find(&users).Error; err != nil {
 		return nil, err
 	}
+
+	for _, u := range users {
+		u.Password = ""
+	}
+
 	return users, nil
 }
 
@@ -61,6 +66,8 @@ func (s *userService) GetUserByID(id int) (*model.User, error) {
 	if err := db.Client.Preload("Roles").First(&user, id).Error; err != nil {
 		return nil, err
 	}
+
+	user.Password = ""
 
 	return user, nil
 }
@@ -108,6 +115,8 @@ func (s *userService) UpdateUser(user model.User) (*model.User, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	user.Password = oldUser.Password
 
 	result := db.Client.Session(&gorm.Session{FullSaveAssociations: true}).Updates(&user)
 

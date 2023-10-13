@@ -620,13 +620,13 @@ func (p *printService) PrintMuster(day *model.SeminarDay) ([]byte, error) {
 	pdf.AddPage()
 
 	pdf.SetFont("Arimo-Regular", "", 8)
-	createSimpleHeader(pdf, cirTr)
+	createSimpleHeaderForLandscape(pdf, cirTr)
 
 	pdf.Ln(5)
 	pdf.Text(15, pdf.GetY(), trObj.translDef("Место: "))
 	pdf.Text(24, pdf.GetY(), trObj.translDef(day.Seminar.ClassRoom.Location.Address.Place))
 	pdf.Ln(5)
-	pdf.Text(15, pdf.GetY(), trObj.translDef("Шифра обуке: "))
+	pdf.Text(20, pdf.GetY(), trObj.translDef("Шифра обуке: "))
 	pdf.Text(31, pdf.GetY(), trObj.translDef(day.Seminar.GetCode()))
 	pdf.Ln(5)
 	pdf.Text(15, pdf.GetY(), trObj.translDef("Датум: "))
@@ -849,6 +849,16 @@ func createSimpleHeader(pdf *fpdf.Fpdf, tr func(string) string) {
 	pdf.Text(95, 14, tr("СРБОЛАБ Д.О.О."))
 	pdf.Text(80, 18, tr("Центар за едукацију и развој Срболаб"))
 	pdf.Image("./images/cers_logo.png", 170, 10, 20, 10, false, "png", 0, "")
+	pdf.Ln(15)
+}
+
+func createSimpleHeaderForLandscape(pdf *fpdf.Fpdf, tr func(string) string) {
+	pdf.SetFont("Helvetica", "", 10)
+	pdf.Image("./images/srbolab_logo.png", 15, 10, 30, 10, false, "png", 0, "")
+	pdf.CellFormat(35, 10, "", "0", 0, "C", false, 0, "")
+	pdf.Text(135, 14, tr("СРБОЛАБ Д.О.О."))
+	pdf.Text(120, 18, tr("Центар за едукацију и развој Срболаб"))
+	pdf.Image("./images/cers_logo.png", 260, 10, 20, 10, false, "png", 0, "")
 	pdf.Ln(15)
 }
 
