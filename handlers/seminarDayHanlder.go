@@ -33,7 +33,6 @@ func GetSeminarDayByID(w http.ResponseWriter, req *http.Request) {
 		SetErrorResponse(w, errors.New("Greška prilikom povlačenja seminar dana: "+err.Error()))
 		return
 	}
-	logoped.ErrorLog.Println(seminarDay.Date)
 
 	SetSuccessResponse(w, seminarDay)
 }
@@ -62,9 +61,6 @@ func UpdateSeminarDay(w http.ResponseWriter, r *http.Request) {
 	var day model.SeminarDay
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&day)
-
-	logoped.ErrorLog.Println(day.Date)
-
 	if err != nil {
 		logoped.ErrorLog.Println("unable to retrieve the just parsed code")
 		SetErrorResponse(w, NewJSONDecodeError("SeminarDay"))
@@ -164,7 +160,7 @@ func GetSeminarDayWithTestByJMBG(w http.ResponseWriter, req *http.Request) {
 		if day.Date.Day() != time.Now().Day() || day.Date.Month() != time.Now().Month() || day.Date.Year() != time.Now().Year() {
 			continue
 		}
-		if *day.TestID == 0 {
+		if day.TestID == nil || *day.TestID == 0 {
 			SetErrorResponse(w, errors.New("Seminar dan nema izabran test."))
 			return
 		}

@@ -588,7 +588,6 @@ export default {
           return;
         }
         this.client = JSON.parse(response.data.Data);
-        console.log(this.client);
         this.client.cpc_date = this.getDateInMMDDYYYYFormat(this.client.cpc_date);
         this.client.seminars.forEach(s => {
           s.seminar.type = this.getSeminarFullType(s.seminar.seminar_theme.base_seminar_type, s.seminar.seminar_theme);
@@ -711,7 +710,6 @@ export default {
       this.filteredAndOpenedSeminars = this.openedSeminars.filter(s => s.class_room.location.ID === this.selectedLocation.ID);
     }
     if (this.selectedLocation && this.$route.query.seminar_id && this.$route.query.seminar_id !== '') {
-      console.log(this.filteredAndOpenedSeminars);
       this.selectedOpenSeminar = this.filteredAndOpenedSeminars.find(s => s.ID == this.$route.query.seminar_id);
     }
   }

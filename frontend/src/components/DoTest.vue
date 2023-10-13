@@ -97,7 +97,7 @@ export default {
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;
         }
-        console.log(response);
+
         this.seminarDay = JSON.parse(response.data.Data);
         this.seminarDay.date= this.getDateInMMDDYYYYFormat(this.seminarDay.date);
 

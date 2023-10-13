@@ -427,13 +427,11 @@ export default {
     },
     async updateClientSeminar(trainee) {
       trainee.pay_date = this.getBackendFormat(trainee.pay_date);
-      console.log(trainee.pay_date);
       await axios.post('/client-seminar/update', JSON.stringify(trainee)).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;
         }
-        console.log(trainee.pay_date);
         trainee.pay_date = this.getDateInMMDDYYYYFormat(trainee.pay_date);
         this.toast.info("Uspešno ažuriranje");
       }, (error) => {
