@@ -136,26 +136,28 @@
       </div>
     </form-tag>
 
+    <hr>
+
+    <div class="row" v-if="this.seminar && this.seminar.ID">
+      <div class="col-sm-2">
+        <button class="btn btn-secondary text-white" @click="printStudentList()">Spisak polaznika</button>
+      </div>
+      <div class="col-sm-2">
+        <button class="btn btn-secondary text-white" @click="printConfirmationStatement()">Izjava o pristanku</button>
+      </div>
+      <div class="col-sm-1">
+        <button class="btn btn-secondary text-white" @click="printCheckIn()">Prijava</button>
+      </div>
+      <div class="col-sm-1">
+        <button class="btn btn-secondary text-white" @click="printConfirmations()">Potvrda</button>
+      </div>
+      <div class="col-sm-3">
+        <button class="btn btn-secondary text-white" @click="printStatementOfReceving()">Izjava o preuzimanju</button>
+      </div>
+    </div>
+
     <div
         v-if="this.seminar && this.seminar.seminar_status && (this.seminar.seminar_status.ID === SEMINAR_STATUSES.IN_PROGRESS || this.seminar.seminar_status.ID === SEMINAR_STATUSES.CLOSED)">
-      <hr>
-      <div class="row">
-        <div class="col-sm-2">
-          <button class="btn btn-secondary text-white" @click="printStudentList()">Spisak polaznika</button>
-        </div>
-        <div class="col-sm-2">
-          <button class="btn btn-secondary text-white" @click="printConfirmationStatement()">Izjava o pristanku</button>
-        </div>
-        <div class="col-sm-1">
-          <button class="btn btn-secondary text-white" @click="printCheckIn()">Prijava</button>
-        </div>
-        <div class="col-sm-1">
-          <button class="btn btn-secondary text-white" @click="printConfirmations()">Potvrda</button>
-        </div>
-        <div class="col-sm-3">
-          <button class="btn btn-secondary text-white" @click="printStatementOfReceving()">Izjava o preuzimanju</button>
-        </div>
-      </div>
       <hr>
       <div class="row">
         <div class="col-sm-9">
