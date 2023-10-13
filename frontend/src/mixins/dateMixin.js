@@ -14,7 +14,7 @@ export const dateMixin = {
             if (this.isDateEmpty(date)) {
                 return null;
             }
-            return date + "T" + time + ":05.576147+02:00"
+            return date + "T" + time + ":00.576147+02:00"
         },
         getDateInMMDDYYYYFormat(date) {
             if (this.isDateEmpty(date)) {

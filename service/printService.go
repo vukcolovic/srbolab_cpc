@@ -628,10 +628,10 @@ func (p *printService) PrintMuster(day *model.SeminarDay) ([]byte, error) {
 
 	pdf.Ln(5)
 	pdf.Text(15, pdf.GetY(), trObj.translDef("Место: "))
-	pdf.Text(24, pdf.GetY(), trObj.translDef(day.Seminar.ClassRoom.Location.Address.Place))
+	pdf.Text(25, pdf.GetY(), trObj.translDef(day.Seminar.ClassRoom.Location.Address.Place))
 	pdf.Ln(5)
-	pdf.Text(20, pdf.GetY(), trObj.translDef("Шифра обуке: "))
-	pdf.Text(31, pdf.GetY(), trObj.translDef(day.Seminar.GetCode()))
+	pdf.Text(15, pdf.GetY(), trObj.translDef("Шифра обуке: "))
+	pdf.Text(35, pdf.GetY(), trObj.translDef(day.Seminar.GetCode()))
 	pdf.Ln(5)
 	pdf.Text(15, pdf.GetY(), trObj.translDef("Датум: "))
 	dayInWeek := util.GetDaySerbian(day.Date)
