@@ -231,13 +231,13 @@ func (p *printService) PrintConfirmationStatements(seminar *model.Seminar) ([]by
 		pdf.Ln(5)
 		pdf.Text(10, pdf.GetY(), trObj.translate("пре опозива, као и да нисам у обавези да дам податке о личности који нису предвиђени као обавезни", 10))
 		pdf.Ln(5)
-		pdf.Text(10, pdf.GetY(), trObj.translate("законским и подзаконсим актима и да исто неће бити од утицаја на прижање услуга од стране руковаоца.", 10))
+		pdf.Text(10, pdf.GetY(), trObj.translate("законским и подзаконским актима и да исто неће бити од утицаја на прижање услуга од стране руковаоца.", 10))
 		pdf.Ln(25)
 
 		pdf.Text(15, pdf.GetY(), trObj.translDef("Датум: "))
 		pdf.Line(30, pdf.GetY(), 70, pdf.GetY())
-		pdf.SetFont("Arimo-Bold", "", 11)
-		pdf.Text(35, pdf.GetY()-1, time.Now().Format("02.01.2006"))
+		//pdf.SetFont("Arimo-Bold", "", 11)
+		pdf.Text(35, pdf.GetY()-1, seminar.Start.Format("02.01.2006"))
 		pdf.SetFont("Arimo-Regular", "", 11)
 
 		pdf.Ln(15)
@@ -549,14 +549,14 @@ func (p *printService) PrintConfirmationReceives(seminar *model.Seminar) ([]byte
 		pdf.Ln(6)
 		pdf.Text(15, pdf.GetY(), trObj.translDef("у фирми"))
 		//pdf.SetFont("Arimo-Bold", "", 11)
-		pdf.Text(30, pdf.GetY()-1, trObj.translDef(company))
-		pdf.Line(28, pdf.GetY(), 178, pdf.GetY())
+		pdf.Text(33, pdf.GetY()-1, trObj.translDef(company))
+		pdf.Line(31.5, pdf.GetY(), 179, pdf.GetY())
 		pdf.SetFont("Arimo-Regular", "", 11)
 		pdf.Text(180, pdf.GetY(), ",")
 		pdf.Ln(6)
 		pdf.Text(15, pdf.GetY(), trObj.translDef(("ЈМБГ")))
 		pdf.Line(28, pdf.GetY(), 70, pdf.GetY())
-		pdf.Text(70, pdf.GetY(), trObj.translDef(fmt.Sprintf(", је преузеп потврде о завршеној %s обуци на", seminar.SeminarTheme.BaseSeminarType.GetSeminarTypeForSentence())))
+		pdf.Text(70, pdf.GetY(), trObj.translDef(fmt.Sprintf(", је преузео потврде о завршеној %s обуци на", seminar.SeminarTheme.BaseSeminarType.GetSeminarTypeForSentence())))
 		pdf.Ln(6)
 		pdf.Text(15, pdf.GetY(), trObj.translDef("обавезним семинарима унапређења знања за следећа лица:"))
 		pdf.Ln(10)
@@ -568,13 +568,17 @@ func (p *printService) PrintConfirmationReceives(seminar *model.Seminar) ([]byte
 		pdf.CellFormat(35, ch, trObj.translDef("ЈМБГ"), "1", 0, "L", false, 0, "")
 		pdf.CellFormat(50, ch, trObj.translDef("Број потврде"), "1", 0, "L", false, 0, "")
 
+		sort.Slice(clients, func(i, j int) bool {
+			return *clients[i].Client.JMBG < *clients[j].Client.JMBG
+		})
+
 		for i, client := range clients {
 			pdf.Ln(ch)
 			pdf.CellFormat(10, ch, strconv.Itoa(i+1), "1", 0, "L", false, 0, "")
 			pdf.CellFormat(40, ch, trObj.translDef(client.Client.Person.FirstName), "1", 0, "L", false, 0, "")
 			pdf.CellFormat(40, ch, trObj.translDef(client.Client.Person.LastName), "1", 0, "L", false, 0, "")
 			pdf.CellFormat(35, ch, *client.Client.JMBG, "1", 0, "L", false, 0, "")
-			pdf.CellFormat(50, ch, trObj.translDef(seminar.GetCode())+"/"+strconv.Itoa(int(client.ClientID)), "1", 0, "L", false, 0, "")
+			pdf.CellFormat(50, ch, trObj.translDef(seminar.GetCode())+"/"+strconv.Itoa(i+1), "1", 0, "L", false, 0, "")
 		}
 
 		pdf.Ln(20)
@@ -588,7 +592,7 @@ func (p *printService) PrintConfirmationReceives(seminar *model.Seminar) ([]byte
 		pdf.Text(15, pdf.GetY(), trObj.translDef("Дана: "))
 		//pdf.SetFont("Arimo-Bold", "", 11)
 		pdf.Line(26, pdf.GetY(), 48, pdf.GetY())
-		pdf.Text(27, pdf.GetY()-1, time.Now().Format("02.01.2006"))
+		pdf.Text(27, pdf.GetY()-1, seminar.Start.Format("02.01.2006"))
 		pdf.SetFont("Arimo-Regular", "", 11)
 		pdf.Text(50, pdf.GetY(), trObj.translDef("година."))
 	}
