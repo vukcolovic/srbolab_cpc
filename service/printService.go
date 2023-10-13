@@ -122,7 +122,7 @@ func (p *printService) PrintSeminarStudentList(seminar *model.Seminar) ([]byte, 
 		seminarType = "основну"
 	}
 	pdf.Text(15, pdf.GetY(), trObj.translDef(fmt.Sprintf("Регистрациони лист - списак полазника за %s обуку", seminarType)))
-	pdf.Text(140, pdf.GetY(), trObj.translDef("Datum: "+time.Now().Format("01.02.2006")))
+	pdf.Text(140, pdf.GetY(), trObj.translDef("Датум: "+time.Now().Format("01.02.2006")))
 
 	ch := 8.0
 	pdf.Ln(ch)
@@ -574,7 +574,7 @@ func (p *printService) PrintConfirmationReceives(seminar *model.Seminar) ([]byte
 			pdf.CellFormat(40, ch, trObj.translDef(client.Client.Person.FirstName), "1", 0, "L", false, 0, "")
 			pdf.CellFormat(40, ch, trObj.translDef(client.Client.Person.LastName), "1", 0, "L", false, 0, "")
 			pdf.CellFormat(35, ch, *client.Client.JMBG, "1", 0, "L", false, 0, "")
-			pdf.CellFormat(50, ch, seminar.GetCode()+"/"+strconv.Itoa(int(client.ClientID)), "1", 0, "L", false, 0, "")
+			pdf.CellFormat(50, ch, trObj.translDef(seminar.GetCode())+"/"+strconv.Itoa(int(client.ClientID)), "1", 0, "L", false, 0, "")
 		}
 
 		pdf.Ln(20)
@@ -623,13 +623,13 @@ func (p *printService) PrintMuster(day *model.SeminarDay) ([]byte, error) {
 	createSimpleHeader(pdf, cirTr)
 
 	pdf.Ln(5)
-	pdf.Text(15, pdf.GetY(), trObj.translDef("Mesto: "))
+	pdf.Text(15, pdf.GetY(), trObj.translDef("Место: "))
 	pdf.Text(24, pdf.GetY(), trObj.translDef(day.Seminar.ClassRoom.Location.Address.Place))
 	pdf.Ln(5)
-	pdf.Text(15, pdf.GetY(), trObj.translDef("Šifra obuke: "))
-	pdf.Text(31, pdf.GetY(), day.Seminar.GetCode())
+	pdf.Text(15, pdf.GetY(), trObj.translDef("Шифра обуке: "))
+	pdf.Text(31, pdf.GetY(), trObj.translDef(day.Seminar.GetCode()))
 	pdf.Ln(5)
-	pdf.Text(15, pdf.GetY(), trObj.translDef("Datum: "))
+	pdf.Text(15, pdf.GetY(), trObj.translDef("Датум: "))
 	dayInWeek := util.GetDaySerbian(day.Date)
 	pdf.Text(25, pdf.GetY(), trObj.translDef(dayInWeek)+" "+day.Date.Format("02.01.2006."))
 	pdf.Ln(5)
@@ -932,7 +932,7 @@ func (p *printService) PrintSeminarEvidence(day *model.SeminarDay) ([]byte, erro
 }
 
 func (p *printService) PrintTestBarcode() ([]byte, error) {
-	url := fmt.Sprintf("%s/do-test")
+	url := fmt.Sprintf("%s/do-test", Domain)
 	qrCode, _ := qrcode.New(url, qrcode.Medium)
 	var buf bytes.Buffer
 
@@ -992,7 +992,7 @@ func (p *printService) PrintPlanTreningRealization(day *model.SeminarDay) ([]byt
 	pdf.SetFont("Arimo-Regular", "", 11)
 	pdf.Ln(ch)
 	splitWidth := 70
-	lines, num := splitLine("Пријава и евидентирање полазника obuke", splitWidth)
+	lines, num := splitLine("Пријава и евидентирање полазника обуке", splitWidth)
 	current := pdf.GetY() + 4.5
 	for i, line := range lines {
 		pdf.Text(30, current+float64(i)*6.0, trObj.translDef(line))

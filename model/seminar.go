@@ -46,7 +46,7 @@ func (s Seminar) GetCode() string {
 		code = code + "35"
 	}
 	if s.SeminarTheme.BaseSeminarType.Code == "CYCLE" {
-		code = code + "7" + s.SeminarTheme.Code
+		code = code + "7." + s.SeminarTheme.Code
 	}
 
 	code = code + "-" + strconv.Itoa(s.SerialNumberByLocation)

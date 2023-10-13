@@ -117,6 +117,8 @@ func UpdateSeminar(w http.ResponseWriter, r *http.Request) {
 	var seminar model.Seminar
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&seminar)
+
+	logoped.ErrorLog.Println(seminar.Start)
 	if err != nil {
 		logoped.ErrorLog.Println("Error decoding seminar: ", err)
 		SetErrorResponse(w, NewJSONDecodeError("seminar"))
