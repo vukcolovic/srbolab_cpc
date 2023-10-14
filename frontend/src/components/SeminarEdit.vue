@@ -140,7 +140,7 @@
 
     <div class="row" v-if="this.seminar && this.seminar.ID">
       <div class="col-sm-2">
-        <button class="btn btn-secondary text-white" @click="printStudentList()">Spisak polaznika</button>
+        <button class="btn btn-secondary text-white" @click="printStudentList()">Registracioni list</button>
       </div>
       <div class="col-sm-2">
         <button class="btn btn-secondary text-white" @click="printConfirmationStatement()">Izjava o pristanku</button>

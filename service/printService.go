@@ -102,7 +102,7 @@ func (p *printService) PrintSeminarStudentList(seminar *model.Seminar) ([]byte, 
 	pdf.AddPage()
 
 	pdf.SetFont("Helvetica", "", 8)
-	createSimpleHeader(pdf, cirTr)
+	createSimpleHeaderForLandscape(pdf, cirTr)
 
 	pdf.Ln(5)
 	pdf.Text(15, pdf.GetY(), trObj.translDef("Број документа: "))
@@ -122,7 +122,7 @@ func (p *printService) PrintSeminarStudentList(seminar *model.Seminar) ([]byte, 
 		seminarType = "основну"
 	}
 	pdf.Text(15, pdf.GetY(), trObj.translDef(fmt.Sprintf("Регистрациони лист - списак полазника за %s обуку", seminarType)))
-	pdf.Text(140, pdf.GetY(), trObj.translDef("Датум: "+time.Now().Format("01.02.2006")))
+	pdf.Text(140, pdf.GetY(), trObj.translDef("Датум: "+seminar.Start.Format("02.01.2006")))
 
 	ch := 8.0
 	pdf.Ln(ch)
@@ -305,7 +305,15 @@ func (p *printService) PrintConfirmations(seminar *model.Seminar) ([]byte, error
 		pdf.SetFont("Arimo-Regular", "", 11)
 		pdf.Text(15, pdf.GetY(), trObj.translDef("Дана:"))
 		//pdf.SetFont("Arimo-Bold", "", 11)
-		pdf.Text(30, pdf.GetY(), time.Now().Format("02.01.2006."))
+		dateOfLastDay := seminar.Start
+		maxNumber := 0
+		for _, day := range seminar.Days {
+			if day.Number > maxNumber {
+				dateOfLastDay = day.Date
+				maxNumber = day.Number
+			}
+		}
+		pdf.Text(30, pdf.GetY(), dateOfLastDay.Format("02.01.2006."))
 		pdf.Ln(5)
 		pdf.SetFont("Arimo-Regular", "", 11)
 		pdf.Text(15, pdf.GetY(), trObj.translDef("Место:"))
@@ -466,6 +474,15 @@ func (p *printService) PrintConfirmationReceives(seminar *model.Seminar) ([]byte
 
 	pdf.SetMargins(15.0, 20, 15.0)
 
+	dateOfLastDay := seminar.Start
+	maxNumber := 0
+	for _, day := range seminar.Days {
+		if day.Number > maxNumber {
+			dateOfLastDay = day.Date
+			maxNumber = day.Number
+		}
+	}
+
 	companyClientsMap := map[string][]model.ClientSeminar{}
 
 	for _, client := range seminar.Trainees {
@@ -495,7 +512,7 @@ func (p *printService) PrintConfirmationReceives(seminar *model.Seminar) ([]byte
 		pdf.Text(20, pdf.GetY(), trObj.translDef("Дана"))
 		pdf.Line(33, pdf.GetY(), 60, pdf.GetY())
 		//pdf.SetFont("Arimo-Bold", "", 11)
-		pdf.Text(33, pdf.GetY()-1, latTr(time.Now().Format("02.01.2006.")))
+		pdf.Text(33, pdf.GetY()-1, latTr(dateOfLastDay.Format("02.01.2006.")))
 		pdf.SetFont("Arimo-Regular", "", 11)
 		pdf.Text(62, pdf.GetY(), trObj.translDef("године, "))
 		pdf.Line(77, pdf.GetY(), 135, pdf.GetY())
@@ -521,7 +538,7 @@ func (p *printService) PrintConfirmationReceives(seminar *model.Seminar) ([]byte
 		pdf.Text(20, pdf.GetY(), trObj.translDef("Дана: "))
 		//pdf.SetFont("Arimo-Bold", "", 11)
 		pdf.Line(31, pdf.GetY(), 58, pdf.GetY())
-		pdf.Text(32, pdf.GetY()-1, time.Now().Format("02.01.2006"))
+		pdf.Text(32, pdf.GetY()-1, dateOfLastDay.Format("02.01.2006"))
 		pdf.SetFont("Arimo-Regular", "", 11)
 		pdf.Text(60, pdf.GetY(), trObj.translDef("године."))
 	}
@@ -541,7 +558,7 @@ func (p *printService) PrintConfirmationReceives(seminar *model.Seminar) ([]byte
 		pdf.Text(15, pdf.GetY(), trObj.translDef("Дана"))
 		pdf.Line(27, pdf.GetY(), 57, pdf.GetY())
 		//pdf.SetFont("Arimo-Bold", "", 11)
-		pdf.Text(30, pdf.GetY()-1, trObj.translDef(time.Now().Format("02.01.2006.")))
+		pdf.Text(30, pdf.GetY()-1, trObj.translDef(dateOfLastDay.Format("02.01.2006.")))
 		pdf.SetFont("Arimo-Regular", "", 11)
 		pdf.Text(60, pdf.GetY(), trObj.translDef("године, "))
 		pdf.Line(75, pdf.GetY(), 135, pdf.GetY())
@@ -592,7 +609,7 @@ func (p *printService) PrintConfirmationReceives(seminar *model.Seminar) ([]byte
 		pdf.Text(15, pdf.GetY(), trObj.translDef("Дана: "))
 		//pdf.SetFont("Arimo-Bold", "", 11)
 		pdf.Line(26, pdf.GetY(), 48, pdf.GetY())
-		pdf.Text(27, pdf.GetY()-1, seminar.Start.Format("02.01.2006"))
+		pdf.Text(27, pdf.GetY()-1, dateOfLastDay.Format("02.01.2006"))
 		pdf.SetFont("Arimo-Regular", "", 11)
 		pdf.Text(50, pdf.GetY(), trObj.translDef("година."))
 	}
@@ -781,7 +798,7 @@ func (p *printService) PrintCheckIn(seminar *model.Seminar) ([]byte, error) {
 		pdf.Ln(ch)
 		pdf.SetFont("Arimo-Regular", "", fontSize)
 		pdf.CellFormat(70, ch, trObj.translDef("Рок важења картице:"), "1", 0, "L", false, 0, "")
-		pdf.SetFont("Arimo-Bold", "", fontSize)
+		//pdf.SetFont("Arimo-Bold", "", fontSize)
 		cpcDate := ""
 		if client.Client.CPCDate != nil {
 			cpcDate = client.Client.CPCDate.Format("02.01.2006.")
@@ -809,7 +826,7 @@ func (p *printService) PrintCheckIn(seminar *model.Seminar) ([]byte, error) {
 		pdf.Text(20, pdf.GetY(), trObj.translDef("- доказ о уплати трошкова за похађање семинара, по важећој тарифи."))
 
 		pdf.Ln(20)
-		pdf.Text(18, pdf.GetY(), "U ")
+		pdf.Text(18, pdf.GetY(), trObj.translDef("У "))
 		//pdf.SetFont("Arimo-Bold", "", fontSize)
 		pdf.Text(23, pdf.GetY(), trObj.translDef(seminar.ClassRoom.Location.Address.Place))
 		pdf.Line(23, pdf.GetY()+1, 65, pdf.GetY()+1)
@@ -817,7 +834,7 @@ func (p *printService) PrintCheckIn(seminar *model.Seminar) ([]byte, error) {
 		pdf.Text(65.5, pdf.GetY(), trObj.translDef(", дана"))
 		//pdf.SetFont("Arimo-Bold", "", fontSize)
 		pdf.Line(78, pdf.GetY()+1, 110, pdf.GetY()+1)
-		pdf.Text(80, pdf.GetY(), time.Now().Format("02.01.2006."))
+		pdf.Text(80, pdf.GetY(), seminar.Start.Format("02.01.2006."))
 		pdf.SetFont("Arimo-Regular", "", fontSize)
 		pdf.Text(110.5, pdf.GetY(), trObj.translDef(", године"))
 
@@ -884,7 +901,7 @@ func (p *printService) PrintSeminarEvidence(day *model.SeminarDay) ([]byte, erro
 	pdf.AddPage()
 
 	pdf.SetFont("Arimo-Regular", "", 9)
-	createSimpleHeader(pdf, cirTr)
+	createSimpleHeaderForLandscape(pdf, cirTr)
 
 	pdf.Ln(5)
 	pdf.SetFont("Arimo-Bold", "", 9)
@@ -892,7 +909,7 @@ func (p *printService) PrintSeminarEvidence(day *model.SeminarDay) ([]byte, erro
 	pdf.Ln(5)
 	pdf.SetFont("Arimo-Regular", "", 9)
 	pdf.Text(15, pdf.GetY(), trObj.translDef("Датум одржавања семинара"))
-	pdf.Text(80, pdf.GetY(), day.Date.Format("02.01.2006."))
+	pdf.Text(60, pdf.GetY(), day.Date.Format("02.01.2006."))
 	pdf.Ln(5)
 	pdf.Text(15, pdf.GetY(), trObj.translDef(day.Seminar.ClassRoom.Location.Address.Place))
 	pdf.Ln(2)

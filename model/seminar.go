@@ -51,7 +51,7 @@ func (s Seminar) GetCode() string {
 
 	code = code + "-" + strconv.Itoa(s.SerialNumberByLocation)
 	code = code + "-" + s.ClassRoom.Location.Code
-	code = code + "-" + s.Start.Format("2006-02-01")
+	code = code + "-" + s.Start.Format("2006-01-02")
 	return code
 }
 

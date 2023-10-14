@@ -95,7 +95,7 @@
         <button class="btn btn-secondary text-white" @click="printTestResults()">Rezultati testova</button>
       </div>
       <div class="col-sm-2">
-        <button class="btn btn-secondary text-white" @click="printListTrainees()">Registracioni list</button>
+        <button class="btn btn-secondary text-white" @click="printListTrainees()">Spisak polaznika</button>
       </div>
       <div class="col-sm-2">
         <button class="btn btn-secondary text-white" @click="printPlanOfTreningRealization()">Plan realizacije obuke</button>
