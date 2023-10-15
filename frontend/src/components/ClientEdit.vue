@@ -494,7 +494,12 @@ export default {
   methods: {
     onOpenedSeminarChange() {
       if(this.selectedOpenSeminar) {
-        this.selectedOpenSeminar.payed_by = this.client.person.first_name + " " + this.client.person.last_name;
+        if (this.client && this.client.company && this.client.company.ID > 0) {
+          this.selectedOpenSeminar.payed_by = this.client.company.name;
+        } else {
+          this.selectedOpenSeminar.payed_by = this.client.person.first_name + " " + this.client.person.last_name;
+        }
+
       }
     },
     onJmbgFocusOut() {
