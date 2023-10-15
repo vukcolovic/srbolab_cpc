@@ -96,23 +96,24 @@ func (p *printService) PrintSeminarStudentList(seminar *model.Seminar) ([]byte, 
 	pdf.AddFont("Helvetica", "", "helvetica_1251.json")
 	latTr := pdf.UnicodeTranslatorFromDescriptor("iso-8859-16")
 	cirTr := pdf.UnicodeTranslatorFromDescriptor("cp1251")
-	trObj := newTranslationDetails(pdf, "Helvetica", "Arimo-Regular", 8, latTr, cirTr)
+	fontSize := 10.0
+	trObj := newTranslationDetails(pdf, "Helvetica", "Arimo-Regular", fontSize, latTr, cirTr)
 
 	pdf.SetMargins(marginLeft, marginTop, marginRight)
 	pdf.AddPage()
 
-	pdf.SetFont("Helvetica", "", 8)
+	pdf.SetFont("Helvetica", "", fontSize)
 	createSimpleHeaderForLandscape(pdf, cirTr)
 
 	pdf.Ln(5)
 	pdf.Text(15, pdf.GetY(), trObj.translDef("Број документа: "))
-	pdf.Text(35, pdf.GetY(), "")
+	pdf.Text(37, pdf.GetY(), "")
 	pdf.Ln(5)
 	pdf.Text(15, pdf.GetY(), trObj.translDef(("Шифра обуке: ")))
-	pdf.Text(35, pdf.GetY(), trObj.translDef(seminar.GetCode()))
+	pdf.Text(39, pdf.GetY(), trObj.translDef(seminar.GetCode()))
 	pdf.Ln(5)
 	pdf.Text(15, pdf.GetY(), trObj.translDef("Место: "))
-	pdf.Text(27, pdf.GetY(), trObj.translDef(seminar.ClassRoom.Location.Address.Place))
+	pdf.Text(28, pdf.GetY(), trObj.translDef(seminar.ClassRoom.Location.Address.Place))
 	pdf.Ln(5)
 	seminarType := "периодичну"
 	if seminar.SeminarTheme.BaseSeminarType.Code == "ADDITIONAL" {
@@ -635,24 +636,25 @@ func (p *printService) PrintMuster(day *model.SeminarDay) ([]byte, error) {
 	pdf.AddFont("Helvetica", "", "helvetica_1251.json")
 	latTr := pdf.UnicodeTranslatorFromDescriptor("iso-8859-16")
 	cirTr := pdf.UnicodeTranslatorFromDescriptor("cp1251")
-	trObj := newTranslationDetails(pdf, "Helvetica", "Arimo-Regular", 8, latTr, cirTr)
+	fontSize := 10.0
+	trObj := newTranslationDetails(pdf, "Helvetica", "Arimo-Regular", fontSize, latTr, cirTr)
 
 	pdf.SetMargins(marginLeft, marginTop, marginRight)
 	pdf.AddPage()
 
-	pdf.SetFont("Arimo-Regular", "", 8)
+	pdf.SetFont("Arimo-Regular", "", fontSize)
 	createSimpleHeaderForLandscape(pdf, cirTr)
 
 	pdf.Ln(5)
 	pdf.Text(15, pdf.GetY(), trObj.translDef("Место: "))
-	pdf.Text(25, pdf.GetY(), trObj.translDef(day.Seminar.ClassRoom.Location.Address.Place))
+	pdf.Text(27, pdf.GetY(), trObj.translDef(day.Seminar.ClassRoom.Location.Address.Place))
 	pdf.Ln(5)
 	pdf.Text(15, pdf.GetY(), trObj.translDef("Шифра обуке: "))
-	pdf.Text(35, pdf.GetY(), trObj.translDef(day.Seminar.GetCode()))
+	pdf.Text(39, pdf.GetY(), trObj.translDef(day.Seminar.GetCode()))
 	pdf.Ln(5)
 	pdf.Text(15, pdf.GetY(), trObj.translDef("Датум: "))
 	dayInWeek := util.GetDaySerbian(day.Date)
-	pdf.Text(25, pdf.GetY(), trObj.translDef(dayInWeek)+" "+day.Date.Format("02.01.2006."))
+	pdf.Text(27, pdf.GetY(), trObj.translDef(dayInWeek)+" "+day.Date.Format("02.01.2006."))
 	pdf.Ln(5)
 	pdf.Text(15, pdf.GetY(), trObj.translDef(fmt.Sprintf("Прозивник полазника семинара унапређења знања на %s обуци професионалних возача", day.Seminar.SeminarTheme.BaseSeminarType.GetSeminarTypeForSentence())))
 
@@ -677,8 +679,8 @@ func (p *printService) PrintMuster(day *model.SeminarDay) ([]byte, error) {
 		pdf.Ln(ch)
 		pdf.CellFormat(10, ch, strconv.Itoa(i+1), "1", 0, "C", false, 0, "")
 		pdf.CellFormat(45, ch, "", "1", 0, "C", false, 0, "")
-		pdf.Text(25, pdf.GetY()+5, trObj.translDef(cs.Client.Person.FullName()))
-		pdf.Text(25, pdf.GetY()+10, *cs.Client.JMBG)
+		pdf.Text(22, pdf.GetY()+5, trObj.translDef(cs.Client.Person.FullName()))
+		pdf.Text(22, pdf.GetY()+10, *cs.Client.JMBG)
 		pdf.CellFormat(27, ch, "", "1", 0, "C", false, 0, "")
 		pdf.CellFormat(27, ch, "", "1", 0, "C", false, 0, "")
 		pdf.CellFormat(27, ch, "", "1", 0, "C", false, 0, "")
