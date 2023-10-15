@@ -419,7 +419,11 @@ export default {
     },
     onPayedChange(traine) {
       if (traine.payed) {
-        traine.payed_by = traine.client.person.first_name + " " + traine.client.person.last_name;
+        if (traine.client && traine.client.company && traine.client.company.ID > 0) {
+          traine.payed_by = traine.client.company.name;
+        } else {
+          traine.payed_by = traine.client.person.first_name + " " + traine.client.person.last_name;
+        }
       } else {
         traine.payed_by = "";
         traine.pay_date = this.getBackendFormat(null);
