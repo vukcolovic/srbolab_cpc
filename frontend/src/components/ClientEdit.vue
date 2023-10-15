@@ -462,7 +462,7 @@ export default {
         address: {place: "", street: "", house_number: ""},
         // drive_licence: "",
         place_birth: "",
-        country_birth: "Srbija",
+        country_birth: "Србија",
         documents: [],
         company: null,
         company_pib: "",
