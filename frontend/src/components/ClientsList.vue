@@ -16,7 +16,7 @@
           <i class="fa fa-filter" aria-hidden="true">
           </i>
         </button>
-        <button class="iconBtn" title="Traži" type="button" @click="doSearch(0, 10)">
+        <button class="iconBtn" title="Traži" type="button" @click="doSearch(0, this.pageSize)">
           <i class="fa fa-search">
           </i>
         </button>
@@ -67,6 +67,7 @@
           ref="localTable"
           @row-clicked="selectClient"
           :total= "table.totalCount"
+          :page-size=this.pageSize
           :columns="table.columns"
           :messages="table.messages"
           :rows="table.rows"
@@ -93,7 +94,8 @@ export default {
   components: {vSelect, VueTableLite },
   data() {
     return {
-      filter: {verified: "", wait_seminar: "", jmbg: "", first_name: "", last_name: ""}
+      filter: {verified: "", wait_seminar: "", jmbg: "", first_name: "", last_name: ""},
+      pageSize: 50,
     }
   },
   setup() {
@@ -220,7 +222,7 @@ export default {
   },
   async created() {
     await this.countClients();
-    await this.doSearch(0, 10, 'id', 'asc');
+    await this.doSearch(0, this.pageSize, 'id', 'asc');
   }
 }
 </script>
