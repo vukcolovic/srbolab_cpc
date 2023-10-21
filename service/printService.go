@@ -2,9 +2,11 @@ package service
 
 import (
 	"bytes"
+	"encoding/base64"
 	"fmt"
 	"github.com/go-pdf/fpdf"
 	"github.com/skip2/go-qrcode"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sort"
@@ -82,6 +84,7 @@ type printServiceInterface interface {
 	PrintSeminarEvidence(day *model.SeminarDay) ([]byte, error)
 	PrintTestBarcode() ([]byte, error)
 	PrintPlanTreningRealization(day *model.SeminarDay) ([]byte, error)
+	PrintPayments(seminar *model.Seminar) ([]byte, error)
 }
 
 func (p *printService) PrintSeminarStudentList(seminar *model.Seminar) ([]byte, error) {
@@ -1270,6 +1273,61 @@ func (p *printService) PrintPlanTreningRealization(day *model.SeminarDay) ([]byt
 	pdf.CellFormat(cw3, chs*num, "", "1", 0, "C", false, 0, "")
 	pdf.CellFormat(cw4, chs*num, start, "1", 0, "C", false, 0, "")
 	pdf.CellFormat(cw5, chs*num, end, "1", 0, "C", false, 0, "")
+
+	var buf bytes.Buffer
+	err = pdf.Output(&buf)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return buf.Bytes(), nil
+}
+
+func (p *printService) PrintPayments(seminar *model.Seminar) ([]byte, error) {
+	pwd, err := os.Getwd()
+	if err != nil {
+		logoped.ErrorLog.Println("Error getting pwd: ", err)
+		return []byte{}, err
+	}
+	pdf := fpdf.New("P", "mm", "A4", filepath.Join(pwd, "font"))
+
+	pdf.SetMargins(15.0, marginTop, marginRight)
+
+	for _, doc := range seminar.Documents {
+		if (strings.HasPrefix(strings.ToLower(doc.Name), "upl") || strings.HasPrefix(strings.ToLower(doc.Name), "упл")) && (strings.HasSuffix(doc.Name, ".png") || strings.HasSuffix(doc.Name, ".jpg") || strings.HasSuffix(doc.Name, ".jpeg")) {
+			pdf.AddPage()
+			pdf.Ln(30)
+			// Write to file.
+			idx := strings.Index(doc.Content, ";base64,")
+			if idx < 0 {
+				return []byte{}, err
+			}
+			reader := base64.NewDecoder(base64.StdEncoding, strings.NewReader(doc.Content[idx+8:]))
+			buff := bytes.Buffer{}
+			_, err := buff.ReadFrom(reader)
+			if err != nil {
+				return []byte{}, err
+			}
+
+			err = ioutil.WriteFile("./temp_images/"+doc.Name, buff.Bytes(), 0644)
+			if err != nil {
+				return []byte{}, err
+			}
+
+			h := 70.0
+			info := pdf.RegisterImage("./temp_images/"+doc.Name, strings.Split(doc.Name, ".")[1])
+			if info != nil && info.Width() > 0 && info.Height() > 0 {
+				scale := info.Width() / info.Height()
+				h = 180 / scale
+			}
+
+			pdf.Image("./temp_images/"+doc.Name, 10, 10, 180, h, false, strings.Split(doc.Name, ".")[1], 0, "")
+			e := os.Remove("./temp_images/" + doc.Name)
+			if e != nil {
+				return []byte{}, err
+			}
+		}
+	}
 
 	var buf bytes.Buffer
 	err = pdf.Output(&buf)
