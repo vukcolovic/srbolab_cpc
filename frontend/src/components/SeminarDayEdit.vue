@@ -19,23 +19,31 @@
               type="text">
           </text-input>
 
-          <text-input
-              v-model="seminarDay.date"
-              :readonly="readonly"
-              :required=true
-              label="Datum"
-              name="date"
-              type="date">
-          </text-input>
 
-          <text-input
-              v-model="startTime"
-              :readonly="readonly"
-              :required=true
-              label="Vreme početka"
-              name="time"
-              type="time">
-          </text-input>
+          <div class="row">
+            <div class="col-sm-6">
+              <label style="font-size: 16px" class="mb-2 mt-2">Datum </label>
+              <Datepicker
+                  style="overflow: hidden"
+                  v-model="seminarDay.date"
+                  :disabled="readonly"
+                  :style="dateStyleInput"
+                  inputFormat="dd.MM.yyyy"
+                  placeholder="dd.MM.yyyy"
+                  typeable="true"
+              />
+            </div>
+            <div class="col-sm-6">
+              <text-input
+                  v-model="startTime"
+                  :readonly="readonly"
+                  :required=true
+                  label="Vreme početka"
+                  name="time"
+                  type="time">
+              </text-input>
+            </div>
+          </div>
 
           <label :style="styleLabel" class="mb-1 mt-1">Test</label>
           <v-select
@@ -146,11 +154,12 @@ import {dateMixin} from "@/mixins/dateMixin";
 import {styleMixin} from "@/mixins/styleMixin";
 import vSelect from "vue-select";
 import {commonMixin} from "@/mixins/commonMixin";
+import Datepicker from "vue3-datepicker";
 
 export default {
   name: 'SeminarDayEdit',
   mixins: [fileMixin, apiMixin, dateMixin, styleMixin, commonMixin],
-  components: {vSelect, FormTag, TextInput},
+  components: {Datepicker, vSelect, FormTag, TextInput},
   computed: {
     readonly() {
       return this.action === 'view';
@@ -329,7 +338,7 @@ export default {
         }
         this.seminarDay = JSON.parse(response.data.Data);
         this.startTime = this.getTime(this.seminarDay.date);
-        this.seminarDay.date = this.getDateInMMDDYYYYFormat(this.seminarDay.date);
+        this.seminarDay.date = this.getFullDate(this.seminarDay.date);
         this.seminarDay.seminar_theme = this.getSeminarFullType(this.seminarDay.seminar.seminar_theme.base_seminar_type, this.seminarDay.seminar.seminar_theme);
         if (this.seminarDay.documents == null) {
           this.seminarDay.documents = [];
@@ -344,13 +353,12 @@ export default {
       });
     },
     async submitHandler() {
-      this.seminarDay.date = this.getBackendFormatWithTime(this.seminarDay.date, this.startTime);
+      this.seminarDay.date = this.getDateWithTime(this.seminarDay.date, this.startTime);
       await axios.post('/seminar-days/update', JSON.stringify(this.seminarDay)).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;
         }
-        this.seminarDay.date = this.getDateInMMDDYYYYFormat(this.seminarDay.date);
         this.toast.info("Uspešno ažuriran seminar dan.");
       }, (error) => {
         this.errorToast(error, "/seminar-days/update");
@@ -363,7 +371,6 @@ export default {
           return;
         }
         this.tests = JSON.parse(response.data.Data);
-        console.log(this.tests);
       }, (error) => {
         this.errorToast(error, "/tests/list/seminar-theme");
       });

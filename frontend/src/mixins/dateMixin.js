@@ -16,6 +16,15 @@ export const dateMixin = {
             }
             return date + "T" + time + ":00.576147+02:00"
         },
+        getDateWithTime(date, time) {
+            console.log(typeof time);
+            if (this.isDateEmpty(date)) {
+                return null;
+            }
+
+            date.setHours(time.split(":")[0]);
+            return date;
+        },
         getDateInMMDDYYYYFormat(date) {
             if (this.isDateEmpty(date)) {
                 return null;
@@ -38,37 +47,21 @@ export const dateMixin = {
 
             var t = date.split('T')[1];
             return t.split(':')[0] + ":" + t.split(':')[1];
-        }
-        ,
-// formatDate(inputDate) {
-//     if (typeof(inputDate) === 'string')
-//     {
-//         let date = inputDate.split('T')[0];
-//         let day, month, year;
-//
-//         day = date.split('-')[2];
-//         month = date.split('-')[1];
-//         year = date.split('-')[0];
-//
-//         return `${day}-${month}-${year}`;
-//     }
-//
-//     return inputDate.getDate() + "-" + inputDate.getMonth() + 1 + "" + inputDate.getFullYear();
-// },
-// formatDateWithPoints(inputDate) {
-//     if (typeof(inputDate) === 'string') {
-//         let date = inputDate.split('T')[0];
-//         let day, month, year;
-//
-//         day = date.split('-')[2];
-//         month = date.split('-')[1];
-//         year = date.split('-')[0];
-//
-//         return `${day}.${month}.${year}.`;
-//     }
-//
-//     return inputDate.getDate() + "." + inputDate.getMonth() + 1 + "." + inputDate.getFullYear() + ".";
-// },
+        },
+        formatDateWithPoints(inputDate) {
+            if (typeof(inputDate) === 'string') {
+                let date = inputDate.split('T')[0];
+                let day, month, year;
+
+                day = date.split('-')[2];
+                month = date.split('-')[1];
+                year = date.split('-')[0];
+
+                return `${day}.${month}.${year}.`;
+            }
+
+            return inputDate.getDate() + "." + inputDate.getMonth() + 1 + "." + inputDate.getFullYear() + ".";
+        },
 // formatDateWithPointsExceptLast(inputDate) {
 //     if (typeof(inputDate) === 'string') {
 //         let date = inputDate.split('T')[0];
@@ -106,6 +99,12 @@ export const dateMixin = {
             const year = date.split('-')[0];
 
             return year === '0001';
-        }
+        },
+        getFullDate(date) {
+            if (date) {
+                return new Date(date.split('T')[0]);
+            }
+            return null;
+        },
     },
 }

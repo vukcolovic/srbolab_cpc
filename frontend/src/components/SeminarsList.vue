@@ -128,7 +128,7 @@ export default {
           s.class_room_name = s.class_room.name;
           s.type = this.getSeminarFullType(s.seminar_theme.base_seminar_type, s.seminar_theme);
           s.status = s.seminar_status.name;
-          s.start_date = this.getDateInMMDDYYYYFormat(s.start_date);
+          s.start_date = this.formatDateWithPoints(s.start_date);
         });
       }, (error) => {
         this.errorToast(error, "/seminars/list");

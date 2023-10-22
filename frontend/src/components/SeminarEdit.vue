@@ -66,14 +66,15 @@
               placeholder="Traži">
           </v-select>
 
-          <text-input
+          <label :style="styleLabelSmall" class="mb-2 mt-2">Početak seminara </label>
+          <Datepicker
               v-model="seminar.start_date"
-              :readonly="readonly"
-              :required=true
-              label="Početak seminara (MM/DD/YYYY)"
-              name="start"
-              type="date">
-          </text-input>
+              :disabled="readonly"
+              :style="dateStyleInput"
+              inputFormat="dd.MM.yyyy"
+              placeholder="dd.MM.yyyy"
+              typeable="true"
+          />
 
           <div class="col-sm-12">
             <input v-if="this.action === 'add'" class="btn btn-primary m-2" type="submit" value="Snimi">
@@ -122,7 +123,14 @@
                   <input id="payed_by" v-model="trainee.payed_by" :hidden="readonly" type="text"/>
                 </td>
                 <td>
-                  <input id="payed_by" v-model="trainee.pay_date" :hidden="readonly" type="date"/>
+                  <Datepicker
+                      v-model="trainee.pay_date"
+                      :disabled="readonly"
+                      :style="dateStyleInput"
+                      inputFormat="dd.MM.yyyy"
+                      placeholder="dd.MM.yyyy"
+                      typeable="true"
+                  />
                 </td>
                 <td>
                   <button type="button" @click="updateClientSeminar(trainee)" class="iconBtn">s</button>
@@ -170,7 +178,7 @@
                style="width: 20%; height: 200px" @click="openSeminarDayEdit(day.ID)">
             <div class="m-1">
               <h6>Dan: {{ day.number }}</h6>
-              <p style="font-size: 0.8em">{{ getDateInMMDDYYYYFormat(day.date) }}</p>
+              <p style="font-size: 0.8em">{{ formatDateWithPoints(day.date) }}</p>
               <hr>
               <p style="font-size: 0.7em; overflow: hidden">Tema: {{ day.name }}</p>
             </div>
@@ -207,15 +215,15 @@ import router from "@/router";
 import {apiMixin} from "@/mixins/apiMixin";
 import {styleMixin} from "@/mixins/styleMixin";
 import {useToast} from "vue-toastification";
-import TextInput from "@/components/forms/TextInput.vue";
 import {dateMixin} from "@/mixins/dateMixin";
 import {commonMixin} from "@/mixins/commonMixin";
 import {fileMixin} from "@/mixins/fileMixin";
+import Datepicker from "vue3-datepicker";
 
 export default {
   name: 'SeminarEdit',
   mixins: [apiMixin, styleMixin, dateMixin, commonMixin, fileMixin],
-  components: {TextInput, FormTag, vSelect},
+  components: {Datepicker, FormTag, vSelect},
   computed: {
     readonly() {
       return this.action === 'view';
@@ -450,17 +458,14 @@ export default {
         }
       } else {
         traine.payed_by = "";
-        traine.pay_date = this.getBackendFormat(null);
       }
     },
     async updateClientSeminar(trainee) {
-      trainee.pay_date = this.getBackendFormat(trainee.pay_date);
       await axios.post('/client-seminar/update', JSON.stringify(trainee)).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;
         }
-        trainee.pay_date = this.getDateInMMDDYYYYFormat(trainee.pay_date);
         this.toast.info("Uspešno ažuriranje");
       }, (error) => {
         this.errorToast(error, "/client-seminar/update");
@@ -478,13 +483,13 @@ export default {
         });
         this.location = this.seminar.class_room.location;
         this.location.address_place = this.seminar.class_room.location.address.place;
-        this.seminar.start_date = this.getDateInMMDDYYYYFormat(this.seminar.start_date);
+        this.seminar.start_date = this.getFullDate(this.seminar.start_date);
         this.selectedBaseSeminarType = this.seminar.seminar_theme.base_seminar_type;
         this.getAllSeminarThemesByTypeId(this.seminar.seminar_theme.base_seminar_type.ID);
         if (this.seminar.trainees == null) {
           this.seminar.trainees = [];
         }
-        this.seminar.trainees.forEach(t => t.pay_date = this.getDateInMMDDYYYYFormat(t.pay_date));
+        this.seminar.trainees.forEach(t => t.pay_date = this.getFullDate(t.pay_date));
         if (this.seminar.documents == null) {
           this.seminar.documents = [];
         }
@@ -500,7 +505,6 @@ export default {
       }
     },
     async createSeminar() {
-      this.seminar.start_date = this.getBackendFormat(this.seminar.start_date);
       this.seminar.seminar_status = this.seminarStatuses.find(status => status.ID === this.SEMINAR_STATUSES.OPENED);
       await axios.post('/seminars/create', JSON.stringify(this.seminar)).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
@@ -508,7 +512,7 @@ export default {
           return;
         }
         this.seminar = JSON.parse(response.data.Data);
-        this.seminar.start_date = this.getDateInMMDDYYYYFormat(this.seminar.start_date);
+        this.seminar.start_date = this.getFullDate(this.seminar.start_date);
         this.toast.info("Uspešno kreiran seminar!");
         router.push("/seminars");
       }, (error) => {
@@ -516,15 +520,11 @@ export default {
       });
     },
     async updateSeminar() {
-      this.seminar.trainees.forEach(t => t.pay_date = this.getBackendFormat(t.pay_date))
-      this.seminar.start_date = this.getBackendFormat(this.seminar.start_date);
       await axios.post('/seminars/update', JSON.stringify(this.seminar)).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;
         }
-        this.seminar.start_date = this.getDateInMMDDYYYYFormat(this.seminar.start_date);
-        this.seminar.trainees.forEach(t => t.pay_date = this.getDateInMMDDYYYYFormat(t.pay_date))
         this.toast.info("Uspešno ažuriran seminar!");
       }, (error) => {
         this.errorToast(error, "/seminars/update");

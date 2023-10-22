@@ -118,16 +118,16 @@
             </div>
 
             <div class="col-sm-6">
-              <text-input
-                  v-model.trim="client.cpc_date"
-                  :readonly="readonly"
-                  :required=false
-                  :styleInput=styleInputSmall
-                  :styleLabel=styleLabelSmall
-                  label="CPC datum isticanja"
-                  name="cpc_date"
-                  type="date">
-              </text-input>
+              <label :style="styleLabelSmall" class="mb-2 mt-2">CPC datum isticanja</label>
+              <Datepicker
+                  v-model="client.cpc_date"
+                  :disabled="readonly"
+                  :style="dateStyleInput"
+                  inputFormat="dd.MM.yyyy"
+                  placeholder="dd.MM.yyyy"
+                  typeable="true"
+              />
+
             </div>
           </div>
 
@@ -329,7 +329,7 @@
             <ul>
               <li v-for="seminarClient in finishedSeminars" :key="seminarClient.ID" style="list-style-type: none">
                 {{ seminarClient.seminar.ID }}: {{ seminarClient.seminar.type }}
-                {{ getDateInMMDDYYYYFormat(seminarClient.seminar.start_date) }} <span
+                {{ formatDateWithPoints(seminarClient.seminar.start_date) }} <span
                   :style="[seminarClient.pass ? {'color':'green'} : {'color':'red'} ]">{{
                   seminarClient.passedText
                 }}</span>
@@ -341,7 +341,7 @@
             <ul>
               <li v-for="seminarClient in inProgressSeminars" :key="seminarClient.ID" style="list-style-type: none;">
                 {{ seminarClient.seminar.ID }}: {{ seminarClient.seminar.type }}
-                {{ getDateInMMDDYYYYFormat(seminarClient.seminar.start_date) }}
+                {{ formatDateWithPoints(seminarClient.seminar.start_date) }}
               </li>
             </ul>
           </div>
@@ -353,13 +353,13 @@
                   <i class="fa fa-remove"></i>
                 </button>
                 <span v-if="seminarClient.payed" class="bg-success">
-                  Plaćeno {{ getDateInMMDDYYYYFormat(seminarClient.pay_date) }}
+                  Plaćeno {{ formatDateWithPoints(seminarClient.pay_date) }}
                 </span>
                 <span v-if="!seminarClient.payed" class="bg-warning">
                   Nije plaćeno
                 </span>
                 | ID: {{seminarClient.seminar.ID }}:
-                {{ seminarClient.seminar.type }} {{ getDateInMMDDYYYYFormat(seminarClient.seminar.start_date) }}
+                {{ seminarClient.seminar.type }} {{ formatDateWithPoints(seminarClient.seminar.start_date) }}
               </li>
             </ul>
           </div>
@@ -405,16 +405,15 @@
                 </text-input>
               </div>
               <div class="col-sm-4" v-if="selectedOpenSeminar.payed">
-                <text-input
-                    v-model.trim="selectedOpenSeminar.pay_date"
-                    :readonly="readonly"
-                    :required=false
-                    :styleInput=styleInputSmall
-                    :styleLabel=styleLabelSmall
-                    label="Datum plaćanja"
-                    name="pay_date"
-                    type="date">
-                </text-input>
+                <label :style="styleLabelSmall" class="mb-1 mt-1">Datum plaćanja</label>
+                <Datepicker
+                    v-model="selectedOpenSeminar.pay_date"
+                    :disabled="readonly"
+                    :style="dateStyleInput"
+                    inputFormat="dd.MM.yyyy"
+                    placeholder="dd.MM.yyyy"
+                    typeable="true"
+                />
               </div>
             </div>
           </div>
@@ -441,11 +440,12 @@ import {styleMixin} from "@/mixins/styleMixin";
 import vSelect from "vue-select";
 import {apiMixin} from "@/mixins/apiMixin";
 import {commonMixin} from "@/mixins/commonMixin";
+import Datepicker from 'vue3-datepicker';
 
 export default {
   name: 'ClientEdit',
   mixins: [fileMixin, styleMixin, apiMixin, commonMixin],
-  components: {vSelect, FormTag, TextInput, TextAreaInput},
+  components: {vSelect, FormTag, TextInput, TextAreaInput, Datepicker},
   computed: {
     readonly() {
       return this.action === 'view';
@@ -593,7 +593,7 @@ export default {
           return;
         }
         this.client = JSON.parse(response.data.Data);
-        this.client.cpc_date = this.getDateInMMDDYYYYFormat(this.client.cpc_date);
+        this.client.cpc_date = this.getFullDate(this.client.cpc_date);
         this.client.seminars.forEach(s => {
           s.seminar.type = this.getSeminarFullType(s.seminar.seminar_theme.base_seminar_type, s.seminar.seminar_theme);
           s.passedText = s.pass ? "Položio" : "Nije položio";
@@ -647,7 +647,7 @@ export default {
       if (this.selectedOpenSeminar) {
         var payDate = null;
         if (this.selectedOpenSeminar.pay_date) {
-          payDate = this.getBackendFormat(this.selectedOpenSeminar.pay_date);
+          payDate = this.selectedOpenSeminar.pay_date;
         }
         this.client.seminars.push({"client_id": this.client.ID, "seminar_id": this.selectedOpenSeminar.ID, payed: this.selectedOpenSeminar.payed, payed_by: this.selectedOpenSeminar.payed_by, pay_date: payDate});
         this.client.wait_seminar = false;
@@ -659,11 +659,10 @@ export default {
       }
     },
     async createClient() {
-      this.client.cpc_date = this.getBackendFormat(this.client.cpc_date);
       await axios.post('/clients/create', JSON.stringify(this.client)).then((response) => {
         if (response.data == null || response.data.Status === 'error') {
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");
-          this.client.cpc_date = this.getDateInMMDDYYYYFormat(this.client.cpc_date);
+          this.client.cpc_date = this.getFullDate(this.client.cpc_date);
           return;
         }
         this.toast.info("Uspešno kreiran klijent.");
@@ -677,10 +676,8 @@ export default {
       });
     },
     async updateClient() {
-      this.client.cpc_date = this.getBackendFormat(this.client.cpc_date);
       await axios.post('/clients/update', JSON.stringify(this.client)).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
-          this.client.cpc_date = this.getDateInMMDDYYYYFormat(this.client.cpc_date);
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;
         }

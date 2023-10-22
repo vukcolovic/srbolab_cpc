@@ -1017,7 +1017,7 @@ func (p *printService) PrintPlanTreningRealization(day *model.SeminarDay) ([]byt
 	cw3 := 45.0
 	cw4 := 21.0
 	cw5 := 21.0
-	pdf.CellFormat(180, ch, trObj.translDef(util.GetDaySerbian(day.Date))+" "+day.Date.Format("01.02.2006"), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(180, ch, trObj.translDef(util.GetDaySerbian(day.Date))+" "+day.Date.Format("02.01.2006"), "1", 0, "C", false, 0, "")
 	pdf.Ln(ch)
 	pdf.SetFillColor(180, 197, 231)
 	pdf.CellFormat(cw1, ch, trObj.translDef("Р.бр"), "1", 0, "C", true, 0, "")
