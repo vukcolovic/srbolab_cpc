@@ -27,11 +27,11 @@
 <!--              name="jmbg"-->
 <!--              type="text">-->
 <!--          </text-input>-->
-          <hr>
           <h6>Pitanja</h6>
-          <div v-for="(question, index) in questions" :key="question.ID" class="row" style="margin-bottom: 5px">
+          <div v-for="(question, index) in questions" :key="question.ID" class="row mt-2" style="margin-bottom: 3px">
             <div class="col-xs-12 col-sm-12 col-md-12">
               <p> {{ index + 1 }}. {{ question.content }}</p>
+              <img v-if="question.image" id="img"  :src="question.image" alt="" style="margin-bottom: 3px" />
               <div v-for="(answer) in question.answers" :key="answer.ID" class="row no-gutters">
                 <div class="col-2 col-sm-2 col-md-1">
                   {{ answer.letter }})

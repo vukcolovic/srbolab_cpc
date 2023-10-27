@@ -37,6 +37,7 @@ type Question struct {
 	SeminarTheme   *SeminarTheme `json:"seminar_theme"`
 	SeminarThemeID *uint         `json:"seminar_theme_id"`
 	Answers        []Answer      `json:"answers"`
+	Image          *string       `gorm:"type:bytea" json:"image"`
 }
 
 type Answer struct {

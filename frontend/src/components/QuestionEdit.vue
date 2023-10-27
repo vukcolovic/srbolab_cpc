@@ -27,6 +27,13 @@
               type="text">
           </text-area-input>
 
+        <img id="img"  :src="question.image" alt="Slika" />
+        <button v-if="question.image.length > 0" class="iconBtn" title="Obriši" @click.prevent="removeImage()">
+          <i class="fa fa-remove"></i>
+        </button>
+        <br>
+        <input id="fileId" ref="file" type="file" @change="uploadFile()"/>
+
         <hr>
         <h6>Ponuđeni odgovori:</h6>
         <div class="row" v-for="answer in question.answers" :key="answer.ID">
@@ -85,6 +92,7 @@ export default {
       question: {
         content: "",
         seminar_theme: null,
+        image: "",
         answers: [],
       },
       action: "view",
@@ -92,6 +100,21 @@ export default {
     }
   },
   methods: {
+    removeImage() {
+      this.question.image = "";
+    },
+    uploadFile() {
+      const file = this.$refs.file.files[0];
+      if (file == null) {
+        return;
+      }
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        document.getElementById("img").setAttribute('src', reader.result);
+        this.question.image = reader.result;
+      }
+      reader.readAsDataURL(file);
+    },
     async getQuestionById() {
       axios.get('/questions/id/' + this.questionId).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
