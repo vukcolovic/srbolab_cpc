@@ -1315,7 +1315,8 @@ func (p *printService) PrintPayments(seminar *model.Seminar) ([]byte, error) {
 			}
 
 			h := 70.0
-			info := pdf.RegisterImage("./temp_images/"+doc.Name, strings.Split(doc.Name, ".")[1])
+			splitedName := strings.Split(doc.Name, ".")
+			info := pdf.RegisterImage("./temp_images/"+doc.Name, splitedName[len(splitedName)-1])
 			if info != nil && info.Width() > 0 && info.Height() > 0 {
 				scale := info.Width() / info.Height()
 				h = 180 / scale
