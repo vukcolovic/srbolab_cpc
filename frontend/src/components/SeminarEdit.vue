@@ -187,7 +187,7 @@
 
         <div class="col-sm-3">
           <label :style=styleLabel>Dokumenta: </label>
-          <input id="fileId" ref="file" type="file" @change="uploadFile()"/>
+          <input id="fileId" ref="file" type="file" multiple @change="uploadFiles()"/>
           <ul>
             <li v-for="(doc, index) in seminar.documents" :key="index" style="list-style-type: none;">
               <label for="index">&nbsp; {{ doc.name }}</label>
@@ -273,17 +273,37 @@ export default {
       link.click()
       URL.revokeObjectURL(link.href)
     },
-    uploadFile() {
-      const file = this.$refs.file.files[0];
-      if (file == null) {
-        return;
+    // uploadFile() {
+    //   const file = this.$refs.file.files[0];
+    //   if (file == null) {
+    //     return;
+    //   }
+    //   const reader = new FileReader()
+    //   reader.onloadend = () => {
+    //     const fileString = reader.result;
+    //     this.seminar.documents.push({content: fileString, name: file.name});
+    //   }
+    //   reader.readAsDataURL(file);
+    // },
+    uploadFiles() {
+      var files = this.$refs.file.files;
+      var self = this;
+      var names = [];
+      var j = 0;
+      for (var i = 0; i < this.$refs.file.files.length; i++) {
+        if (files[i] == null) {
+          continue;
+        }
+
+        names.push(files[i].name);
+
+        const reader = new FileReader();
+        reader.addEventListener("load", function (event) {
+          self.seminar.documents.push({content: event.target.result, name: names[j]});
+          j++;
+        });
+        reader.readAsDataURL(files[i]);
       }
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        const fileString = reader.result;
-        this.seminar.documents.push({content: fileString, name: file.name});
-      }
-      reader.readAsDataURL(file);
     },
     removeFile(i) {
       this.seminar.documents.splice(i, 1);

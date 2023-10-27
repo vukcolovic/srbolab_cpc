@@ -320,7 +320,7 @@
             </li>
           </ul>
 
-          <input id="fileId" ref="file" type="file" @change="uploadFile()"/>
+          <input id="fileId" ref="file" type="file" multiple @change="uploadFiles()"/>
 
         </div>
         <div class="col-sm-4" style="font-size: 0.7em">
@@ -381,8 +381,7 @@
               :options="filteredAndOpenedSeminars"
               :style="styleInputSmall"
               label="base_info"
-              placeholder="Traži"
-              @option:selected="onOpenedSeminarChange">
+              placeholder="Traži">
           </v-select>
 
           <div v-if="selectedOpenSeminar">
@@ -390,7 +389,7 @@
               <div class="col-sm-2">
                 <div class="my-1">
                   <label :style=styleLabelSmall for="payed">Plaćeno:&nbsp;</label>
-                  <input id="payed" v-model="selectedOpenSeminar.payed" :hidden="readonly" type="checkbox"/>
+                  <input id="payed" v-model="selectedOpenSeminar.payed" :hidden="readonly" @click="onPayedChange" type="checkbox"/>
                 </div>
               </div>
               <div class="col-sm-6" v-if="selectedOpenSeminar.payed">
@@ -492,14 +491,15 @@ export default {
     }
   },
   methods: {
-    onOpenedSeminarChange() {
-      if(this.selectedOpenSeminar) {
-        if (this.client && this.client.company && this.client.company.ID > 0) {
-          this.selectedOpenSeminar.payed_by = this.client.company.name;
-        } else {
-          this.selectedOpenSeminar.payed_by = this.client.person.first_name + " " + this.client.person.last_name;
-        }
-
+    onPayedChange() {
+      if (!this.selectedOpenSeminar.payed) {
+        this.selectedOpenSeminar.payed_by = "";
+        return;
+      }
+      if (this.client && this.client.company && this.client.company.ID > 0) {
+        this.selectedOpenSeminar.payed_by = this.client.company.name;
+      } else {
+        this.selectedOpenSeminar.payed_by = this.client.person.first_name + " " + this.client.person.last_name;
       }
     },
     onJmbgFocusOut() {
@@ -550,7 +550,7 @@ export default {
         this.errorToast(error, "/clients/jmbg");
       });
     },
-    downloadFile(i) {
+      downloadFile(i) {
       const arr = this.client.documents[i].content.split(',')
       var sampleArr = this.base64ToArrayBuffer(arr[1]);
       const blob = new Blob([sampleArr])
@@ -571,17 +571,25 @@ export default {
         this.waitingSeminars.splice(idx, 1); // 2nd parameter means remove one item only
       }
     },
-    uploadFile() {
-      const file = this.$refs.file.files[0];
-      if (file == null) {
-        return;
+    uploadFiles() {
+      var files = this.$refs.file.files;
+      var self = this;
+      var names = [];
+      var j = 0;
+      for (var i = 0; i < this.$refs.file.files.length; i++) {
+        if (files[i] == null) {
+          continue;
+        }
+
+        names.push(files[i].name);
+
+        const reader = new FileReader();
+        reader.addEventListener("load", function (event) {
+          self.client.documents.push({content: event.target.result, name: names[j]});
+          j++;
+        });
+        reader.readAsDataURL(files[i]);
       }
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        const fileString = reader.result;
-        this.client.documents.push({content: fileString, name: file.name});
-      }
-      reader.readAsDataURL(file);
     },
     removeFile(i) {
       this.client.documents.splice(i, 1);
@@ -649,7 +657,9 @@ export default {
         if (this.selectedOpenSeminar.pay_date) {
           payDate = this.selectedOpenSeminar.pay_date;
         }
-        this.client.seminars.push({"client_id": this.client.ID, "seminar_id": this.selectedOpenSeminar.ID, payed: this.selectedOpenSeminar.payed, payed_by: this.selectedOpenSeminar.payed_by, pay_date: payDate});
+        if (!this.client.seminars.find(s => s.seminar_id === this.selectedOpenSeminar.ID)) {
+          this.client.seminars.push({"client_id": this.client.ID, "seminar_id": this.selectedOpenSeminar.ID, payed: this.selectedOpenSeminar.payed, payed_by: this.selectedOpenSeminar.payed_by, pay_date: payDate});
+        }
         this.client.wait_seminar = false;
       }
       if (this.clientId) {
@@ -695,8 +705,7 @@ export default {
   setup() {
     const toast = useToast();
     return {toast}
-  }
-  ,
+  },
   async mounted() {
     await this.getAllLocations();
     await this.getSeminarsByStatusCode("OPENED").then(result => this.openedSeminars = result);

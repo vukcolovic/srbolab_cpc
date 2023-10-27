@@ -49,6 +49,9 @@ export const dateMixin = {
             return t.split(':')[0] + ":" + t.split(':')[1];
         },
         formatDateWithPoints(inputDate) {
+            if (inputDate == null) {
+                return null;
+            }
             if (typeof(inputDate) === 'string') {
                 let date = inputDate.split('T')[0];
                 let day, month, year;
