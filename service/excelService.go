@@ -139,7 +139,7 @@ func (excelService) CreateListClientsBySeminarDayReport(seminarDay *model.Semina
 
 	for i, t := range seminarDay.Presence {
 		exc.SetCellValue("Sheet1", "B"+strconv.Itoa(i+4), strconv.Itoa(i+1))
-		exc.SetCellValue("Sheet1", "C"+strconv.Itoa(i+4), t.Client.Person.FullName())
+		exc.SetCellValue("Sheet1", "C"+strconv.Itoa(i+4), t.Client.Person.FullNameWithMiddleName())
 		exc.SetCellValue("Sheet1", "D"+strconv.Itoa(i+4), *t.Client.JMBG)
 		exc.SetCellValue("Sheet1", "E"+strconv.Itoa(i+4), util.CentarForEducationName)
 		exc.SetCellValue("Sheet1", "F"+strconv.Itoa(i+4), seminarDay.Name)
@@ -150,11 +150,11 @@ func (excelService) CreateListClientsBySeminarDayReport(seminarDay *model.Semina
 			payDate = clientSeminar.PayDate.Format("02.01.2006")
 		}
 		exc.SetCellValue("Sheet1", "H"+strconv.Itoa(i+4), payDate)
-		company := ""
-		if t.Client.Company.ID > 0 {
-			company = t.Client.Company.Name
+		payedBy := ""
+		if clientSeminar.Payed != nil && *clientSeminar.Payed == true && clientSeminar.PayedBy != nil {
+			payedBy = *clientSeminar.PayedBy
 		}
-		exc.SetCellValue("Sheet1", "I"+strconv.Itoa(i+4), company)
+		exc.SetCellValue("Sheet1", "I"+strconv.Itoa(i+4), payedBy)
 	}
 
 	var buf bytes.Buffer
