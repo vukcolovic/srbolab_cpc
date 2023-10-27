@@ -28,7 +28,7 @@
           </text-area-input>
 
         <img id="img"  :src="question.image" alt="Slika" />
-        <button v-if="question.image.length > 0" class="iconBtn" title="Obriši" @click.prevent="removeImage()">
+        <button v-if="question.image" class="iconBtn" title="Obriši" @click.prevent="removeImage()">
           <i class="fa fa-remove"></i>
         </button>
         <br>
