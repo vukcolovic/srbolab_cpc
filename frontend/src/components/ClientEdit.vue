@@ -336,10 +336,19 @@
               </li>
             </ul>
           </div>
-          <div v-if="inProgressSeminars.length > 0">
+          <div v-if="inProgressClientSeminars.length > 0">
             <h6>Aktuelni seminari</h6>
             <ul>
-              <li v-for="seminarClient in inProgressSeminars" :key="seminarClient.ID" style="list-style-type: none;">
+              <li v-for="seminarClient in inProgressClientSeminars" :key="seminarClient.ID" style="list-style-type: none;">
+                <button class="iconSmallBtn" title="Obriši" @click.prevent="removeSeminar(seminarClient)">
+                  <i class="fa fa-remove"></i>
+                </button>
+                <span v-if="seminarClient.payed" class="bg-success">
+                  Plaćeno {{ formatDateWithPoints(seminarClient.pay_date) }}
+                </span>
+                <span v-if="!seminarClient.payed" class="bg-warning">
+                  Nije plaćeno
+                </span>
                 {{ seminarClient.seminar.ID }}: {{ seminarClient.seminar.type }}
                 {{ formatDateWithPoints(seminarClient.seminar.start_date) }}
               </li>
@@ -389,7 +398,7 @@
               <div class="col-sm-2">
                 <div class="my-1">
                   <label :style=styleLabelSmall for="payed">Plaćeno:&nbsp;</label>
-                  <input id="payed" v-model="selectedOpenSeminar.payed" :hidden="readonly" @click="onPayedChange" type="checkbox"/>
+                  <input id="payed" v-model="selectedOpenSeminar.payed" :hidden="readonly" @change="onPayedChangeOpened" type="checkbox"/>
                 </div>
               </div>
               <div class="col-sm-6" v-if="selectedOpenSeminar.payed">
@@ -415,6 +424,56 @@
                 />
               </div>
             </div>
+          </div>
+
+          <div class="form-check form-switch mt-2">
+            <input id="flexSwitchCheckDefault" v-model="showInProgressSeminars" class="form-check-input" role="switch"
+                   type="checkbox">
+            <label :style="styleInput" class="form-check-label" for="flexSwitchCheckDefault">Aktuelni seminari</label>
+          </div>
+          <div v-if="showInProgressSeminars">
+          <label :style="styleLabelSmall" class="mb-1 mt-1">Aktuelni seminari</label>
+          <v-select
+              v-model="selectedInProgressSeminar"
+              :disabled=readonly
+              :options="inProgressSeminars"
+              :style="styleInputSmall"
+              label="base_info"
+              placeholder="Traži">
+          </v-select>
+
+          <div v-if="selectedInProgressSeminar">
+            <div class="row my-1">
+              <div class="col-sm-2">
+                <div class="my-1">
+                  <label :style=styleLabelSmall for="payed">Plaćeno:&nbsp;</label>
+                  <input id="payed" v-model="selectedInProgressSeminar.payed" :hidden="readonly" @change="onPayedChangeInProgress" type="checkbox"/>
+                </div>
+              </div>
+              <div class="col-sm-6" v-if="selectedInProgressSeminar.payed">
+                <text-input
+                    v-model.trim="selectedInProgressSeminar.payed_by"
+                    :required=false
+                    :styleInput=styleInputSmall
+                    :styleLabel=styleLabelSmall
+                    label="Platio"
+                    name="payed_by"
+                    type="text">
+                </text-input>
+              </div>
+              <div class="col-sm-4" v-if="selectedInProgressSeminar.payed">
+                <label :style="styleLabelSmall" class="mb-1 mt-1">Datum plaćanja</label>
+                <Datepicker
+                    v-model="selectedInProgressSeminar.pay_date"
+                    :disabled="readonly"
+                    :style="dateStyleInput"
+                    inputFormat="dd.MM.yyyy"
+                    placeholder="dd.MM.yyyy"
+                    typeable="true"
+                />
+              </div>
+            </div>
+          </div>
           </div>
 
         </div>
@@ -479,10 +538,13 @@ export default {
         d_licence: false,
       },
       showNote: false,
+      showInProgressSeminars: false,
       finishedSeminars: [],
+      inProgressClientSeminars: [],
       inProgressSeminars: [],
       waitingSeminars: [],
       selectedOpenSeminar: null,
+      selectedInProgressSeminar: null,
       openedSeminars: [],
       filteredAndOpenedSeminars: [],
       action: "",
@@ -491,7 +553,7 @@ export default {
     }
   },
   methods: {
-    onPayedChange() {
+    onPayedChangeOpened() {
       if (!this.selectedOpenSeminar.payed) {
         this.selectedOpenSeminar.payed_by = "";
         return;
@@ -500,6 +562,17 @@ export default {
         this.selectedOpenSeminar.payed_by = this.client.company.name;
       } else {
         this.selectedOpenSeminar.payed_by = this.client.person.first_name + " " + this.client.person.last_name;
+      }
+    },
+      onPayedChangeInProgress() {
+      if (!this.selectedInProgressSeminar.payed) {
+        this.selectedInProgressSeminar.payed_by = "";
+        return;
+      }
+      if (this.client && this.client.company && this.client.company.ID > 0) {
+        this.selectedInProgressSeminar.payed_by = this.client.company.name;
+      } else {
+        this.selectedInProgressSeminar.payed_by = this.client.person.first_name + " " + this.client.person.last_name;
       }
     },
     onJmbgFocusOut() {
@@ -570,6 +643,10 @@ export default {
       if (idx > -1) { // only splice array when item is found
         this.waitingSeminars.splice(idx, 1); // 2nd parameter means remove one item only
       }
+      const idxp = this.inProgressClientSeminars.indexOf(seminar);
+      if (idxp > -1) { // only splice array when item is found
+        this.inProgressClientSeminars.splice(idxp, 1); // 2nd parameter means remove one item only
+      }
     },
     uploadFiles() {
       var files = this.$refs.file.files;
@@ -608,10 +685,11 @@ export default {
         });
         if (this.client.seminars) {
           this.finishedSeminars = this.client.seminars.filter(s => s.seminar.seminar_status.ID === this.SEMINAR_STATUSES.CLOSED);
-          this.inProgressSeminars = this.client.seminars.filter(s => s.seminar.seminar_status.ID === this.SEMINAR_STATUSES.IN_PROGRESS);
+          this.inProgressClientSeminars = this.client.seminars.filter(s => s.seminar.seminar_status.ID === this.SEMINAR_STATUSES.IN_PROGRESS);
           this.waitingSeminars = this.client.seminars.filter(s => (s.seminar.seminar_status.ID === this.SEMINAR_STATUSES.OPENED || s.seminar.seminar_status.ID === this.SEMINAR_STATUSES.FILLED));
 
           this.openedSeminars = this.openedSeminars.filter((el) => !this.waitingSeminars.find(rm => (rm.seminar.ID === el.ID)));
+          this.inProgressSeminars = this.inProgressSeminars.filter((el) => !this.client.seminars.find(rm => (rm.seminar.ID === el.ID)));
         }
         if (this.client.documents == null) {
           this.client.documents = [];
@@ -662,6 +740,18 @@ export default {
         }
         this.client.wait_seminar = false;
       }
+
+      if (this.selectedInProgressSeminar) {
+        var payDateInProg = null;
+        if (this.selectedInProgressSeminar.pay_date) {
+          payDateInProg = this.selectedInProgressSeminar.pay_date;
+        }
+        if (!this.client.seminars.find(s => s.seminar_id === this.selectedInProgressSeminar.ID)) {
+          this.client.seminars.push({"client_id": this.client.ID, "seminar_id": this.selectedInProgressSeminar.ID, payed: this.selectedInProgressSeminar.payed, payed_by: this.selectedInProgressSeminar.payed_by, pay_date: payDateInProg});
+        }
+        this.client.wait_seminar = false;
+      }
+
       if (this.clientId) {
         await this.updateClient();
       } else {
@@ -710,6 +800,7 @@ export default {
     await this.getAllLocations();
     await this.getSeminarsByStatusCode("OPENED").then(result => this.openedSeminars = result);
     this.filteredAndOpenedSeminars = this.openedSeminars;
+    await this.getSeminarsByStatusCode("IN_PROGRESS").then(result => this.inProgressSeminars = result);
     await this.getAllCompanies();
     if (this.$route.query.id && this.$route.query.id !== '') {
       this.clientId = this.$route.query.id;

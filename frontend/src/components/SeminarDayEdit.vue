@@ -211,7 +211,7 @@ export default {
 
             const link = document.createElement('a')
             link.href = URL.createObjectURL(blob)
-            link.download = "Registracioni_list.xlsx"
+            link.download = "Spisak_polaznika.xlsx"
             link.click()
             URL.revokeObjectURL(link.href)
             //FIXME add notie

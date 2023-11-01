@@ -198,12 +198,12 @@ func (c *clientService) UpdateClient(client model.Client, userID int) (*model.Cl
 	}
 
 	for _, os := range oldSeminars {
-		if os.Seminar.SeminarStatus.ID != model.SEMINAR_STATUS_OPENED && os.Seminar.SeminarStatus.ID != model.SEMINAR_STATUS_FILLED {
+		if os.Seminar.SeminarStatus.ID != model.SEMINAR_STATUS_OPENED && os.Seminar.SeminarStatus.ID != model.SEMINAR_STATUS_FILLED && os.Seminar.SeminarStatus.ID != model.SEMINAR_STATUS_IN_PROGRESS {
 			continue
 		}
 		found := false
 		for _, ns := range client.Seminars {
-			if ns.Seminar.SeminarStatus.ID != model.SEMINAR_STATUS_OPENED && os.Seminar.SeminarStatus.ID != model.SEMINAR_STATUS_FILLED {
+			if ns.Seminar.SeminarStatus.ID != model.SEMINAR_STATUS_OPENED && os.Seminar.SeminarStatus.ID != model.SEMINAR_STATUS_FILLED && os.Seminar.SeminarStatus.ID != model.SEMINAR_STATUS_IN_PROGRESS {
 				continue
 			}
 			if os.ClientID == ns.ClientID && os.SeminarID == ns.SeminarID {
@@ -217,23 +217,23 @@ func (c *clientService) UpdateClient(client model.Client, userID int) (*model.Cl
 		}
 	}
 
-	if len(client.Seminars) > len(oldSeminars) {
-		updatedClient, err := c.GetClientByID(int(client.ID))
-		if err != nil {
-			return nil, err
-		}
-		for _, ns := range updatedClient.Seminars {
-			found := false
-			for _, os := range oldSeminars {
-				if os.ClientID == ns.ClientID && os.SeminarID == ns.SeminarID {
-					found = true
-					break
-				}
+	updatedClient, err := c.GetClientByID(int(client.ID))
+	if err != nil {
+		return nil, err
+	}
+	for _, ns := range updatedClient.Seminars {
+		found := false
+		for _, os := range oldSeminars {
+			if os.ClientID == ns.ClientID && os.SeminarID == ns.SeminarID {
+				found = true
+				break
 			}
+		}
 
-			if !found {
-				err = SeminarService.UpdateSeminarStatusIfNeed(int(ns.SeminarID))
-
+		if !found {
+			err = SeminarService.UpdateSeminarStatusIfNeed(int(ns.SeminarID))
+			if ns.Seminar.SeminarStatusID == model.SEMINAR_STATUS_IN_PROGRESS {
+				SeminarDayService.AddClientToInProgressSeminar(ns)
 			}
 		}
 	}

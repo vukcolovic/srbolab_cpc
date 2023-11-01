@@ -135,6 +135,13 @@ func (c *seminarService) DeleteSeminarClient(clientSeminar model.ClientSeminar) 
 		return result.Error
 	}
 
+	if clientSeminar.Seminar.SeminarStatusID == model.SEMINAR_STATUS_IN_PROGRESS {
+		result := db.Client.Exec("DELETE FROM client_presences WHERE client_id = ? AND seminar_day_id IN (SELECT id FROM seminar_days WHERE seminar_id = ?)", clientSeminar.ClientID, clientSeminar.SeminarID)
+		if result.Error != nil {
+			return result.Error
+		}
+	}
+
 	return c.UpdateSeminarStatusIfNeed(int(clientSeminar.Seminar.ID))
 }
 

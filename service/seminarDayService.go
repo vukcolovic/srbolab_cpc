@@ -22,6 +22,7 @@ type seminarDayServiceInterface interface {
 	CreateSeminarDay(seminarDay model.SeminarDay) (*model.SeminarDay, error)
 	UpdateSeminarDay(seminarDay model.SeminarDay) (*model.SeminarDay, error)
 	CreateAllSeminarDaysForSeminar(seminarID int) ([]model.SeminarDay, error)
+	AddClientToInProgressSeminar(clientSeminar model.ClientSeminar) error
 }
 
 func (c *seminarDayService) GetSeminarDaysBySeminarID(seminarID int) ([]model.SeminarDay, error) {
@@ -127,4 +128,19 @@ func (c *seminarDayService) CreateAllSeminarDaysForSeminar(seminarID int) ([]mod
 	}
 
 	return seminarDays, nil
+}
+
+func (c *seminarDayService) AddClientToInProgressSeminar(clientSeminar model.ClientSeminar) error {
+	seminar, err := SeminarService.GetSeminarByID(int(clientSeminar.SeminarID))
+	if err != nil {
+		return err
+	}
+	for _, d := range seminar.Days {
+		result := db.Client.Exec("INSERT INTO client_presences (created_at, updated_at, client_id, presence, seminar_day_id) VALUES (now(), now(), ?, true, ?);", clientSeminar.ClientID, d.ID)
+		if result.Error != nil {
+			return result.Error
+		}
+	}
+
+	return nil
 }
