@@ -302,7 +302,7 @@ func (p *printService) PrintConfirmations(seminar *model.Seminar) ([]byte, error
 
 		pdf.SetFont("Arimo-Regular", "", 11)
 
-		pdf.Ln(5)
+		pdf.Ln(25)
 		pdf.Text(15, pdf.GetY(), trObj.translDef("Број:"))
 		pdf.Text(30, pdf.GetY(), trObj.translDef(seminar.GetCode()+"/"+strconv.Itoa(i+1)))
 		pdf.Ln(5)
@@ -351,12 +351,12 @@ func (p *printService) PrintConfirmations(seminar *model.Seminar) ([]byte, error
 		}
 		pdf.Ln(ch)
 		pdf.SetFont("Arimo-Regular", "", 11)
-		pdf.CellFormat(wl, ch, trObj.translDef("Место прбивалишта"), "1", 0, "L", false, 0, "")
+		pdf.CellFormat(wl, ch, trObj.translDef("Место пребивалишта"), "1", 0, "L", false, 0, "")
 		//pdf.SetFont("Arimo-Bold", "", 11)
 		pdf.CellFormat(wr, ch, trObj.translDef(client.Client.Address.Place), "1", 0, "L", false, 0, "")
 		pdf.Ln(ch)
 		pdf.SetFont("Arimo-Regular", "", 11)
-		pdf.CellFormat(wl, ch, trObj.translDef("Адреса прбивалишта"), "1", 0, "L", false, 0, "")
+		pdf.CellFormat(wl, ch, trObj.translDef("Адреса пребивалишта"), "1", 0, "L", false, 0, "")
 		//pdf.SetFont("Arimo-Bold", "", 11)
 		pdf.CellFormat(wr, ch, trObj.translDef(client.Client.Address.Street+" "+client.Client.Address.HouseNumber), "1", 0, "L", false, 0, "")
 		pdf.Ln(ch)
@@ -388,14 +388,14 @@ func (p *printService) PrintConfirmations(seminar *model.Seminar) ([]byte, error
 			cx = cx + 1
 		}
 		if seminarNumber > 0 {
-			pdf.Circle(cx, 137, 3, "")
+			pdf.Circle(cx, 157, 3, "")
 		}
 		pdf.CellFormat(wr, ch, " I    II    III    IV    V", "1", 0, "L", false, 0, "")
 		pdf.Ln(ch)
 		pdf.SetFont("Arimo-Regular", "", 11)
 		pdf.CellFormat(wl, ch-1, trObj.translDef("Датум похађања"), "LRT", 0, "L", false, 0, "")
 		//pdf.SetFont("Arimo-Bold", "", 11)
-		pdf.CellFormat(wr, ch-1, "od "+startSeminar.Format("02.01.2006"), "LRT", 0, "L", false, 0, "")
+		pdf.CellFormat(wr, ch-1, trObj.translDef("од ")+startSeminar.Format("02.01.2006"), "LRT", 0, "L", false, 0, "")
 		pdf.Ln(ch - 1)
 		pdf.SetFont("Arimo-Regular", "", 11)
 		seminarType := "периодичне"
@@ -407,7 +407,7 @@ func (p *printService) PrintConfirmations(seminar *model.Seminar) ([]byte, error
 		}
 		pdf.CellFormat(wl, ch-1, trObj.translDef(fmt.Sprintf("%s обуке", seminarType)), "LRB", 0, "L", false, 0, "")
 		//pdf.SetFont("Arimo-Bold", "", 11)
-		pdf.CellFormat(wr, ch-1, "do "+endSeminar.Format("02.01.2006"), "LRB", 0, "L", false, 0, "")
+		pdf.CellFormat(wr, ch-1, trObj.translDef("до ")+endSeminar.Format("02.01.2006"), "LRB", 0, "L", false, 0, "")
 		pdf.Ln(ch - 1)
 		pdf.SetFont("Arimo-Regular", "", 11)
 		pdf.CellFormat(wl, ch-1, trObj.translDef("Место похађања"), "LRT", 0, "L", false, 0, "")
@@ -423,10 +423,10 @@ func (p *printService) PrintConfirmations(seminar *model.Seminar) ([]byte, error
 		pdf.CellFormat(wl, ch, trObj.translDef("Врста ЦПЦ"), "1", 0, "L", false, 0, "")
 		//pdf.SetFont("Arimo-Bold", "", 11)
 		if client.Client.CLicence != nil && *client.Client.CLicence {
-			pdf.Circle(97.5, 178.5, 2.5, "")
+			pdf.Circle(97.5, 198.5, 2.5, "")
 		}
 		if client.Client.DLicence != nil && *client.Client.DLicence {
-			pdf.Circle(129.5, 178.5, 2.5, "")
+			pdf.Circle(129.5, 198.5, 2.5, "")
 		}
 		pdf.CellFormat(wr, ch, trObj.translDef("1. превоз терета  2. превоз путника"), "1", 0, "L", false, 0, "")
 		pdf.Ln(20)
