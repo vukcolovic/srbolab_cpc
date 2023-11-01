@@ -565,6 +565,8 @@ export default {
       this.seminar.seminar_status = this.seminarStatuses.find(ss => ss.ID == this.SEMINAR_STATUSES.IN_PROGRESS);
       this.updateSeminar();
       this.createSeminarDays();
+
+      location.reload();
     },
     finishSeminar() {
       this.seminar.seminar_status = this.seminarStatuses.find(ss => ss.ID == this.SEMINAR_STATUSES.CLOSED);
