@@ -59,6 +59,11 @@ export default {
           isKey: true,
         },
         {
+          label: 'Broj seminara',
+          field: 'serial_number_by_location',
+          width: '10%',
+        },
+        {
           label: 'Početak(MM-DD-YYYY)',
           field: 'start_date',
           width: '10%',

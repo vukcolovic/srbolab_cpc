@@ -56,6 +56,17 @@
               @option:selected="onLocationChange">
           </v-select>
 
+          <text-input
+              v-model.number="seminar.serial_number_by_location"
+              :readonly="readonly"
+              :required=false
+              :styleInput=styleInputSmall
+              :styleLabel=styleLabelSmall
+              label="Broj seminara"
+              name="serial_number_by_location"
+              type="text">
+          </text-input>
+
           <label :style="styleLabel" class="mb-1 mt-1">Učionica</label>
           <v-select
               v-model="seminar.class_room"
@@ -219,11 +230,12 @@ import {dateMixin} from "@/mixins/dateMixin";
 import {commonMixin} from "@/mixins/commonMixin";
 import {fileMixin} from "@/mixins/fileMixin";
 import Datepicker from "vue3-datepicker";
+import TextInput from "@/components/forms/TextInput.vue";
 
 export default {
   name: 'SeminarEdit',
   mixins: [apiMixin, styleMixin, dateMixin, commonMixin, fileMixin],
-  components: {Datepicker, FormTag, vSelect},
+  components: {TextInput, Datepicker, FormTag, vSelect},
   computed: {
     readonly() {
       return this.action === 'view';
@@ -248,6 +260,7 @@ export default {
         class_room: {},
         seminar_theme: null,
         seminar_status: null,
+        serial_number_by_location: 0,
         trainees: [],
         documents: [],
         days: []
