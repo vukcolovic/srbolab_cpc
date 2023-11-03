@@ -104,7 +104,7 @@ export const apiMixin = {
                 var result = JSON.parse(response.data.Data);
                 result.forEach(vs => {
                     vs.details = vs.seminar_theme.base_seminar_type.name + "-" + vs.seminar_theme.name + " | " + this.getDateInMMDDYYYYFormat(vs.start_date) + " | " + vs.class_room.location.address.place;
-                    vs.base_info = this.getSeminarFullType(vs.seminar_theme.base_seminar_type, vs.seminar_theme) + " | " + this.getDateInMMDDYYYYFormat(vs.start_date) + " | " + vs.class_room.location.address.place;
+                    vs.base_info = this.getSeminarFullType(vs.seminar_theme.base_seminar_type, vs.seminar_theme) + " | " + this.getDateInMMDDYYYYFormat(vs.start_date) + " | " + vs.class_room.location.code + "-" + vs.class_room.name;
                 });
                 return result;
             }, (error) => {

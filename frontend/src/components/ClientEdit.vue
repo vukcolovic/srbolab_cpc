@@ -351,6 +351,7 @@
                 </span>
                 {{ seminarClient.seminar.ID }}: {{ seminarClient.seminar.type }}
                 {{ formatDateWithPoints(seminarClient.seminar.start_date) }}
+                {{seminarClient.seminar.class_room.location.code}} - {{seminarClient.seminar.class_room.name}}
               </li>
             </ul>
           </div>
@@ -369,6 +370,7 @@
                 </span>
                 | ID: {{seminarClient.seminar.ID }}:
                 {{ seminarClient.seminar.type }} {{ formatDateWithPoints(seminarClient.seminar.start_date) }}
+                {{seminarClient.seminar.class_room.location.code}} - {{seminarClient.seminar.class_room.name}}
               </li>
             </ul>
           </div>
