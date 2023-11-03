@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"gorm.io/gorm"
 	"srbolab_cpc/db"
 	"srbolab_cpc/model"
@@ -69,9 +70,14 @@ func (c *seminarService) DeleteSeminar(id int) error {
 }
 
 func (c *seminarService) CreateSeminar(seminar model.Seminar) (*model.Seminar, error) {
-	//countByLocation := 0
-	//db.Client.Raw("SELECT COUNT(*) FROM seminars s JOIN class_rooms cr ON s.class_room_id = cr.id WHERE s.deleted_at is null AND cr.location_id = ?", seminar.ClassRoom.LocationID).Scan(&countByLocation)
-	//seminar.SerialNumberByLocation = countByLocation + 1
+	if seminar.SerialNumberByLocation > 0 {
+		countByLocation := 0
+		db.Client.Raw("SELECT COUNT(*) FROM seminars s JOIN class_rooms cr ON s.class_room_id = cr.id WHERE s.deleted_at is null AND cr.location_id = ? AND s.serial_number_by_location = ?", seminar.ClassRoom.LocationID, seminar.SerialNumberByLocation).Scan(&countByLocation)
+		if countByLocation > 0 {
+			return nil, errors.New("već postoji seminar sa ovim brojem na izabranoj lokaciji")
+		}
+	}
+
 	result := db.Client.Create(&seminar)
 	if result.Error != nil {
 		return nil, result.Error
@@ -81,6 +87,14 @@ func (c *seminarService) CreateSeminar(seminar model.Seminar) (*model.Seminar, e
 }
 
 func (c *seminarService) UpdateSeminar(seminar model.Seminar) (*model.Seminar, error) {
+	if seminar.SerialNumberByLocation > 0 {
+		countByLocation := 0
+		db.Client.Raw("SELECT COUNT(*) FROM seminars s JOIN class_rooms cr ON s.class_room_id = cr.id WHERE s.deleted_at is null AND cr.location_id = ? AND s.serial_number_by_location = ? AND s.id <> ?", seminar.ClassRoom.LocationID, seminar.SerialNumberByLocation, seminar.ID).Scan(&countByLocation)
+		if countByLocation > 0 {
+			return nil, errors.New("već postoji seminar sa ovim brojem na izabranoj lokaciji")
+		}
+	}
+
 	oldSeminar, err := c.GetSeminarByID(int(seminar.ID))
 	if err != nil {
 		return nil, err
