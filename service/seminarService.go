@@ -4,6 +4,7 @@ import (
 	"errors"
 	"gorm.io/gorm"
 	"srbolab_cpc/db"
+	"srbolab_cpc/logoped"
 	"srbolab_cpc/model"
 )
 
@@ -91,12 +92,14 @@ func (c *seminarService) UpdateSeminar(seminar model.Seminar) (*model.Seminar, e
 		countByLocation := 0
 		db.Client.Raw("SELECT COUNT(*) FROM seminars s JOIN class_rooms cr ON s.class_room_id = cr.id WHERE s.deleted_at is null AND cr.location_id = ? AND s.serial_number_by_location = ? AND s.id <> ?", seminar.ClassRoom.LocationID, seminar.SerialNumberByLocation, seminar.ID).Scan(&countByLocation)
 		if countByLocation > 0 {
+			logoped.ErrorLog.Println("Error updating seminar, already exists seminar number on this location.")
 			return nil, errors.New("već postoji seminar sa ovim brojem na izabranoj lokaciji")
 		}
 	}
 
 	oldSeminar, err := c.GetSeminarByID(int(seminar.ID))
 	if err != nil {
+		logoped.ErrorLog.Println("Error updating seminar, error getting seminar by id.")
 		return nil, err
 	}
 
@@ -120,6 +123,7 @@ func (c *seminarService) UpdateSeminar(seminar model.Seminar) (*model.Seminar, e
 
 	result := db.Client.Session(&gorm.Session{FullSaveAssociations: true}).Updates(&seminar)
 	if result.Error != nil {
+		logoped.ErrorLog.Println("Error updating seminar")
 		return nil, result.Error
 	}
 
@@ -135,6 +139,7 @@ func (c *seminarService) UpdateSeminar(seminar model.Seminar) (*model.Seminar, e
 		if !found {
 			result := db.Client.Exec("DELETE FROM seminar_file WHERE seminar_id = ? AND file_id = ?", seminar.ID, od.ID)
 			if result.Error != nil {
+				logoped.ErrorLog.Println("Error updating seminar, delete from seminar file")
 				return nil, result.Error
 			}
 		}
