@@ -574,10 +574,10 @@ export default {
         this.errorToast(error, "/seminar-days/create-all");
       });
     },
-    startSeminar() {
+    async startSeminar() {
       this.seminar.seminar_status = this.seminarStatuses.find(ss => ss.ID == this.SEMINAR_STATUSES.IN_PROGRESS);
-      this.updateSeminar();
-      this.createSeminarDays();
+      await this.updateSeminar();
+      await this.createSeminarDays();
 
       location.reload();
     },
