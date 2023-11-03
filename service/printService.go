@@ -294,6 +294,12 @@ func (p *printService) PrintConfirmations(seminar *model.Seminar) ([]byte, error
 		return *seminar.Trainees[i].Client.JMBG < *seminar.Trainees[j].Client.JMBG
 	})
 
+	maxConfNum, err := ClientSeminarService.GetMaxConfirmationNumber()
+	if err != nil {
+		logoped.ErrorLog.Println("Error getting max confirmation number: ", err)
+		return []byte{}, err
+	}
+
 	for i, client := range seminar.Trainees {
 		if _, exist := notPassedClientIds[client.ClientID]; exist {
 			continue
@@ -451,6 +457,18 @@ func (p *printService) PrintConfirmations(seminar *model.Seminar) ([]byte, error
 			seminarType = "основног"
 		}
 		pdf.Text(15, pdf.GetY(), trObj.translDef(fmt.Sprintf("за потребе стицања %s ЦПЦ и не може се користити у друге сврхе.", seminarType)))
+
+		if client.ConfirmationNumber == 0 {
+			maxConfNum++
+			client.ConfirmationNumber = maxConfNum
+			_, err = ClientSeminarService.UpdateClientSeminar(client)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		pdf.Ln(40)
+		pdf.Text(15, pdf.GetY(), strconv.Itoa(client.ConfirmationNumber))
 	}
 
 	var buf bytes.Buffer

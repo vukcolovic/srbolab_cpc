@@ -15,6 +15,7 @@ type clientSeminarService struct {
 
 type clientSeminarServiceInterface interface {
 	UpdateClientSeminar(clientSeminar model.ClientSeminar) (*model.ClientSeminar, error)
+	GetMaxConfirmationNumber() (int, error)
 }
 
 func (c *clientSeminarService) UpdateClientSeminar(clientSeminar model.ClientSeminar) (*model.ClientSeminar, error) {
@@ -24,4 +25,18 @@ func (c *clientSeminarService) UpdateClientSeminar(clientSeminar model.ClientSem
 	}
 
 	return &clientSeminar, nil
+}
+
+func (c *clientSeminarService) GetMaxConfirmationNumber() (int, error) {
+	var max *int
+	err := db.Client.Raw("SELECT MAX(confirmation_number) FROM client_seminars").Scan(&max).Error
+	if err != nil {
+		return 0, err
+	}
+
+	if max == nil {
+		return 0, nil
+	}
+
+	return *max, nil
 }
