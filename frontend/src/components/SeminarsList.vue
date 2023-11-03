@@ -19,6 +19,7 @@
           ref="localTable"
           @row-clicked="selectSeminar"
           :total= "table.totalCount"
+          :page-size=this.pageSize
           :columns="table.columns"
           :messages="table.messages"
           :rows="table.rows"
@@ -43,6 +44,11 @@ export default {
   name: 'SeminarsList',
   mixins: [dateMixin, apiMixin, commonMixin],
   components: { VueTableLite },
+  data() {
+    return {
+      pageSize: 50,
+    }
+  },
   setup() {
     // Table config
     const table = reactive({
@@ -155,7 +161,7 @@ export default {
   },
   async created() {
     await this.countSeminars();
-    await this.doSearch(0, 10, 'id', 'asc');
+    await this.doSearch(0, this.pageSize, 'id', 'asc');
   }
   }
 </script>
