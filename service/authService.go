@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"github.com/dgrijalva/jwt-go"
 	"golang.org/x/crypto/bcrypt"
 	"srbolab_cpc/logoped"
@@ -24,7 +25,8 @@ type authServiceInterface interface {
 func (s *authService) Login(request model.LoginRequest) (model.LoginResponse, error) {
 	user, err := UsersService.GetUserByEmail(request.Email)
 	if err != nil {
-		return model.LoginResponse{}, nil
+		logoped.ErrorLog.Println("Error loging " + err.Error())
+		return model.LoginResponse{}, errors.New("korisnički email ili šifra nisu dobri")
 	}
 
 	if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(request.Password)); err != nil {

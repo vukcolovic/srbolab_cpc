@@ -31,6 +31,7 @@ type seminarServiceInterface interface {
 func (c *seminarService) GetAllSeminars(skip, take int) ([]model.Seminar, error) {
 	var seminars []model.Seminar
 	if err := db.Client.Order("id desc").Limit(take).Offset(skip).Preload("ClassRoom.Location").Joins("ClassRoom").Joins("SeminarTheme").Joins("SeminarTheme.BaseSeminarType").Joins("SeminarStatus").Find(&seminars).Error; err != nil {
+		logoped.ErrorLog.Println("Error getting all seminars " + err.Error())
 		return nil, err
 	}
 	return seminars, nil
@@ -39,10 +40,12 @@ func (c *seminarService) GetAllSeminars(skip, take int) ([]model.Seminar, error)
 func (c *seminarService) GetAllSeminarsByStatus(statusCode string) ([]model.Seminar, error) {
 	status, err := SeminarStatusService.GetSeminarStatusByCode(statusCode)
 	if err != nil {
+		logoped.ErrorLog.Println("Error getting all seminars by status, error get seminar status by code " + err.Error())
 		return nil, err
 	}
 	var seminars []model.Seminar
 	if err := db.Client.Where("seminar_status_id", status.ID).Order("id desc").Preload("ClassRoom.Location").Joins("ClassRoom").Joins("SeminarTheme").Joins("SeminarTheme.BaseSeminarType").Joins("SeminarStatus").Find(&seminars).Error; err != nil {
+		logoped.ErrorLog.Println("Error getting all seminars by status " + err.Error())
 		return nil, err
 	}
 	return seminars, nil
@@ -51,6 +54,7 @@ func (c *seminarService) GetAllSeminarsByStatus(statusCode string) ([]model.Semi
 func (c *seminarService) GetSeminarByID(id int) (*model.Seminar, error) {
 	var seminar *model.Seminar
 	if err := db.Client.Preload("Trainees").Preload("Trainees.Client").Preload("Trainees.Client.Company").Preload("Trainees.Client.Seminars").Preload("Days").Preload("Documents").Preload("Days.Presence").Preload("ClassRoom.Location").Joins("ClassRoom").Joins("SeminarTheme.BaseSeminarType").Joins("SeminarTheme").Joins("SeminarStatus").First(&seminar, id).Error; err != nil {
+		logoped.ErrorLog.Println("Error getting seminar by id " + err.Error())
 		return nil, err
 	}
 
@@ -60,6 +64,7 @@ func (c *seminarService) GetSeminarByID(id int) (*model.Seminar, error) {
 func (c *seminarService) GetSeminarsCount() (int64, error) {
 	var count int64
 	if err := db.Client.Model(&model.Seminar{}).Count(&count).Error; err != nil {
+		logoped.ErrorLog.Println("Error getting seminars count " + err.Error())
 		return 0, err
 	}
 
@@ -67,7 +72,12 @@ func (c *seminarService) GetSeminarsCount() (int64, error) {
 }
 
 func (c *seminarService) DeleteSeminar(id int) error {
-	return db.Client.Delete(&model.Seminar{}, id).Error
+	err := db.Client.Delete(&model.Seminar{}, id).Error
+	if err != nil {
+		logoped.ErrorLog.Println("Error deleting seminar " + err.Error())
+		return err
+	}
+	return nil
 }
 
 func (c *seminarService) CreateSeminar(seminar model.Seminar) (*model.Seminar, error) {
@@ -81,6 +91,7 @@ func (c *seminarService) CreateSeminar(seminar model.Seminar) (*model.Seminar, e
 
 	result := db.Client.Create(&seminar)
 	if result.Error != nil {
+		logoped.ErrorLog.Println("Error creating seminar " + result.Error.Error())
 		return nil, result.Error
 	}
 
@@ -151,12 +162,14 @@ func (c *seminarService) UpdateSeminar(seminar model.Seminar) (*model.Seminar, e
 func (c *seminarService) DeleteSeminarClient(clientSeminar model.ClientSeminar) error {
 	result := db.Client.Exec("DELETE FROM client_seminars WHERE client_id = ? AND seminar_id = ?", clientSeminar.ClientID, clientSeminar.SeminarID)
 	if result.Error != nil {
+		logoped.ErrorLog.Println("Error deleting client seminar " + result.Error.Error())
 		return result.Error
 	}
 
 	if clientSeminar.Seminar.SeminarStatusID == model.SEMINAR_STATUS_IN_PROGRESS {
 		result := db.Client.Exec("DELETE FROM client_presences WHERE client_id = ? AND seminar_day_id IN (SELECT id FROM seminar_days WHERE seminar_id = ?)", clientSeminar.ClientID, clientSeminar.SeminarID)
 		if result.Error != nil {
+			logoped.ErrorLog.Println("Error deleting client seminar, error deleting client presence " + result.Error.Error())
 			return result.Error
 		}
 	}
@@ -167,18 +180,21 @@ func (c *seminarService) DeleteSeminarClient(clientSeminar model.ClientSeminar) 
 func (c *seminarService) UpdateSeminarStatusIfNeed(seminarID int) error {
 	seminar, err := c.GetSeminarByID(seminarID)
 	if err != nil {
+		logoped.ErrorLog.Println("Error updating seminar status if need, error get seminar by id " + err.Error())
 		return err
 	}
 
 	if seminar.SeminarStatus.ID == model.SEMINAR_STATUS_FILLED && len(seminar.Trainees) < seminar.ClassRoom.MaxStudents {
 		statusOpened, err := SeminarStatusService.GetSeminarStatusByID(model.SEMINAR_STATUS_OPENED)
 		if err != nil {
+			logoped.ErrorLog.Println("Error updating seminar status if need, error get seminar status by id " + err.Error())
 			return err
 		}
 		seminar.SeminarStatus = *statusOpened
 		seminar.SeminarStatusID = model.SEMINAR_STATUS_OPENED
 		_, err = c.UpdateSeminar(*seminar)
 		if err != nil {
+			logoped.ErrorLog.Println("Error updating seminar status if need " + err.Error())
 			return err
 		}
 
@@ -194,6 +210,7 @@ func (c *seminarService) UpdateSeminarStatusIfNeed(seminarID int) error {
 		seminar.SeminarStatusID = model.SEMINAR_STATUS_FILLED
 		_, err = c.UpdateSeminar(*seminar)
 		if err != nil {
+			logoped.ErrorLog.Println("Error updating seminar status if need " + err.Error())
 			return err
 		}
 
@@ -206,6 +223,7 @@ func (c *seminarService) UpdateSeminarStatusIfNeed(seminarID int) error {
 func (c *seminarService) GetClientSeminarBySeminarIDAndClientID(seminarID, clientID uint) (*model.ClientSeminar, error) {
 	var clientSeminar *model.ClientSeminar
 	if err := db.Client.Where("client_id = ? AND seminar_id = ?", clientID, seminarID).First(&clientSeminar).Error; err != nil {
+		logoped.ErrorLog.Println("Error getting ClientSeminar by SeminarID and ClientID" + err.Error())
 		return nil, err
 	}
 
