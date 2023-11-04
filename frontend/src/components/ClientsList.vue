@@ -66,6 +66,7 @@
       <vue-table-lite
           ref="localTable"
           @row-clicked="selectClient"
+          @dblclick="doubleClick"
           :total= "table.totalCount"
           :page-size=this.pageSize
           :columns="table.columns"
@@ -87,6 +88,7 @@ import {useToast} from "vue-toastification";
 import {styleMixin} from "@/mixins/styleMixin";
 import vSelect from "vue-select";
 import {commonMixin} from "@/mixins/commonMixin";
+import router from "@/router";
 
 export default {
   name: 'ClientsList',
@@ -176,11 +178,17 @@ export default {
       table.selectedClient = rowData;
     }
 
+    const doubleClick = () => {
+      router.push("/client?action=update&id=" + table.selectedClient.ID);
+
+    }
+
     const toast = useToast();
     return {
       toast,
       table,
       selectClient,
+      doubleClick,
     };
   },
   methods: {
