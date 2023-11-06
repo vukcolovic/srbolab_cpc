@@ -2,7 +2,6 @@ package service
 
 import (
 	"errors"
-	"fmt"
 	"gorm.io/gorm"
 	"srbolab_cpc/db"
 	"srbolab_cpc/model"
@@ -35,14 +34,11 @@ func (c *seminarDayService) GetSeminarDaysBySeminarID(seminarID int) ([]model.Se
 }
 
 func (c *seminarDayService) GetSeminarDayByID(seminarDayID int) (*model.SeminarDay, error) {
-	start := time.Now()
 	var seminarDay *model.SeminarDay
 	if err := db.Client.Preload("Seminar").Preload("Seminar.Trainees").Preload("Documents").Preload("Seminar.SeminarTheme").Preload("Seminar.SeminarTheme.BaseSeminarType").Preload("Seminar.ClassRoom.Location").Preload("Presence").Preload("Presence.Client").Preload("Presence.Client.Company").Preload("Classes.Teacher").Preload("Classes").Preload("Test").Find(&seminarDay, seminarDayID).Error; err != nil {
 		return nil, err
 	}
 
-	duration := time.Since(start)
-	fmt.Println(duration)
 	return seminarDay, nil
 }
 
