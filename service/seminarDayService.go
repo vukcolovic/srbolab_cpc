@@ -18,6 +18,7 @@ type seminarDayService struct {
 
 type seminarDayServiceInterface interface {
 	GetSeminarDayByID(seminarDayID int) (*model.SeminarDay, error)
+	GetSeminarDayWithTestByID(seminarDayID int) (*model.SeminarDay, error)
 	GetSeminarDaysBySeminarID(seminarID int) ([]model.SeminarDay, error)
 	CreateSeminarDay(seminarDay model.SeminarDay) (*model.SeminarDay, error)
 	UpdateSeminarDay(seminarDay model.SeminarDay) (*model.SeminarDay, error)
@@ -36,6 +37,15 @@ func (c *seminarDayService) GetSeminarDaysBySeminarID(seminarID int) ([]model.Se
 func (c *seminarDayService) GetSeminarDayByID(seminarDayID int) (*model.SeminarDay, error) {
 	var seminarDay *model.SeminarDay
 	if err := db.Client.Preload("Seminar").Preload("Seminar.Trainees").Preload("Documents").Preload("Seminar.SeminarTheme").Preload("Seminar.SeminarTheme.BaseSeminarType").Preload("Seminar.ClassRoom.Location").Preload("Presence").Preload("Presence.Client").Preload("Presence.Client.Company").Preload("Classes.Teacher").Preload("Classes").Preload("Test").Find(&seminarDay, seminarDayID).Error; err != nil {
+		return nil, err
+	}
+
+	return seminarDay, nil
+}
+
+func (c *seminarDayService) GetSeminarDayWithTestByID(seminarDayID int) (*model.SeminarDay, error) {
+	var seminarDay *model.SeminarDay
+	if err := db.Client.Preload("Seminar").Preload("Seminar.SeminarTheme").Preload("Seminar.SeminarTheme.BaseSeminarType").Preload("Seminar.ClassRoom.Location").Preload("Classes").Preload("Test").Preload("Test.Questions").Preload("Test.Questions.Answers").Find(&seminarDay, seminarDayID).Error; err != nil {
 		return nil, err
 	}
 

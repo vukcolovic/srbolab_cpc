@@ -183,7 +183,7 @@ func GetSeminarDayWithTestByJMBG(w http.ResponseWriter, req *http.Request) {
 			}
 		}
 
-		fullSeminarDay, err := service.SeminarDayService.GetSeminarDayByID(int(day.ID))
+		fullSeminarDay, err := service.SeminarDayService.GetSeminarDayWithTestByID(int(day.ID))
 		if err != nil {
 			SetErrorResponse(w, err)
 			return
