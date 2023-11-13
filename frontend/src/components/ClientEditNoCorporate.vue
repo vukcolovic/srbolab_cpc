@@ -1,12 +1,14 @@
 <template>
   <div class="container">
-    <div class="row">
+    <div v-if="false" class="row">
       <div class="col-sm-11 mx-auto">
         <h3 class="mt-1">Prijava za slušanje seminara</h3>
         <p>Nakon što se prijavite vrlo brzo će vas kontaktirati osoblje firme Srbolab d.o.o., kako bi dogovorili termin i mesto slušanja seminara.</p>
       </div>
     </div>
-    <form-tag @formEvent="submitHandler" name="myForm" event="formEvent">
+    <br>
+    Stranica je u pripremi...
+    <form-tag v-if="false" @formEvent="submitHandler" name="myForm" event="formEvent">
       <div class="row">
         <div class="col-sm-6">
           <div class="row">

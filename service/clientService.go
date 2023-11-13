@@ -139,6 +139,21 @@ func (c *clientService) CreateClient(client model.Client, userID int) (*model.Cl
 		return nil, result.Error
 	}
 
+	if len(client.Seminars) == 0 {
+		return &client, nil
+	}
+
+	for _, s := range client.Seminars {
+		err := SeminarService.UpdateSeminarStatusIfNeed(int(s.SeminarID))
+		if err != nil {
+			return &client, err
+		}
+		seminar, err := SeminarService.GetSeminarByID(int(s.SeminarID))
+		if seminar.SeminarStatusID == model.SEMINAR_STATUS_IN_PROGRESS {
+			SeminarDayService.AddClientToInProgressSeminar(s)
+		}
+	}
+
 	if len(client.Seminars) > 0 {
 		err := SeminarService.UpdateSeminarStatusIfNeed(int(client.Seminars[0].SeminarID))
 		if err != nil {
