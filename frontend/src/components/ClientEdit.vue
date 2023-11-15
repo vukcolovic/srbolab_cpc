@@ -478,6 +478,31 @@
           </div>
           </div>
 
+          <hr>
+
+          <div>
+            <div class="my-1">
+              <label :style=styleLabelSmall for="work_time_and_tahografs">Radno vreme i tahografi :&nbsp;&nbsp;</label>
+              <input id="work_time_and_tahografs" v-model="client.passed_checkboxes.work_time_and_tahografs" :hidden="readonly" type="checkbox"/>
+            </div>
+            <div class="my-1">
+              <label :style=styleLabelSmall for="tahografs_2">Tahografi 2:&nbsp;&nbsp;</label>
+              <input id="tahografs_2" v-model="client.passed_checkboxes.tahografs_2" :hidden="readonly" type="checkbox"/>
+            </div>
+            <div class="my-1">
+              <label :style=styleLabelSmall for="Regulations">Propisi(tahografi, dimenzije, mase, održavanje vozila):&nbsp;&nbsp;</label>
+              <input id="Regulations" v-model="client.passed_checkboxes.regulations" :hidden="readonly" type="checkbox"/>
+            </div>
+            <div class="my-1">
+              <label :style=styleLabelSmall for="burden">Teret:&nbsp;&nbsp;</label>
+              <input id="burden" v-model="client.passed_checkboxes.burden" :hidden="readonly" type="checkbox"/>
+            </div>
+            <div class="my-1">
+              <label :style=styleLabelSmall for="theme_documents">Dokumenta:&nbsp;&nbsp;</label>
+              <input id="theme_documents" v-model="client.passed_checkboxes.theme_documents" :hidden="readonly" type="checkbox"/>
+            </div>
+          </div>
+
         </div>
         <div>
           <input v-if="this.action === 'add'" class="btn btn-primary m-2" type="submit" value="Snimi">
@@ -538,6 +563,13 @@ export default {
         seminars: [],
         c_licence: true,
         d_licence: false,
+        passed_checkboxes: {
+          work_time_and_tahografs: false,
+          tahografs_2: false,
+          regulations: false,
+          burden: false,
+          theme_documents: false
+        }
       },
       showNote: false,
       showInProgressSeminars: false,

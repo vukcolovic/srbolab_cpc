@@ -27,14 +27,23 @@ type Client struct {
 	EducationalProfile *string    `json:"educational_profile"`
 	Comment            *string    `json:"comment"`
 	//for now changed purpose, now is number of seminar we currently do
-	InitialCompletedSeminars *int            `json:"initial_completed_seminars"`
-	Seminars                 []ClientSeminar `json:"seminars"`
-	CreatedBy                User            `json:"created_by"`
-	CreatedByID              *uint           `json:"created_by_id"`
-	VerifiedBy               User            `json:"verified_by"`
-	VerifiedByID             *uint           `json:"verified_by_id"`
-	CLicence                 *bool           `json:"c_licence"`
-	DLicence                 *bool           `json:"d_licence"`
+	InitialCompletedSeminars *int             `json:"initial_completed_seminars"`
+	Seminars                 []ClientSeminar  `json:"seminars"`
+	CreatedBy                User             `json:"created_by"`
+	CreatedByID              *uint            `json:"created_by_id"`
+	VerifiedBy               User             `json:"verified_by"`
+	VerifiedByID             *uint            `json:"verified_by_id"`
+	CLicence                 *bool            `json:"c_licence"`
+	DLicence                 *bool            `json:"d_licence"`
+	PassedCheckboxes         PassedCheckboxes `json:"passed_checkboxes" gorm:"embedded"`
+}
+
+type PassedCheckboxes struct {
+	WorkTimeAndTahografs *bool `json:"work_time_and_tahografs"`
+	Tahografs2           *bool `json:"tahografs_2"`
+	Regulations          *bool `json:"regulations"`
+	Burden               *bool `json:"burden"`
+	ThemeDocuments       *bool `json:"theme_documents"`
 }
 
 func (a Address) GetStreetWithNumber() string {
