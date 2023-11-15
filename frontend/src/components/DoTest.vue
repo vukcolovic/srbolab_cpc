@@ -46,7 +46,7 @@
       </div>
       <div>
         <p v-if="isfinish" class="bg-info mt-1">Rezultat: {{(client_test.result * 100).toFixed(2)}}%</p>
-        <input class="btn btn-primary m-2" type="submit" value="Snimi">
+        <input v-if="!isfinish" class="btn btn-primary m-2" type="submit" value="Snimi">
       </div>
     </form-tag>
 <!--    <h2 v-else>Test nije dozvoljen, obratite se rukovodiocu kursa.</h2>-->

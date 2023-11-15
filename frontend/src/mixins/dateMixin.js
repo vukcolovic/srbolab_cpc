@@ -29,7 +29,8 @@ export const dateMixin = {
             if (this.isDateEmpty(date)) {
                 return null;
             }
-            return date.split('T')[0];
+            var result = date.split('T')[0];
+            return result;
         },
         isToday(date) {
             const today = new Date();
