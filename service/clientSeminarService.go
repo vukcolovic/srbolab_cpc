@@ -16,6 +16,7 @@ type clientSeminarService struct {
 type clientSeminarServiceInterface interface {
 	UpdateClientSeminar(clientSeminar model.ClientSeminar) (*model.ClientSeminar, error)
 	GetMaxConfirmationNumber() (int, error)
+	GetNumberOfPassedSeminars(clientID uint) (int, error)
 }
 
 func (c *clientSeminarService) UpdateClientSeminar(clientSeminar model.ClientSeminar) (*model.ClientSeminar, error) {
@@ -39,4 +40,18 @@ func (c *clientSeminarService) GetMaxConfirmationNumber() (int, error) {
 	}
 
 	return *max, nil
+}
+
+func (c *clientSeminarService) GetNumberOfPassedSeminars(clientID uint) (int, error) {
+	var count *int
+	err := db.Client.Raw("select count(*) from client_seminars cs where cs.client_id = ? and (cs.confirmation_number  > 0 or cs.pass = true)", clientID).Scan(&count).Error
+	if err != nil {
+		return 0, err
+	}
+
+	if count == nil {
+		return 0, nil
+	}
+
+	return *count, nil
 }

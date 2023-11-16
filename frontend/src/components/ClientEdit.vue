@@ -137,7 +137,7 @@
               :required=false
               :styleInput=styleInputSmall
               :styleLabel=styleLabelSmall
-              label="Redni broj seminara na koji se prijavljuje"
+              label="Broj prethodno odlušanih kurseva"
               name="initial_completed_seminars"
               type="number">
           </text-input>

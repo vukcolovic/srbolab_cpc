@@ -308,6 +308,28 @@ func (p *printService) PrintConfirmations(seminar *model.Seminar) ([]byte, error
 
 		pdf.SetFont("Arimo-Regular", "", 11)
 
+		if client.ConfirmationNumber == 0 {
+			maxConfNum++
+			client.ConfirmationNumber = maxConfNum
+			//var t = true
+			//switch client.Seminar.SeminarTheme.Code {
+			//case "1":
+			//	client.Client.PassedCheckboxes.Burden = &t
+			//case "2":
+			//	client.Client.PassedCheckboxes.Burden = &t
+			//case "3":
+			//	client.Client.PassedCheckboxes.Burden = &t
+			//case "4":
+			//	client.Client.PassedCheckboxes.Burden = &t
+			//case "5":
+			//	client.Client.PassedCheckboxes.Burden = &t
+			//}
+			_, err = ClientSeminarService.UpdateClientSeminar(client)
+			if err != nil {
+				return nil, err
+			}
+		}
+
 		pdf.Ln(25)
 		pdf.Text(15, pdf.GetY(), trObj.translDef("Број:"))
 		pdf.Text(30, pdf.GetY(), trObj.translDef(seminar.GetCode()+"/"+strconv.Itoa(i+1)))
@@ -370,21 +392,18 @@ func (p *printService) PrintConfirmations(seminar *model.Seminar) ([]byte, error
 		pdf.CellFormat(wl, ch, trObj.translDef("Редни број семинара"), "1", 0, "L", false, 0, "")
 		//pdf.SetFont("Arimo-Bold", "", 11)
 		//fixme just closed seminars and passed
-		completedSeminars := 0
+		completedSeminarsBeforeSrbolab := 0
 		if client.Client.InitialCompletedSeminars != nil {
-			completedSeminars = *client.Client.InitialCompletedSeminars
+			completedSeminarsBeforeSrbolab = *client.Client.InitialCompletedSeminars
 		}
 
-		//changed after consulatition with Marko Jovanovic
-		//completedInSrbolab := 0
-		//for _, s := range client.Client.Seminars {
-		//	if s.Pass != nil && *s.Pass {
-		//		completedInSrbolab++
-		//	}
-		//}
-		seminarNumber := completedSeminars
+		completedInSrbolab, err := ClientSeminarService.GetNumberOfPassedSeminars(client.ClientID)
+		if err != nil {
+			return nil, err
+		}
+		seminarNumber := completedInSrbolab + completedSeminarsBeforeSrbolab
 		if seminarNumber > 5 {
-			seminarNumber = 5
+			seminarNumber = seminarNumber - 5
 		}
 		cx := 89.5 + float64(seminarNumber)*7
 		if seminarNumber == 1 {
@@ -457,15 +476,6 @@ func (p *printService) PrintConfirmations(seminar *model.Seminar) ([]byte, error
 			seminarType = "основног"
 		}
 		pdf.Text(15, pdf.GetY(), trObj.translDef(fmt.Sprintf("за потребе стицања %s ЦПЦ и не може се користити у друге сврхе.", seminarType)))
-
-		if client.ConfirmationNumber == 0 {
-			maxConfNum++
-			client.ConfirmationNumber = maxConfNum
-			_, err = ClientSeminarService.UpdateClientSeminar(client)
-			if err != nil {
-				return nil, err
-			}
-		}
 
 		pdf.Ln(40)
 		pdf.Text(15, pdf.GetY(), strconv.Itoa(client.ConfirmationNumber))
