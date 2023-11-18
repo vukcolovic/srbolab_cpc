@@ -131,24 +131,33 @@ func (p *printService) PrintSeminarStudentList(seminar *model.Seminar) ([]byte, 
 	ch := 8.0
 	pdf.Ln(ch)
 	pdf.CellFormat(20, ch, trObj.translDef("Редни број"), "1", 0, "C", false, 0, "")
-	pdf.CellFormat(75, ch, trObj.translDef("Име и презиме"), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(70, ch, trObj.translDef("Име и презиме"), "1", 0, "C", false, 0, "")
 	pdf.CellFormat(30, ch, trObj.translDef("ЈМБГ"), "1", 0, "C", false, 0, "")
-	pdf.CellFormat(60, ch, trObj.translDef("Фирма у којој сте запослени"), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(80, ch, trObj.translDef("Фирма у којој сте запослени"), "1", 0, "C", false, 0, "")
 	pdf.CellFormat(35, ch, trObj.translDef("Телефон"), "1", 0, "C", false, 0, "")
-	pdf.CellFormat(60, ch, trObj.translDef("Потпис"), "1", 0, "C", false, 0, "")
+	pdf.CellFormat(45, ch, trObj.translDef("Потпис"), "1", 0, "C", false, 0, "")
 
 	sort.Slice(seminar.Trainees, func(i, j int) bool {
 		return *seminar.Trainees[i].Client.JMBG < *seminar.Trainees[j].Client.JMBG
 	})
 
 	for i, cs := range seminar.Trainees {
-		pdf.Ln(ch)
-		pdf.CellFormat(20, ch, strconv.Itoa(i+1), "1", 0, "C", false, 0, "")
-		pdf.CellFormat(75, ch, trObj.translDef(cs.Client.Person.FullName()), "1", 0, "C", false, 0, "")
-		pdf.CellFormat(30, ch, *cs.Client.JMBG, "1", 0, "C", false, 0, "")
-		pdf.CellFormat(60, ch, "", "1", 0, "C", false, 0, "")
-		pdf.CellFormat(35, ch, "", "1", 0, "C", false, 0, "")
-		pdf.CellFormat(60, ch, "", "1", 0, "C", false, 0, "")
+		lines, num := splitLine(cs.Client.Company.Name, 40)
+		current := pdf.GetY() + 4.5
+		for i, line := range lines {
+			pdf.Text(130, current+float64(i)*4.0, trObj.translDef(line))
+		}
+		chc := ch
+		if num > 1 {
+			chc = chc * num * 0.7
+		}
+		pdf.CellFormat(20, chc, strconv.Itoa(i+1), "1", 0, "C", false, 0, "")
+		pdf.CellFormat(70, chc, trObj.translDef(cs.Client.Person.FullName()), "1", 0, "C", false, 0, "")
+		pdf.CellFormat(30, chc, *cs.Client.JMBG, "1", 0, "C", false, 0, "")
+		pdf.CellFormat(80, chc, "", "1", 0, "C", false, 0, "")
+		pdf.CellFormat(35, chc, "", "1", 0, "C", false, 0, "")
+		pdf.CellFormat(45, chc, "", "1", 0, "C", false, 0, "")
+		pdf.Ln(chc)
 	}
 
 	var buf bytes.Buffer

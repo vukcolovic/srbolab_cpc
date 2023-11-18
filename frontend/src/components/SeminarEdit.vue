@@ -122,7 +122,7 @@
               </tr>
               </thead>
               <tbody>
-              <tr v-for="trainee in filteredClients" :key="trainee.client_id">
+              <tr @dblclick.prevent=clientDoubleClick(trainee.client_id) v-for="trainee in filteredClients" :key="trainee.client_id">
                 <td class="p-1">{{ trainee.client.person.first_name }} {{ trainee.client.person.last_name }}</td>
                 <td class="p-1">{{ trainee.client.jmbg }}</td>
                 <td class="p-1">{{ trainee.client.company.name }}</td>
@@ -278,6 +278,9 @@ export default {
     }
   },
   methods: {
+    clientDoubleClick(clientId) {
+      router.push("/client?action=update&id=" + clientId);
+    },
     downloadFile(i) {
       const arr = this.seminar.documents[i].content.split(',')
       var sampleArr = this.base64ToArrayBuffer(arr[1]);
@@ -289,18 +292,6 @@ export default {
       link.click()
       URL.revokeObjectURL(link.href)
     },
-    // uploadFile() {
-    //   const file = this.$refs.file.files[0];
-    //   if (file == null) {
-    //     return;
-    //   }
-    //   const reader = new FileReader()
-    //   reader.onloadend = () => {
-    //     const fileString = reader.result;
-    //     this.seminar.documents.push({content: fileString, name: file.name});
-    //   }
-    //   reader.readAsDataURL(file);
-    // },
     uploadFiles() {
       var files = this.$refs.file.files;
       var self = this;

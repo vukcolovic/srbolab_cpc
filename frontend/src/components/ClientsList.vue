@@ -180,7 +180,6 @@ export default {
 
     const doubleClick = () => {
       router.push("/client?action=update&id=" + table.selectedClient.ID);
-
     }
 
     const toast = useToast();
