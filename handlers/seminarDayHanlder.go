@@ -143,20 +143,19 @@ func GetSeminarDayWithTestByJMBG(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	seminarInProgress := model.Seminar{}
+	seminarDays := []model.SeminarDay{}
 	for _, cs := range client.Seminars {
 		if cs.Seminar.SeminarStatusID == model.SEMINAR_STATUS_IN_PROGRESS {
-			seminarInProgress = cs.Seminar
-			break
+			seminarDays = append(seminarDays, cs.Seminar.Days...)
 		}
 	}
 
-	if seminarInProgress.ID == 0 {
+	if len(seminarDays) == 0 {
 		SetErrorResponse(w, errors.New("Vozač sa upisanim jmbg-om nije na nekom od aktulenih seminara."))
 		return
 	}
 
-	for _, day := range seminarInProgress.Days {
+	for _, day := range seminarDays {
 		if day.Date.Day() != time.Now().Day() || day.Date.Month() != time.Now().Month() || day.Date.Year() != time.Now().Year() {
 			continue
 		}
@@ -172,7 +171,7 @@ func GetSeminarDayWithTestByJMBG(w http.ResponseWriter, req *http.Request) {
 		}
 
 		if len(tests) > 1 {
-			SetErrorResponse(w, errors.New("Ovaj test nije dozvoljeno, klijent je već odradio dva testa u toku dana."))
+			SetErrorResponse(w, errors.New("Ovaj test nije dozvoljen, klijent je već odradio dva testa u toku dana."))
 			return
 		}
 
