@@ -144,10 +144,7 @@ func (p *printService) PrintSeminarStudentList(seminar *model.Seminar) ([]byte, 
 	pdf.Ln(ch)
 	for i, cs := range seminar.Trainees {
 		lines, num := splitLine(cs.Client.Company.Name, 40)
-		current := pdf.GetY() + 4.5
-		for i, line := range lines {
-			pdf.Text(130, current+float64(i)*4.0, trObj.translDef(line))
-		}
+
 		chc := ch
 		if num > 1 {
 			chc = chc * num * 0.7
@@ -158,6 +155,10 @@ func (p *printService) PrintSeminarStudentList(seminar *model.Seminar) ([]byte, 
 		pdf.CellFormat(80, chc, "", "1", 0, "C", false, 0, "")
 		pdf.CellFormat(35, chc, "", "1", 0, "C", false, 0, "")
 		pdf.CellFormat(45, chc, "", "1", 0, "C", false, 0, "")
+		current := pdf.GetY() + 4.5
+		for i, line := range lines {
+			pdf.Text(130, current+float64(i)*4.0, trObj.translDef(line))
+		}
 		pdf.Ln(chc)
 	}
 
