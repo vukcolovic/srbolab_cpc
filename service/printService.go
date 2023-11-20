@@ -141,6 +141,7 @@ func (p *printService) PrintSeminarStudentList(seminar *model.Seminar) ([]byte, 
 		return *seminar.Trainees[i].Client.JMBG < *seminar.Trainees[j].Client.JMBG
 	})
 
+	pdf.Ln(ch)
 	for i, cs := range seminar.Trainees {
 		lines, num := splitLine(cs.Client.Company.Name, 40)
 		current := pdf.GetY() + 4.5
