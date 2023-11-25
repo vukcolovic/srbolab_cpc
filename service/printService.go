@@ -85,6 +85,7 @@ type printServiceInterface interface {
 	PrintTestBarcode() ([]byte, error)
 	PrintPlanTreningRealization(day *model.SeminarDay) ([]byte, error)
 	PrintPayments(seminar *model.Seminar) ([]byte, error)
+	PrintSeminarReport(seminar *model.Seminar) ([]byte, error)
 }
 
 func (p *printService) PrintSeminarStudentList(seminar *model.Seminar) ([]byte, error) {
@@ -1368,6 +1369,453 @@ func (p *printService) PrintPayments(seminar *model.Seminar) ([]byte, error) {
 			}
 		}
 	}
+
+	var buf bytes.Buffer
+	err = pdf.Output(&buf)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return buf.Bytes(), nil
+}
+
+func (p *printService) PrintSeminarReport(seminar *model.Seminar) ([]byte, error) {
+	pwd, err := os.Getwd()
+	if err != nil {
+		logoped.ErrorLog.Println("Error getting pwd: ", err)
+		return []byte{}, err
+	}
+	pdf := fpdf.New("P", "mm", "A4", filepath.Join(pwd, "font"))
+	pdf.AddFont("Arimo-Regular", "", "Arimo-Regular.json")
+	pdf.AddFont("Arimo-Bold", "", "Arimo-Bold.json")
+	pdf.AddFont("Helvetica", "", "helvetica_1251.json")
+	latTr := pdf.UnicodeTranslatorFromDescriptor("iso-8859-16")
+	cirTr := pdf.UnicodeTranslatorFromDescriptor("cp1251")
+	trObj := newTranslationDetails(pdf, "Helvetica", "Arimo-Regular", 11, latTr, cirTr)
+
+	pdf.SetMargins(15.0, marginTop, marginRight)
+	pdf.AddPage()
+
+	createSimpleHeader(pdf, cirTr)
+
+	pdf.Ln(5)
+	pdf.SetTextColor(47, 83, 150)
+	pdf.Text(30, pdf.GetY(), trObj.translate("ИЗВЕШТАЈ О РЕАЛИЗОВАНОМ СЕМИНАРУ УНАПРЕЂЕЊА ЗНАЊА", 13))
+	pdf.Line(30, pdf.GetY()+1, 180, pdf.GetY()+1)
+	pdf.Ln(12)
+
+	var seminarDay *model.SeminarDay
+	if len(seminar.Days) > 0 {
+		seminarDay = &seminar.Days[0]
+	}
+
+	seminarDay, err = SeminarDayService.GetSeminarDayByID(int(seminarDay.ID))
+	if err != nil {
+		logoped.ErrorLog.Println("Error getting SeminarDay: ", err)
+		return []byte{}, err
+	}
+
+	presenceTrue := 0
+	presenceFalse := 0
+	notPresendet := []model.Client{}
+	for _, p := range seminarDay.Presence {
+		if p.Presence != nil && *p.Presence {
+			presenceTrue++
+		} else {
+			presenceFalse++
+			notPresendet = append(notPresendet, p.Client)
+		}
+	}
+
+	pdf.Text(15, pdf.GetY(), trObj.translDef(fmt.Sprintf("Семинар унапређења знања реализован %s године са почетком у %s и завршетком у", seminar.Start.Format("02.01.2006."), seminarDay.Date.Format("15:04"))))
+	pdf.Ln(5)
+	pdf.Text(15, pdf.GetY(), trObj.translDef(fmt.Sprintf("%s, на адреси Центра за обуку у Србобрану, Туријски пут 17. Семинару је присуствовало %s", seminarDay.Date.Add(375*time.Minute).Format("15:04"), strconv.Itoa(presenceTrue))))
+
+	sentence := fmt.Sprintf("од најављених %s полазника", strconv.Itoa(len(seminarDay.Presence)))
+	if len(notPresendet) == 0 {
+		sentence = sentence + "."
+	}
+	if len(notPresendet) == 1 {
+		sentence = sentence + "(није присуствовао " + notPresendet[0].Person.FullName() + " " + *notPresendet[0].JMBG + ")."
+	}
+	if len(notPresendet) > 1 {
+		sentence = sentence + "(нису присуствовали "
+		for i, c := range notPresendet {
+			sentence = sentence + c.Person.FullName() + " " + *c.JMBG
+			if i+1 < len(notPresendet) {
+				sentence = sentence + ", "
+			}
+		}
+
+		sentence = sentence + ")."
+	}
+
+	sentenceSplited, _ := splitLine(sentence, 130)
+	for _, s := range sentenceSplited {
+		pdf.Ln(5)
+		pdf.Text(15, pdf.GetY(), trObj.translDef(s))
+	}
+
+	pdf.Ln(5)
+	pdf.Text(15, pdf.GetY(), trObj.translDef(fmt.Sprintf("Тема семинара била је: %s.", seminarDay.Name)))
+	pdf.Ln(10)
+
+	ch := 6.0
+	pdf.SetTextColor(0, 0, 0)
+	pdf.SetFillColor(146, 208, 80)
+	pdf.CellFormat(40, ch, trObj.translDef("Тема семинара:"), "TLR", 0, "C", true, 0, "")
+	pdf.CellFormat(29, ch, trObj.translDef("Датум почетка"), "TLR", 0, "C", true, 0, "")
+	pdf.CellFormat(30, ch, trObj.translDef("Време"), "TLR", 0, "C", true, 0, "")
+	pdf.CellFormat(50, ch, trObj.translDef("Шифра обуке:"), "TLR", 0, "C", true, 0, "")
+	pdf.CellFormat(29, ch, trObj.translDef("Број"), "TLR", 0, "C", true, 0, "")
+	pdf.Ln(ch)
+	pdf.CellFormat(40, ch, "", "BLR", 0, "C", true, 0, "")
+	pdf.CellFormat(29, ch, trObj.translDef("обуке:"), "BLR", 0, "C", true, 0, "")
+	pdf.CellFormat(30, ch, trObj.translDef("реализације:"), "BLR", 0, "C", true, 0, "")
+	pdf.CellFormat(50, ch, "", "BLR", 0, "C", true, 0, "")
+	pdf.CellFormat(29, ch, trObj.translDef("полазника:"), "BLR", 0, "C", true, 0, "")
+
+	pdf.Ln(ch)
+	ch = 7.0
+	pdf.SetTextColor(47, 83, 150)
+	lines, _ := splitLine(seminarDay.Name, 40)
+	for i, line := range lines {
+		if i == 0 {
+			pdf.CellFormat(40, ch, trObj.translDef(line), "TLR", 0, "C", false, 0, "")
+			pdf.CellFormat(29, ch, seminar.Start.Format("02.01.2006."), "TLR", 0, "C", false, 0, "")
+			pdf.CellFormat(30, ch, fmt.Sprintf("%s - %s", seminarDay.Date.Format("15:04"), seminarDay.Date.Add(time.Minute*375).Format("15:04")), "TLR", 0, "C", false, 0, "")
+			pdf.CellFormat(50, ch, trObj.translDef(seminar.GetCode()), "TLR", 0, "C", false, 0, "")
+			pdf.CellFormat(29, ch, strconv.Itoa(presenceTrue), "TLR", 0, "C", false, 0, "")
+		} else {
+			borderStr := "LR"
+			if i+1 == len(lines) {
+				borderStr = "BLR"
+			}
+			pdf.CellFormat(40, ch, trObj.translDef(line), borderStr, 0, "C", false, 0, "")
+			pdf.CellFormat(29, ch, "", borderStr, 0, "C", false, 0, "")
+			pdf.CellFormat(30, ch, "", borderStr, 0, "C", false, 0, "")
+			pdf.CellFormat(50, ch, "", borderStr, 0, "C", false, 0, "")
+			pdf.CellFormat(29, ch, "", borderStr, 0, "C", false, 0, "")
+		}
+		if i+1 < len(lines) {
+			pdf.Ln(ch)
+		}
+	}
+	pdf.Ln(15)
+	pdf.Text(15, pdf.GetY(), trObj.translDef("Наставу су реализовали следећи предавачи:"))
+	pdf.Ln(5)
+	h := 27.0
+	pdf.Rect(15, pdf.GetY()-2, 30, h, "FD")
+	pdf.Rect(45, pdf.GetY()-2, 65, h, "FD")
+	pdf.Rect(110, pdf.GetY()-2, 15, h, "FD")
+	pdf.Rect(125, pdf.GetY()-2, 15, h, "FD")
+	pdf.Rect(140, pdf.GetY()-2, 15, h, "FD")
+	pdf.Rect(155, pdf.GetY()-2, 15, h, "FD")
+	pdf.Rect(170, pdf.GetY()-2, 15, h, "FD")
+	pdf.Rect(185, pdf.GetY()-2, 15, h, "FD")
+
+	pdf.SetTextColor(0, 0, 0)
+	pdf.Text(20, pdf.GetY()+7, trObj.translDef("Предавачи:"))
+	pdf.Text(65, pdf.GetY()+7, trObj.translDef("Наставни час"))
+
+	pdf.TransformBegin()
+	pdf.TransformRotate(90, 119, pdf.GetY()+8)
+	pdf.Text(106, pdf.GetY()+4, trObj.translDef("Број"))
+	pdf.Text(106, pdf.GetY()+8, trObj.translDef("одржаних"))
+	pdf.Text(106, pdf.GetY()+12, trObj.translDef("часова"))
+	pdf.TransformEnd()
+
+	pdf.TransformBegin()
+	pdf.TransformRotate(90, 136, pdf.GetY()+11)
+	pdf.Text(123, pdf.GetY()+4, trObj.translDef("Час држи на"))
+	pdf.Text(123, pdf.GetY()+8, trObj.translDef("интересантан"))
+	pdf.Text(123, pdf.GetY()+12, trObj.translDef("начин"))
+	pdf.TransformEnd()
+
+	pdf.TransformBegin()
+	pdf.TransformRotate(90, 149, pdf.GetY()+8)
+	pdf.Text(136, pdf.GetY()+4, trObj.translDef("Успешно"))
+	pdf.Text(136, pdf.GetY()+8, trObj.translDef("објашњава"))
+	pdf.Text(136, pdf.GetY()+12, trObj.translDef("градиво"))
+	pdf.TransformEnd()
+
+	pdf.TransformBegin()
+	pdf.TransformRotate(90, 166, pdf.GetY()+11)
+	pdf.Text(153, pdf.GetY()+4, trObj.translDef("Спреман је да"))
+	pdf.Text(153, pdf.GetY()+8, trObj.translDef("одговара на"))
+	pdf.Text(153, pdf.GetY()+12, trObj.translDef("питања"))
+	pdf.TransformEnd()
+
+	pdf.TransformBegin()
+	pdf.TransformRotate(90, 179, pdf.GetY()+8)
+	pdf.Text(166, pdf.GetY()+4, trObj.translDef("Користио"))
+	pdf.Text(166, pdf.GetY()+8, trObj.translDef("је добре"))
+	pdf.Text(166, pdf.GetY()+12, trObj.translDef("примере"))
+	pdf.TransformEnd()
+
+	pdf.TransformBegin()
+	pdf.TransformRotate(90, 194, pdf.GetY()+8)
+	pdf.Text(181, pdf.GetY()+4, trObj.translDef("Просечна"))
+	pdf.Text(181, pdf.GetY()+8, trObj.translDef("оцена"))
+	pdf.TransformEnd()
+
+	teacherClassMap := map[string][]string{}
+	for _, c := range seminarDay.Classes {
+		classes, ok := teacherClassMap[c.Teacher.Person.FullName()]
+		if ok {
+			classes = append(classes, c.Name)
+			teacherClassMap[c.Teacher.Person.FullName()] = classes
+		} else {
+			teacherClassMap[c.Teacher.Person.FullName()] = []string{c.Name}
+		}
+	}
+
+	pdf.Ln(25)
+	pdf.SetTextColor(47, 83, 150)
+	for k, classes := range teacherClassMap {
+		firstName := strings.Split(k, " ")[0]
+		lastName := strings.Split(k, " ")[1]
+
+		lines, _ := splitLine(classes[0], 60)
+		if len(classes) == 1 && len(lines) == 1 {
+			pdf.CellFormat(30, ch, trObj.translDef(firstName), "TLR", 0, "C", false, 0, "")
+			pdf.CellFormat(65, ch, trObj.translDef(lines[0]), "TLR", 0, "L", false, 0, "")
+			pdf.CellFormat(15, ch, strconv.Itoa(len(classes)), "TLR", 0, "C", false, 0, "")
+			pdf.CellFormat(15, ch, "", "TLR", 0, "C", false, 0, "")
+			pdf.CellFormat(15, ch, "", "TLR", 0, "C", false, 0, "")
+			pdf.CellFormat(15, ch, "", "TLR", 0, "C", false, 0, "")
+			pdf.CellFormat(15, ch, "", "TLR", 0, "C", false, 0, "")
+			pdf.CellFormat(15, ch, "", "TLR", 0, "C", false, 0, "")
+			pdf.Ln(ch)
+
+			pdf.CellFormat(30, ch, trObj.translDef(lastName), "BLR", 0, "C", false, 0, "")
+			pdf.CellFormat(65, ch, "", "BLR", 0, "C", false, 0, "")
+			pdf.CellFormat(15, ch, "", "BLR", 0, "C", false, 0, "")
+			pdf.CellFormat(15, ch, "", "BLR", 0, "C", false, 0, "")
+			pdf.CellFormat(15, ch, "", "BLR", 0, "C", false, 0, "")
+			pdf.CellFormat(15, ch, "", "BLR", 0, "C", false, 0, "")
+			pdf.CellFormat(15, ch, "", "BLR", 0, "C", false, 0, "")
+			pdf.CellFormat(15, ch, "", "BLR", 0, "C", false, 0, "")
+			pdf.Ln(ch)
+
+			continue
+		}
+
+		nameDone := false
+		lastNameDone := false
+		borderStr := "1"
+		borderStrName := "L"
+		borderStrMarks := "LR"
+		classesNum := ""
+
+		for j, class := range classes {
+			lines, _ = splitLine(class, 60)
+			for i, line := range lines {
+				name := ""
+				if !nameDone {
+					name = firstName
+					nameDone = true
+					borderStr = "TLR"
+				} else if !lastNameDone {
+					name = lastName
+					lastNameDone = true
+					borderStr = "LR"
+				} else {
+					borderStr = "LR"
+				}
+
+				if i == 0 {
+					borderStr = "TLR"
+				}
+				if i == 0 && j == 0 {
+					classesNum = strconv.Itoa(len(classes))
+				} else {
+					classesNum = ""
+				}
+
+				if i+1 == len(lines) {
+					borderStr = "BLR"
+				}
+				if j+1 == len(classes) && i+1 == len(lines) {
+					borderStrName = "BL"
+					borderStrMarks = "BLR"
+				}
+
+				pdf.CellFormat(30, ch, trObj.translDef(name), borderStrName, 0, "C", false, 0, "")
+				pdf.CellFormat(65, ch, trObj.translDef(line), borderStr, 0, "L", false, 0, "")
+				pdf.CellFormat(15, ch, classesNum, borderStrMarks, 0, "C", false, 0, "")
+				pdf.CellFormat(15, ch, "", borderStrMarks, 0, "C", false, 0, "")
+				pdf.CellFormat(15, ch, "", borderStrMarks, 0, "C", false, 0, "")
+				pdf.CellFormat(15, ch, "", borderStrMarks, 0, "C", false, 0, "")
+				pdf.CellFormat(15, ch, "", borderStrMarks, 0, "C", false, 0, "")
+				pdf.CellFormat(15, ch, "", borderStrMarks, 0, "C", false, 0, "")
+				pdf.Ln(ch)
+			}
+		}
+
+	}
+
+	pdf.Ln(10)
+	ch = 10.0
+	pdf.Text(15, pdf.GetY(), trObj.translDef("Списак полазника:"))
+	pdf.Ln(3)
+
+	pdf.Rect(15, pdf.GetY(), 186, 5, "FD")
+	pdf.SetTextColor(0, 0, 0)
+	pdf.Text(90, pdf.GetY()+4, trObj.translDef("Списак полазника"))
+	pdf.SetTextColor(47, 83, 150)
+	pdf.Ln(5)
+
+	sort.Slice(seminar.Trainees, func(i, j int) bool {
+		return *seminar.Trainees[i].Client.JMBG < *seminar.Trainees[j].Client.JMBG
+	})
+
+	for i := 0; i < len(seminar.Trainees); i++ {
+		pdf.CellFormat(10, ch, strconv.Itoa(i+1), "1", 0, "C", false, 0, "")
+		pdf.CellFormat(47, ch, trObj.translDef(seminar.Trainees[i].Client.Person.FullName()), "1", 0, "C", false, 0, "")
+		pdf.CellFormat(35, ch, *seminar.Trainees[i].Client.JMBG, "1", 0, "C", false, 0, "")
+		pdf.CellFormat(10, ch, "", "1", 0, "C", false, 0, "")
+		pdf.CellFormat(42, ch, "", "1", 0, "C", false, 0, "")
+		pdf.CellFormat(42, ch, "", "1", 0, "C", false, 0, "")
+		pdf.Ln(ch)
+	}
+
+	pdf.Ln(10)
+	pdf.Text(15, pdf.GetY(), trObj.translDef("Евалуација наставе:"))
+	pdf.Ln(3)
+
+	pdf.Rect(15, pdf.GetY(), 186, 5, "FD")
+	pdf.SetTextColor(0, 0, 0)
+	pdf.Text(90, pdf.GetY()+4, trObj.translDef("Евалуација семинара"))
+	pdf.SetTextColor(47, 83, 150)
+	pdf.Ln(5)
+
+	ch = 5
+	pdf.CellFormat(80, ch, trObj.translDef("Простор је био пријатан за рад(осветлење,"), "TLR", 0, "L", false, 0, "")
+	pdf.CellFormat(13, ch, "", "TLR", 0, "L", false, 0, "")
+	pdf.CellFormat(80, ch, trObj.translDef("Предавачи су се придржавали сатнице"), "TLR", 0, "L", false, 0, "")
+	pdf.CellFormat(13, ch, "", "TLR", 0, "L", false, 0, "")
+	pdf.Ln(5)
+	pdf.CellFormat(80, ch, trObj.translDef("температура, столица, акустика)"), "BLR", 0, "L", false, 0, "")
+	pdf.CellFormat(13, ch, "", "BLR", 0, "L", false, 0, "")
+	pdf.CellFormat(80, ch, trObj.translDef("(почетка/завршетка часа)"), "BLR", 0, "L", false, 0, "")
+	pdf.CellFormat(13, ch, "", "BLR", 0, "L", false, 0, "")
+	pdf.Ln(5)
+
+	pdf.CellFormat(80, ch, trObj.translDef("Атмосфера током семинара је била"), "1", 0, "L", false, 0, "")
+	pdf.CellFormat(13, ch, "", "1", 0, "L", false, 0, "")
+	pdf.CellFormat(80, ch, trObj.translDef("Трајање пауза је било одговарајуће"), "1", 0, "L", false, 0, "")
+	pdf.CellFormat(13, ch, "", "1", 0, "L", false, 0, "")
+	pdf.Ln(5)
+	pdf.CellFormat(80, ch, trObj.translDef("Храна током обуке је била одговарајућа"), "1", 0, "L", false, 0, "")
+	pdf.CellFormat(13, ch, "", "1", 0, "L", false, 0, "")
+	pdf.CellFormat(80, ch, trObj.translDef("Пиће током обуке је било одговарајуће"), "1", 0, "L", false, 0, "")
+	pdf.CellFormat(13, ch, "", "1", 0, "L", false, 0, "")
+	pdf.Ln(5)
+
+	pdf.CellFormat(80, ch, trObj.translDef("Предавачи су подржавали комуникацију и"), "TLR", 0, "L", false, 0, "")
+	pdf.CellFormat(13, ch, "", "TLR", 0, "L", false, 0, "")
+	pdf.CellFormat(80, ch, trObj.translDef("У којој мери је обука испунила Ваша"), "TLR", 0, "L", false, 0, "")
+	pdf.CellFormat(13, ch, "", "TLR", 0, "L", false, 0, "")
+	pdf.Ln(5)
+	pdf.CellFormat(80, ch, trObj.translDef("интеракцију полазника"), "BLR", 0, "L", false, 0, "")
+	pdf.CellFormat(13, ch, "", "BLR", 0, "L", false, 0, "")
+	pdf.CellFormat(80, ch, trObj.translDef("очекивања"), "BLR", 0, "L", false, 0, "")
+	pdf.CellFormat(13, ch, "", "BLR", 0, "L", false, 0, "")
+
+	pdf.Ln(15)
+	pdf.Text(15, pdf.GetY(), trObj.translDef("За време семинара унапређења знања спроведено је и улазно и излазно тестирање полазника."))
+	pdf.Ln(4)
+
+	clientTests, err := TestService.GetClientTestBySeminarDayID(int(seminarDay.ID))
+	if err != nil {
+		logoped.ErrorLog.Println("Error getting client test by seminar day id: ", err)
+		return []byte{}, err
+	}
+
+	testsMap := map[string][]model.ClientTest{}
+	for _, ct := range clientTests {
+		_, ok := testsMap[ct.Jmbg]
+		if ok {
+			testsMap[ct.Jmbg] = append(testsMap[ct.Jmbg], ct)
+		} else {
+			testsMap[ct.Jmbg] = []model.ClientTest{ct}
+		}
+	}
+
+	sum1 := 0.0
+	num1 := 0.0
+	sum2 := 0.0
+	num2 := 0.0
+	for _, t := range testsMap {
+		if len(t) != 2 {
+			continue
+		}
+
+		if t[0].CreatedAt.Before(t[1].CreatedAt) {
+			num1++
+			sum1 = sum1 + t[0].Result
+
+			num2++
+			sum2 = sum2 + t[1].Result
+		} else {
+			num2++
+			sum2 = sum2 + t[0].Result
+
+			num1++
+			sum1 = sum1 + t[1].Result
+		}
+	}
+
+	pdf.Text(15, pdf.GetY(), trObj.translDef(fmt.Sprintf("Просечан резултат на улазном тесту био је %d%% тачних одговора, док је на излазном тесту", int((sum1/num1)*100))))
+	pdf.Ln(4)
+	pdf.Text(15, pdf.GetY(), trObj.translDef(fmt.Sprintf("резултат био %d%% тачних одговора. Проценат успешности приказан је у наредној табели:", int((sum2/num2)*100))))
+	pdf.Ln(8)
+
+	pdf.Rect(15, pdf.GetY(), 186, 5, "FD")
+	pdf.SetTextColor(0, 0, 0)
+	pdf.Text(90, pdf.GetY()+4, trObj.translDef("Евалуација семинара"))
+	pdf.SetTextColor(47, 83, 150)
+	pdf.Ln(5)
+
+	for i := 0; i < len(seminar.Trainees); i++ {
+		p := ""
+		p = fmt.Sprintf("Полазник %d", i+1)
+
+		tests, _ := testsMap[*seminar.Trainees[i].Client.JMBG]
+
+		t1 := 0
+		t2 := 0
+		d := 0
+		if len(tests) > 1 {
+			if tests[0].CreatedAt.Before(tests[1].CreatedAt) {
+				t1 = int(tests[0].Result * 100)
+				t2 = int(tests[1].Result * 100)
+				d = int(tests[1].Result*100 - tests[0].Result*100)
+			} else {
+				t1 = int(tests[1].Result * 100)
+				t2 = int(tests[0].Result * 100)
+				d = int(tests[0].Result*100 - tests[1].Result*100)
+			}
+		}
+
+		pdf.CellFormat(26, ch, trObj.translDef(p), "1", 0, "L", false, 0, "")
+		pdf.CellFormat(12, ch, fmt.Sprintf("%d%%", t1), "1", 0, "L", false, 0, "")
+		pdf.CellFormat(12, ch, fmt.Sprintf("%d%%", t2), "1", 0, "L", false, 0, "")
+		pdf.CellFormat(12, ch, fmt.Sprintf("%d%%", d), "1", 0, "L", false, 0, "")
+
+		if (i+1)%3 == 0 {
+			pdf.Ln(5)
+		}
+	}
+
+	pdf.Ln(7)
+	pdf.Text(15, pdf.GetY()+4, trObj.translDef("Семинар унапређења знања успешно је реализован уз активно учешће полазника."))
+
+	pdf.Ln(15)
+	pdf.Text(175, pdf.GetY(), trObj.translDef("Србобран,"))
+	pdf.Ln(4)
+	pdf.Text(160, pdf.GetY(), trObj.translDef(seminar.Start.Format("02.01.2006.")+" године"))
 
 	var buf bytes.Buffer
 	err = pdf.Output(&buf)
