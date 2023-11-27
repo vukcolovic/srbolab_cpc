@@ -86,6 +86,7 @@ type printServiceInterface interface {
 	PrintPlanTreningRealization(day *model.SeminarDay) ([]byte, error)
 	PrintPayments(seminar *model.Seminar) ([]byte, error)
 	PrintSeminarReport(seminar *model.Seminar) ([]byte, error)
+	PrintSeminarReport2(seminar *model.Seminar) ([]byte, error)
 }
 
 func (p *printService) PrintSeminarStudentList(seminar *model.Seminar) ([]byte, error) {
@@ -1816,6 +1817,113 @@ func (p *printService) PrintSeminarReport(seminar *model.Seminar) ([]byte, error
 	pdf.Text(175, pdf.GetY(), trObj.translDef("Србобран,"))
 	pdf.Ln(4)
 	pdf.Text(160, pdf.GetY(), trObj.translDef(seminar.Start.Format("02.01.2006.")+" године"))
+
+	var buf bytes.Buffer
+	err = pdf.Output(&buf)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return buf.Bytes(), nil
+}
+
+func (p *printService) PrintSeminarReport2(seminar *model.Seminar) ([]byte, error) {
+	pwd, err := os.Getwd()
+	if err != nil {
+		logoped.ErrorLog.Println("Error getting pwd: ", err)
+		return []byte{}, err
+	}
+	pdf := fpdf.New("P", "mm", "A4", filepath.Join(pwd, "font"))
+	pdf.AddFont("Arimo-Regular", "", "Arimo-Regular.json")
+	pdf.AddFont("Arimo-Bold", "", "Arimo-Bold.json")
+	pdf.AddFont("Helvetica", "", "helvetica_1251.json")
+	latTr := pdf.UnicodeTranslatorFromDescriptor("iso-8859-16")
+	cirTr := pdf.UnicodeTranslatorFromDescriptor("cp1251")
+	trObj := newTranslationDetails(pdf, "Helvetica", "Arimo-Regular", 11, latTr, cirTr)
+
+	pdf.SetMargins(15.0, marginTop, marginRight)
+	pdf.AddPage()
+
+	pdf.Ln(20)
+	pdf.SetTextColor(47, 83, 150)
+	pdf.Text(85, pdf.GetY(), trObj.translate("Срболаб доо", 15))
+	pdf.Ln(12)
+
+	pdf.Text(55, pdf.GetY(), trObj.translate("Центар за едукацију и развој Срболаб", 17))
+	pdf.Ln(12)
+
+	pdf.Text(40, pdf.GetY(), trObj.translate("Извештај о реализованој периодичној обуци", 19))
+	pdf.Ln(12)
+
+	pdf.Text(65, pdf.GetY(), trObj.translate(fmt.Sprintf("Центар за обуку у %s", seminar.ClassRoom.Location.GetLocationForSentence()), 15))
+	pdf.Ln(20)
+
+	pdf.Text(20, pdf.GetY(), trObj.translate("1. Основни подаци о Центру и времену одржавања", 13))
+	pdf.Ln(5)
+
+	ch := 7.0
+	pdf.SetFillColor(232, 238, 248)
+	pdf.CellFormat(60, ch, trObj.translDef("Mesto održavanja obuka"), "1", 0, "C", true, 0, "")
+	pdf.SetFillColor(255, 255, 255)
+	pdf.SetTextColor(0, 0, 0)
+	pdf.CellFormat(115, ch, trObj.translDef(seminar.ClassRoom.Location.Address.GetStreetWithNumber()+", "+seminar.ClassRoom.Location.Address.Place), "1", 0, "L", true, 0, "")
+	pdf.Ln(ch)
+	pdf.SetFillColor(232, 238, 248)
+	pdf.SetTextColor(47, 83, 150)
+	pdf.CellFormat(60, ch, trObj.translDef("Vrste obuka koje su realizovane"), "1", 0, "C", true, 0, "")
+	pdf.SetFillColor(255, 255, 255)
+	pdf.SetTextColor(0, 0, 0)
+	pdf.CellFormat(115, ch, trObj.translDef("Периодична ЦПЦ обука - 7 часова"), "1", 0, "L", true, 0, "")
+	pdf.Ln(ch)
+	pdf.SetFillColor(232, 238, 248)
+	pdf.SetTextColor(47, 83, 150)
+	pdf.CellFormat(60, ch, trObj.translDef("Podaci o realizaciji obuke"), "TLR", 0, "C", true, 0, "")
+	pdf.SetFillColor(255, 255, 255)
+	pdf.SetTextColor(0, 0, 0)
+	pdf.CellFormat(115, ch, trObj.translDef(seminar.Start.Format("02.01.2006.")+" године"), "1", 0, "L", true, 0, "")
+	pdf.Ln(ch)
+	pdf.SetFillColor(232, 238, 248)
+	pdf.SetTextColor(47, 83, 150)
+	pdf.CellFormat(60, ch, trObj.translDef(""), "BLR", 0, "C", true, 0, "")
+	pdf.SetFillColor(255, 255, 255)
+	pdf.SetTextColor(0, 0, 0)
+	start := ""
+	end := ""
+	if len(seminar.Days) > 0 {
+		start = seminar.Days[0].Date.Format("15:04")
+		end = seminar.Days[0].Date.Add(375 * time.Minute).Format("15:04")
+	}
+
+	pdf.CellFormat(115, ch, trObj.translDef(fmt.Sprintf("%s до %s", start, end)), "1", 0, "L", true, 0, "")
+	pdf.Ln(20)
+
+	pdf.SetTextColor(47, 83, 150)
+	pdf.Text(20, pdf.GetY(), trObj.translate(fmt.Sprintf("2.  Полазници (%s)", seminar.GetCode()), 13))
+	pdf.Ln(5)
+
+	pdf.SetFillColor(232, 238, 248)
+	pdf.Rect(15, pdf.GetY(), 180, 6, "FD")
+	pdf.SetTextColor(0, 0, 0)
+	pdf.Text(64, pdf.GetY()+5, trObj.translate("Периодична ЦПЦ обука - 7 часова", 13))
+	pdf.Ln(6)
+	pdf.SetTextColor(47, 83, 150)
+	pdf.Rect(15, pdf.GetY(), 25, 18, "FD")
+	pdf.Text(21, pdf.GetY()+10, trObj.translate("Датум", 13))
+	pdf.Rect(40, pdf.GetY(), 25, 18, "FD")
+	pdf.Text(44, pdf.GetY()+5, trObj.translate("Укупан", 13))
+	pdf.Text(47, pdf.GetY()+10, trObj.translate("број", 13))
+	pdf.Text(41, pdf.GetY()+15, trObj.translate("полазника", 13))
+	pdf.Rect(65, pdf.GetY(), 40, 18, "FD")
+	pdf.Text(68, pdf.GetY()+7, trObj.translate("Правно/физичко", 13))
+	pdf.Text(80, pdf.GetY()+14, trObj.translate("лице", 13))
+	pdf.Rect(105, pdf.GetY(), 30, 18, "FD")
+	pdf.Text(115, pdf.GetY()+7, trObj.translate("Број", 13))
+	pdf.Text(108, pdf.GetY()+14, trObj.translate("полазника", 13))
+	pdf.Rect(135, pdf.GetY(), 30, 18, "FD")
+	pdf.Text(141, pdf.GetY()+10, trObj.translate("Попуст", 13))
+	pdf.Rect(165, pdf.GetY(), 30, 18, "FD")
+	pdf.Text(171.5, pdf.GetY()+7, trObj.translate("Начин", 13))
+	pdf.Text(169, pdf.GetY()+14, trObj.translate("плаћања", 13))
 
 	var buf bytes.Buffer
 	err = pdf.Output(&buf)

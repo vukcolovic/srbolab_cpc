@@ -71,6 +71,19 @@ func (b BaseSeminarType) GetSeminarTypeForSentence() string {
 	return "периодичној"
 }
 
+func (l Location) GetLocationForSentence() string {
+	if l.Address.Place == "Batajnica" {
+		return "Батајници"
+	}
+	if l.Address.Place == "Србобран" {
+		return "Србобрану"
+	}
+	if l.Address.Place == "Велики Црљени" {
+		return "Лазаревцу"
+	}
+	return ""
+}
+
 type SeminarTheme struct {
 	gorm.Model
 	BaseSeminarTypeID uint            `json:"base_seminar_type_id"`

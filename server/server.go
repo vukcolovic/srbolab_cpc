@@ -117,6 +117,7 @@ func RunServer(host string) {
 	s.HandleFunc("/seminar-day/training-realization/{seminar_day_id}", handlers.PrintPlanTreningRealization).Methods("GET")
 	s.HandleFunc("/seminar/payments/{seminar_id}", handlers.PrintPayments).Methods("GET")
 	s.HandleFunc("/seminar/report/{seminar_id}", handlers.PrintReport).Methods("GET")
+	s.HandleFunc("/seminar/report2/{seminar_id}", handlers.PrintReport2).Methods("GET")
 
 	s = r.PathPrefix("/api/questions").Subrouter()
 	s.HandleFunc("/list/seminar-theme/{id}", handlers.ListQuestionsBySeminarThemeID).Methods("GET")

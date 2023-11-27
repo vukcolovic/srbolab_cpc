@@ -173,11 +173,14 @@
       <div class="col-sm-2">
         <button class="btn btn-secondary text-white" @click="printStatementOfReceving()">Izjava o preuzimanju</button>
       </div>
-      <div class="col-sm-1">
+      <div class="col-sm-2">
         <button class="btn btn-secondary text-white" @click="printPayments()">Uplatnice</button>
       </div>
       <div class="col-sm-2">
         <button class="btn btn-secondary text-white" @click="printReport()">Izveštaj</button>
+      </div>
+      <div class="col-sm-2 mt-1">
+        <button class="btn btn-secondary text-white" @click="printReport2()">Izveštaj 2</button>
       </div>
     </div>
 
@@ -355,6 +358,27 @@ export default {
         iframe.setAttribute("hidden", "hidden");
       }, (error) => {
         this.errorToast(error, "/print/seminar/report");
+      });
+    },
+    async printReport2() {
+      await axios.get('/print/seminar/report2/' + this.seminarId).then((response) => {
+        if (response.data === null || response.data.Status === 'error') {
+          this.toast.error(response.data != null ? response.data.ErrorMessage : "");
+          return;
+        }
+        var fileContent = JSON.parse(response.data.Data);
+        var sampleArr = this.base64ToArrayBuffer(fileContent);
+        const blob = new Blob([sampleArr], {type: 'application/pdf'});
+
+        var iframe = document.createElement('iframe');
+        iframe.src = URL.createObjectURL(blob);
+        document.body.appendChild(iframe);
+
+        URL.revokeObjectURL(iframe.src);
+        iframe.contentWindow.print();
+        iframe.setAttribute("hidden", "hidden");
+      }, (error) => {
+        this.errorToast(error, "/print/seminar/report2");
       });
     },
     async printStudentList() {
