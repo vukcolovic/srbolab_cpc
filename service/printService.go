@@ -1925,6 +1925,74 @@ func (p *printService) PrintSeminarReport2(seminar *model.Seminar) ([]byte, erro
 	pdf.Text(171.5, pdf.GetY()+7, trObj.translate("Начин", 13))
 	pdf.Text(169, pdf.GetY()+14, trObj.translate("плаћања", 13))
 
+	pdf.Ln(18)
+
+	totalNum := len(seminar.Trainees)
+	companyMap := map[string]int{}
+	for _, t := range seminar.Trainees {
+		companyMap[t.Client.Company.Name]++
+	}
+
+	pdf.SetFont("Helvetica", "", 10)
+	pdf.SetFillColor(255, 255, 255)
+	firstLine := true
+	borderGlobal := "LR"
+	mapRowNum := 0
+	for k, v := range companyMap {
+		mapRowNum++
+		if k == "" {
+			k = "Физичко лице"
+		}
+
+		lines, _ := splitLine(k, 19)
+		for i, line := range lines {
+			date := ""
+			total := ""
+			if firstLine {
+				date = trObj.translate(seminar.Start.Format("02.01.2006."), 10)
+				total = strconv.Itoa(totalNum)
+				firstLine = false
+			}
+
+			numByCompany := ""
+			border := "LR"
+			if i == 0 {
+				numByCompany = strconv.Itoa(v)
+				border = "TLR"
+			} else {
+				ch = 5
+			}
+
+			if mapRowNum == len(companyMap) && i+1 == len(lines) {
+				if len(lines) == 1 {
+					border = "1"
+				} else {
+					border = "BLR"
+					borderGlobal = "BLR"
+				}
+			}
+
+			pdf.CellFormat(25, ch, date, borderGlobal, 0, "C", true, 0, "")
+			pdf.CellFormat(25, ch, total, borderGlobal, 0, "C", true, 0, "")
+			pdf.CellFormat(40, ch, trObj.translate(line, 10), border, 0, "L", true, 0, "")
+			pdf.CellFormat(30, ch, numByCompany, border, 0, "C", true, 0, "")
+			pdf.CellFormat(30, ch, "", border, 0, "C", true, 0, "")
+			pdf.CellFormat(30, ch, "", border, 0, "C", true, 0, "")
+			pdf.Ln(ch)
+
+			ch = 7
+		}
+	}
+
+	pdf.SetFillColor(232, 238, 248)
+	pdf.SetTextColor(47, 83, 150)
+	pdf.Rect(15, pdf.GetY(), 25, ch, "FD")
+	pdf.Text(21, pdf.GetY()+5, trObj.translate("Укупно", 12))
+	pdf.Rect(40, pdf.GetY(), 25, ch, "FD")
+	pdf.Text(44, pdf.GetY()+5, strconv.Itoa(totalNum))
+	pdf.Rect(65, pdf.GetY(), 130, ch, "FD")
+	pdf.Text(74, pdf.GetY()+5, trObj.translate("Напомена:", 12))
+
 	var buf bytes.Buffer
 	err = pdf.Output(&buf)
 	if err != nil {
@@ -1961,7 +2029,9 @@ func splitLine(text string, length int) ([]string, float64) {
 	lines := []string{}
 	currentLine := ""
 	for _, word := range words {
-		if len(currentLine)+len(word)+1 > length {
+		wordR := []rune(word)
+		currentLineR := []rune(currentLine)
+		if len(currentLineR)+len(wordR)+1 > length {
 			lines = append(lines, currentLine)
 			lineNum++
 			currentLine = ""
