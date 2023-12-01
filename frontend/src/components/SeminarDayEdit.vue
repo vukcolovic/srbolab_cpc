@@ -351,6 +351,8 @@ export default {
         if (this.seminarDay.documents == null) {
           this.seminarDay.documents = [];
         }
+
+        this.seminarDay.classes.sort((a, b) => a.number - b.number);
         this.seminarDay.classes.forEach(cls => {
           if (cls.teacher) {
             cls.teacher.full_name = cls.teacher.person.first_name + " "+ cls.teacher.person.last_name;
