@@ -194,3 +194,29 @@ func GetSeminarDayWithTestByJMBG(w http.ResponseWriter, req *http.Request) {
 
 	SetErrorResponse(w, errors.New("Danas nije predviđen dan seminara."))
 }
+
+func DownloadSeminarDayFile(w http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	seminarDayId, ok := vars["id"]
+	if !ok {
+		logoped.ErrorLog.Println("missing parameter id")
+		SetErrorResponse(w, NewMissingRequestParamError("id"))
+		return
+	}
+
+	filename, ok := vars["filename"]
+	if !ok {
+		logoped.ErrorLog.Println("missing parameter filename")
+		SetErrorResponse(w, NewMissingRequestParamError("filename"))
+		return
+	}
+
+	content, err := service.FileService.GetFile(service.SeminarDayFolder, seminarDayId, filename)
+	if err != nil {
+		logoped.ErrorLog.Println("error downloading file")
+		SetErrorResponse(w, errors.New("Greška prilikom skidanja fajla: "+err.Error()))
+		return
+	}
+
+	SetSuccessResponse(w, content)
+}

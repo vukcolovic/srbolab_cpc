@@ -239,15 +239,35 @@ export default {
       });
     },
     downloadFile(i) {
-      const arr = this.seminarDay.documents[i].content.split(',')
+      if (this.seminarDay.documents[i].content) {
+      const arr = this.seminarDay.documents[i].content.split(',');
       var sampleArr = this.base64ToArrayBuffer(arr[1]);
       const blob = new Blob([sampleArr])
 
-      const link = document.createElement('a')
-      link.href = URL.createObjectURL(blob)
-      link.download = this.seminarDay.documents[i].name
-      link.click()
-      URL.revokeObjectURL(link.href)
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = this.seminarDay.documents[i].name;
+      link.click();
+      URL.revokeObjectURL(link.href);
+        return;
+      }
+      axios.get('/seminar-days/download/id/' + this.seminarDayId + '/filename/' + this.seminarDay.documents[i].name).then((response) => {
+        if (response.data === null || response.data.Status === 'error') {
+          this.toast.error(response.data != null ? response.data.ErrorMessage : "");
+          return;
+        }
+        var content = JSON.parse(response.data.Data);
+        var sampleArr = this.base64ToArrayBuffer(content);
+        const blob = new Blob([sampleArr]);
+
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = this.seminarDay.documents[i].name;
+        link.click();
+        URL.revokeObjectURL(link.href);
+      }, (error) => {
+        this.errorToast(error, "/seminar-days/download");
+      });
     },
     uploadFiles() {
       var files = this.$refs.file.files;

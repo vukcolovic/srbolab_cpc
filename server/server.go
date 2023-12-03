@@ -41,6 +41,7 @@ func RunServer(host string) {
 	s.HandleFunc("/jmbg/{jmbg}", handlers.GetClientByJMBG).Methods("GET")
 	s.HandleFunc("/delete/{id}", handlers.DeleteClient).Methods("GET")
 	s.HandleFunc("/count", handlers.CountClients).Methods("GET")
+	s.HandleFunc("/download/id/{id}/filename/{filename}", handlers.DownloadClientFile).Methods("GET")
 
 	s = r.PathPrefix("/api/seminars").Subrouter()
 	s.HandleFunc("/create", handlers.CreateSeminar).Methods("POST")
@@ -50,6 +51,7 @@ func RunServer(host string) {
 	s.HandleFunc("/id/{id}", handlers.GetSeminarByID).Methods("GET")
 	s.HandleFunc("/delete/{id}", handlers.DeleteSeminar).Methods("GET")
 	s.HandleFunc("/count", handlers.CountSeminars).Methods("GET")
+	s.HandleFunc("/download/id/{id}/filename/{filename}", handlers.DownloadSeminarFile).Methods("GET")
 
 	s = r.PathPrefix("/api/client-seminar").Subrouter()
 	s.HandleFunc("/update", handlers.UpdateClientSeminar).Methods("POST")
@@ -61,6 +63,7 @@ func RunServer(host string) {
 	s.HandleFunc("/list/{seminar_id}", handlers.ListSeminarDays).Methods("GET")
 	s.HandleFunc("/id/{id}", handlers.GetSeminarDayByID).Methods("GET")
 	s.HandleFunc("/jmbg/{jmbg}", handlers.GetSeminarDayWithTestByJMBG).Methods("GET")
+	s.HandleFunc("/download/id/{id}/filename/{filename}", handlers.DownloadSeminarDayFile).Methods("GET")
 	//s.HandleFunc("/delete/{id}", handlers.DeleteSeminarDay).Methods("GET")
 
 	s = r.PathPrefix("/api/class-names").Subrouter()

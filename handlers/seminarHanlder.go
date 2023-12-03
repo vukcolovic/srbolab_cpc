@@ -170,3 +170,29 @@ func CountSeminars(w http.ResponseWriter, req *http.Request) {
 
 	SetSuccessResponse(w, count)
 }
+
+func DownloadSeminarFile(w http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	seminarId, ok := vars["id"]
+	if !ok {
+		logoped.ErrorLog.Println("missing parameter id")
+		SetErrorResponse(w, NewMissingRequestParamError("id"))
+		return
+	}
+
+	filename, ok := vars["filename"]
+	if !ok {
+		logoped.ErrorLog.Println("missing parameter filename")
+		SetErrorResponse(w, NewMissingRequestParamError("filename"))
+		return
+	}
+
+	content, err := service.FileService.GetFile(service.SeminarFolder, seminarId, filename)
+	if err != nil {
+		logoped.ErrorLog.Println("error downloading file")
+		SetErrorResponse(w, errors.New("Greška prilikom skidanja fajla: "+err.Error()))
+		return
+	}
+
+	SetSuccessResponse(w, content)
+}

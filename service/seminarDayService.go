@@ -6,8 +6,11 @@ import (
 	"srbolab_cpc/db"
 	"srbolab_cpc/model"
 	"srbolab_cpc/util"
+	"strconv"
 	"time"
 )
+
+const SeminarDayFolder = "seminar_days"
 
 var (
 	SeminarDayService seminarDayServiceInterface = &seminarDayService{}
@@ -67,11 +70,6 @@ func (c *seminarDayService) UpdateSeminarDay(seminarDay model.SeminarDay) (*mode
 		return nil, err
 	}
 
-	result := db.Client.Session(&gorm.Session{FullSaveAssociations: true}).Updates(&seminarDay)
-	if result.Error != nil {
-		return nil, result.Error
-	}
-
 	for _, od := range oldSeminarDay.Documents {
 		found := false
 		for _, nd := range seminarDay.Documents {
@@ -82,11 +80,37 @@ func (c *seminarDayService) UpdateSeminarDay(seminarDay model.SeminarDay) (*mode
 		}
 
 		if !found {
+			if len(od.Content) == 0 {
+				FileService.DeleteFile(FileService.GetPath(SeminarDayFolder, strconv.Itoa(int(seminarDay.ID)), od.Name))
+			}
 			result := db.Client.Exec("DELETE FROM seminarday_file WHERE seminar_day_id = ? AND file_id = ?", seminarDay.ID, od.ID)
 			if result.Error != nil {
 				return nil, result.Error
 			}
 		}
+	}
+
+	for _, nd := range seminarDay.Documents {
+		found := false
+		for _, od := range oldSeminarDay.Documents {
+			if od.ID == nd.ID {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			FileService.WriteFile(FileService.GetPath(SeminarDayFolder, strconv.Itoa(int(seminarDay.ID)), nd.Name), nd.Content)
+		}
+	}
+
+	for _, doc := range seminarDay.Documents {
+		doc.Content = ""
+	}
+
+	result := db.Client.Session(&gorm.Session{FullSaveAssociations: true}).Updates(&seminarDay)
+	if result.Error != nil {
+		return nil, result.Error
 	}
 
 	return &seminarDay, nil

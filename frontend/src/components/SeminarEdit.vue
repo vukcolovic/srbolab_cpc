@@ -285,15 +285,35 @@ export default {
       router.push("/client?action=update&id=" + clientId);
     },
     downloadFile(i) {
-      const arr = this.seminar.documents[i].content.split(',')
-      var sampleArr = this.base64ToArrayBuffer(arr[1]);
-      const blob = new Blob([sampleArr])
+      if (this.seminar.documents[i].content) {
+        const arr = this.seminar.documents[i].content.split(',');
+        var sampleArr = this.base64ToArrayBuffer(arr[1]);
+        const blob = new Blob([sampleArr]);
 
-      const link = document.createElement('a')
-      link.href = URL.createObjectURL(blob)
-      link.download = this.seminar.documents[i].name
-      link.click()
-      URL.revokeObjectURL(link.href)
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = this.seminar.documents[i].name;
+        link.click();
+        URL.revokeObjectURL(link.href);
+        return;
+      }
+      axios.get('/seminars/download/id/' + this.seminarId + '/filename/' + this.seminar.documents[i].name).then((response) => {
+        if (response.data === null || response.data.Status === 'error') {
+          this.toast.error(response.data != null ? response.data.ErrorMessage : "");
+          return;
+        }
+        var content = JSON.parse(response.data.Data);
+        var sampleArr = this.base64ToArrayBuffer(content);
+        const blob = new Blob([sampleArr]);
+
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = this.seminar.documents[i].name;
+        link.click();
+        URL.revokeObjectURL(link.href);
+      }, (error) => {
+        this.errorToast(error, "/seminars/download");
+      });
     },
     uploadFiles() {
       var files = this.$refs.file.files;

@@ -6,5 +6,6 @@ db_name: "srbolab_cpc"
 db_user: "postgres"
 db_password: "passw0rd"
 domain: "http://127.0.0.1:8001"
+root_path: "/home/wolf/Desktop/test/"
 corporateIps:
   - "109.121.53.252"

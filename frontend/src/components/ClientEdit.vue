@@ -658,15 +658,35 @@ export default {
       });
     },
       downloadFile(i) {
-      const arr = this.client.documents[i].content.split(',')
-      var sampleArr = this.base64ToArrayBuffer(arr[1]);
-      const blob = new Blob([sampleArr])
+      if (this.client.documents[i].content) {
+        const arr = this.client.documents[i].content.split(',')
+        var sampleArr = this.base64ToArrayBuffer(arr[1]);
+        const blob = new Blob([sampleArr])
 
-      const link = document.createElement('a')
-      link.href = URL.createObjectURL(blob)
-      link.download = this.client.documents[i].name
-      link.click()
-      URL.revokeObjectURL(link.href)
+        const link = document.createElement('a')
+        link.href = URL.createObjectURL(blob)
+        link.download = this.client.documents[i].name
+        link.click()
+        URL.revokeObjectURL(link.href)
+        return;
+      }
+        axios.get('/clients/download/id/' + this.clientId + '/filename/' + this.client.documents[i].name).then((response) => {
+          if (response.data === null || response.data.Status === 'error') {
+             this.toast.error(response.data != null ? response.data.ErrorMessage : "");
+            return;
+          }
+          var content = JSON.parse(response.data.Data);
+          var sampleArr = this.base64ToArrayBuffer(content);
+          const blob = new Blob([sampleArr])
+
+          const link = document.createElement('a')
+          link.href = URL.createObjectURL(blob)
+          link.download = this.client.documents[i].name
+          link.click()
+          URL.revokeObjectURL(link.href)
+        }, (error) => {
+          this.errorToast(error, "/clients/download");
+        });
     },
     removeSeminar(seminar) {
       const index = this.client.seminars.indexOf(seminar);

@@ -32,6 +32,7 @@ func main() {
 
 	handlers.CorporateIps = conf.CorporateIps
 	service.Domain = conf.Domain
+	service.RootPath = conf.RootPath
 
 	server.RunServer(conf.HTTP)
 }

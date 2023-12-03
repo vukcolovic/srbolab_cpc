@@ -6,7 +6,10 @@ import (
 	"srbolab_cpc/db"
 	"srbolab_cpc/logoped"
 	"srbolab_cpc/model"
+	"strconv"
 )
+
+const SeminarFolder = "seminars"
 
 var (
 	SeminarService seminarServiceInterface = &seminarService{}
@@ -132,12 +135,6 @@ func (c *seminarService) UpdateSeminar(seminar model.Seminar) (*model.Seminar, e
 		}
 	}
 
-	result := db.Client.Session(&gorm.Session{FullSaveAssociations: true}).Updates(&seminar)
-	if result.Error != nil {
-		logoped.ErrorLog.Println("Error updating seminar")
-		return nil, result.Error
-	}
-
 	for _, od := range oldSeminar.Documents {
 		found := false
 		for _, nd := range seminar.Documents {
@@ -148,12 +145,39 @@ func (c *seminarService) UpdateSeminar(seminar model.Seminar) (*model.Seminar, e
 		}
 
 		if !found {
+			if len(od.Content) == 0 {
+				FileService.DeleteFile(FileService.GetPath(SeminarFolder, strconv.Itoa(int(seminar.ID)), od.Name))
+			}
 			result := db.Client.Exec("DELETE FROM seminar_file WHERE seminar_id = ? AND file_id = ?", seminar.ID, od.ID)
 			if result.Error != nil {
 				logoped.ErrorLog.Println("Error updating seminar, delete from seminar file")
 				return nil, result.Error
 			}
 		}
+	}
+
+	for _, nd := range seminar.Documents {
+		found := false
+		for _, od := range oldSeminar.Documents {
+			if od.ID == nd.ID {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			FileService.WriteFile(FileService.GetPath(SeminarFolder, strconv.Itoa(int(seminar.ID)), nd.Name), nd.Content)
+		}
+	}
+
+	for _, doc := range seminar.Documents {
+		doc.Content = ""
+	}
+
+	result := db.Client.Session(&gorm.Session{FullSaveAssociations: true}).Updates(&seminar)
+	if result.Error != nil {
+		logoped.ErrorLog.Println("Error updating seminar")
+		return nil, result.Error
 	}
 
 	return &seminar, nil

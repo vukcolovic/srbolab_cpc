@@ -5,8 +5,11 @@ import (
 	"gorm.io/gorm"
 	"srbolab_cpc/db"
 	"srbolab_cpc/model"
+	"strconv"
 	"strings"
 )
+
+const ClientFolder = "clients"
 
 var (
 	ClientService clientServiceInterface = &clientService{}
@@ -134,9 +137,23 @@ func (c *clientService) CreateClient(client model.Client, userID int) (*model.Cl
 	if *client.Verified {
 		client.VerifiedByID = &userIDUint
 	}
+
+	documents := []model.File{}
+	for _, doc := range client.Documents {
+		documents = append(documents, model.File{Content: doc.Content, Name: doc.Name})
+		doc.Content = ""
+	}
+
 	result := db.Client.Create(&client)
 	if result.Error != nil {
 		return nil, result.Error
+	}
+
+	for _, doc := range documents {
+		err := FileService.WriteFile(FileService.GetPath(ClientFolder, strconv.Itoa(int(client.ID)), doc.Name), doc.Content)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	if len(client.Seminars) == 0 {
@@ -190,11 +207,6 @@ func (c *clientService) UpdateClient(client model.Client, userID int) (*model.Cl
 	}
 	oldSeminars := oldClient.Seminars
 
-	result := db.Client.Session(&gorm.Session{FullSaveAssociations: true}).Updates(&client)
-	if result.Error != nil {
-		return nil, result.Error
-	}
-
 	for _, od := range oldClient.Documents {
 		found := false
 		for _, nd := range client.Documents {
@@ -205,11 +217,37 @@ func (c *clientService) UpdateClient(client model.Client, userID int) (*model.Cl
 		}
 
 		if !found {
+			if len(od.Content) == 0 {
+				FileService.DeleteFile(FileService.GetPath(ClientFolder, strconv.Itoa(int(client.ID)), od.Name))
+			}
 			result := db.Client.Exec("DELETE FROM client_file WHERE client_id = ? AND file_id = ?", client.ID, od.ID)
 			if result.Error != nil {
 				return nil, result.Error
 			}
 		}
+	}
+
+	for _, nd := range client.Documents {
+		found := false
+		for _, od := range oldClient.Documents {
+			if od.ID == nd.ID {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			FileService.WriteFile(FileService.GetPath(ClientFolder, strconv.Itoa(int(client.ID)), nd.Name), nd.Content)
+		}
+	}
+
+	for _, doc := range client.Documents {
+		doc.Content = ""
+	}
+
+	result := db.Client.Session(&gorm.Session{FullSaveAssociations: true}).Updates(&client)
+	if result.Error != nil {
+		return nil, result.Error
 	}
 
 	for _, os := range oldSeminars {
