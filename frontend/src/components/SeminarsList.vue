@@ -18,6 +18,7 @@
       <vue-table-lite
           ref="localTable"
           @row-clicked="selectSeminar"
+          @dblclick="doubleClick"
           :total= "table.totalCount"
           :page-size=this.pageSize
           :columns="table.columns"
@@ -39,6 +40,7 @@ import {useToast} from "vue-toastification";
 import {dateMixin} from "@/mixins/dateMixin";
 import {apiMixin} from "@/mixins/apiMixin";
 import {commonMixin} from "@/mixins/commonMixin";
+import router from "@/router";
 
 export default {
   name: 'SeminarsList',
@@ -117,11 +119,16 @@ export default {
       table.selectedSeminar = rowData;
     }
 
+    const doubleClick = () => {
+      router.push("/seminar?action=update&id=" + table.selectedSeminar.ID);
+    }
+
     const toast = useToast();
     return {
       toast,
       table,
       selectSeminar,
+      doubleClick,
     };
   },
   methods: {
