@@ -973,9 +973,13 @@ func (p *printService) PrintSeminarEvidence(day *model.SeminarDay) ([]byte, erro
 	pdf.Text(182, pdf.GetY()+8.5, trObj.translDef("Потпис предавача"))
 	pdf.CellFormat(50, ch, trObj.translDef("Напомена"), "1", 0, "C", false, 0, "")
 
+	sort.Slice(day.Classes, func(i, j int) bool {
+		return day.Classes[i].Number < day.Classes[j].Number
+	})
+
 	for i := 0; i < len(day.Classes); i++ {
 		pdf.Ln(ch)
-		lines, _ := splitLine(day.Classes[i].Name, 90)
+		lines, _ := splitLine(day.Classes[i].Name, 55)
 		current := pdf.GetY() + 3.5
 		for i, line := range lines {
 			pdf.Text(72, current+float64(i)*4.0, trObj.translDef(line))
