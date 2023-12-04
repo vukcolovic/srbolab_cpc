@@ -291,7 +291,7 @@ func PrintPayments(w http.ResponseWriter, req *http.Request) {
 		SetErrorResponse(w, NewWrongParamFormatErrorError("seminarId", seminarIdParam))
 		return
 	}
-	seminar, err := service.SeminarService.GetSeminarByID(seminarId)
+	seminar, err := service.SeminarService.GetSeminarByIDWithClientFiles(seminarId)
 	if err != nil {
 		logoped.ErrorLog.Println(err.Error())
 		SetErrorResponse(w, errors.New("Greška štampanja, greška prilikom povlačenja seminara: "+err.Error()))

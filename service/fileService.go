@@ -23,6 +23,7 @@ type fileServiceInterface interface {
 	GetFile(folder, clientID, filename string) (string, error)
 	DeleteFile(filepath string) error
 	GetPath(folder, clientID, filename string) string
+	GetFullPath(folder, clientID, filename string) string
 }
 
 func (f *fileService) WriteFile(path string, content string) error {
@@ -71,4 +72,8 @@ func (f *fileService) DeleteFile(filepath string) error {
 
 func (f *fileService) GetPath(folder, clientID, filename string) string {
 	return fmt.Sprintf("/%s/%s_%s", folder, clientID, filename)
+}
+
+func (f *fileService) GetFullPath(folder, clientID, filename string) string {
+	return fmt.Sprintf("%s/%s/%s_%s", RootPath, folder, clientID, filename)
 }
