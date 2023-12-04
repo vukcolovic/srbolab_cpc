@@ -1461,46 +1461,50 @@ func (p *printService) PrintSeminarReport(seminar *model.Seminar) ([]byte, error
 		pdf.Text(15, pdf.GetY(), trObj.translDef(s))
 	}
 
-	pdf.Ln(5)
-	pdf.Text(15, pdf.GetY(), trObj.translDef(fmt.Sprintf("Тема семинара била је: %s.", seminarDay.Name)))
+	lines, _ := splitLine(fmt.Sprintf("Тема семинара била је: %s.", seminarDay.Name), 80)
+	for _, line := range lines {
+		pdf.Ln(5)
+		pdf.Text(15, pdf.GetY(), trObj.translDef(line))
+
+	}
 	pdf.Ln(10)
 
 	ch := 6.0
 	pdf.SetTextColor(0, 0, 0)
 	pdf.SetFillColor(146, 208, 80)
-	pdf.CellFormat(40, ch, trObj.translDef("Тема семинара:"), "TLR", 0, "C", true, 0, "")
+	pdf.CellFormat(45, ch, trObj.translDef("Тема семинара:"), "TLR", 0, "C", true, 0, "")
 	pdf.CellFormat(29, ch, trObj.translDef("Датум почетка"), "TLR", 0, "C", true, 0, "")
-	pdf.CellFormat(30, ch, trObj.translDef("Време"), "TLR", 0, "C", true, 0, "")
-	pdf.CellFormat(50, ch, trObj.translDef("Шифра обуке:"), "TLR", 0, "C", true, 0, "")
-	pdf.CellFormat(29, ch, trObj.translDef("Број"), "TLR", 0, "C", true, 0, "")
+	pdf.CellFormat(28, ch, trObj.translDef("Време"), "TLR", 0, "C", true, 0, "")
+	pdf.CellFormat(48, ch, trObj.translDef("Шифра обуке:"), "TLR", 0, "C", true, 0, "")
+	pdf.CellFormat(28, ch, trObj.translDef("Број"), "TLR", 0, "C", true, 0, "")
 	pdf.Ln(ch)
-	pdf.CellFormat(40, ch, "", "BLR", 0, "C", true, 0, "")
+	pdf.CellFormat(45, ch, "", "BLR", 0, "C", true, 0, "")
 	pdf.CellFormat(29, ch, trObj.translDef("обуке:"), "BLR", 0, "C", true, 0, "")
-	pdf.CellFormat(30, ch, trObj.translDef("реализације:"), "BLR", 0, "C", true, 0, "")
-	pdf.CellFormat(50, ch, "", "BLR", 0, "C", true, 0, "")
-	pdf.CellFormat(29, ch, trObj.translDef("полазника:"), "BLR", 0, "C", true, 0, "")
+	pdf.CellFormat(28, ch, trObj.translDef("реализације:"), "BLR", 0, "C", true, 0, "")
+	pdf.CellFormat(48, ch, "", "BLR", 0, "C", true, 0, "")
+	pdf.CellFormat(28, ch, trObj.translDef("полазника:"), "BLR", 0, "C", true, 0, "")
 
 	pdf.Ln(ch)
 	ch = 7.0
 	pdf.SetTextColor(47, 83, 150)
-	lines, _ := splitLine(seminarDay.Name, 40)
+	lines, _ = splitLine(seminarDay.Name, 22)
 	for i, line := range lines {
 		if i == 0 {
-			pdf.CellFormat(40, ch, trObj.translDef(line), "TLR", 0, "C", false, 0, "")
+			pdf.CellFormat(45, ch, trObj.translate(line, 9), "TLR", 0, "C", false, 0, "")
 			pdf.CellFormat(29, ch, seminar.Start.Format("02.01.2006."), "TLR", 0, "C", false, 0, "")
-			pdf.CellFormat(30, ch, fmt.Sprintf("%s - %s", seminarDay.Date.Format("15:04"), seminarDay.Date.Add(time.Minute*375).Format("15:04")), "TLR", 0, "C", false, 0, "")
-			pdf.CellFormat(50, ch, trObj.translDef(seminar.GetCode()), "TLR", 0, "C", false, 0, "")
-			pdf.CellFormat(29, ch, strconv.Itoa(presenceTrue), "TLR", 0, "C", false, 0, "")
+			pdf.CellFormat(28, ch, fmt.Sprintf("%s - %s", seminarDay.Date.Format("15:04"), seminarDay.Date.Add(time.Minute*375).Format("15:04")), "TLR", 0, "C", false, 0, "")
+			pdf.CellFormat(48, ch, trObj.translDef(seminar.GetCode()), "TLR", 0, "C", false, 0, "")
+			pdf.CellFormat(28, ch, strconv.Itoa(presenceTrue), "TLR", 0, "C", false, 0, "")
 		} else {
 			borderStr := "LR"
 			if i+1 == len(lines) {
 				borderStr = "BLR"
 			}
-			pdf.CellFormat(40, ch, trObj.translDef(line), borderStr, 0, "C", false, 0, "")
+			pdf.CellFormat(45, ch, trObj.translate(line, 9), borderStr, 0, "C", false, 0, "")
 			pdf.CellFormat(29, ch, "", borderStr, 0, "C", false, 0, "")
-			pdf.CellFormat(30, ch, "", borderStr, 0, "C", false, 0, "")
-			pdf.CellFormat(50, ch, "", borderStr, 0, "C", false, 0, "")
-			pdf.CellFormat(29, ch, "", borderStr, 0, "C", false, 0, "")
+			pdf.CellFormat(28, ch, "", borderStr, 0, "C", false, 0, "")
+			pdf.CellFormat(48, ch, "", borderStr, 0, "C", false, 0, "")
+			pdf.CellFormat(28, ch, "", borderStr, 0, "C", false, 0, "")
 		}
 		if i+1 < len(lines) {
 			pdf.Ln(ch)
@@ -1581,7 +1585,7 @@ func (p *printService) PrintSeminarReport(seminar *model.Seminar) ([]byte, error
 		firstName := strings.Split(k, " ")[0]
 		lastName := strings.Split(k, " ")[1]
 
-		lines, _ := splitLine(classes[0], 60)
+		lines, _ := splitLine(classes[0], 30)
 		if len(classes) == 1 && len(lines) == 1 {
 			pdf.CellFormat(30, ch, trObj.translDef(firstName), "TLR", 0, "C", false, 0, "")
 			pdf.CellFormat(65, ch, trObj.translDef(lines[0]), "TLR", 0, "L", false, 0, "")
@@ -1614,7 +1618,7 @@ func (p *printService) PrintSeminarReport(seminar *model.Seminar) ([]byte, error
 		classesNum := ""
 
 		for j, class := range classes {
-			lines, _ = splitLine(class, 60)
+			lines, _ = splitLine(class, 30)
 			for i, line := range lines {
 				name := ""
 				if !nameDone {
@@ -1772,9 +1776,18 @@ func (p *printService) PrintSeminarReport(seminar *model.Seminar) ([]byte, error
 		}
 	}
 
-	pdf.Text(15, pdf.GetY(), trObj.translDef(fmt.Sprintf("Просечан резултат на улазном тесту био је %d%% тачних одговора, док је на излазном тесту", int((sum1/num1)*100))))
+	percentIn := 0.0
+	if sum1 > 0 {
+		percentIn = (sum1 / num1) * 100
+	}
+	percentOut := 0.0
+	if sum2 > 0 {
+		percentIn = (sum2 / num2) * 100
+	}
+
+	pdf.Text(15, pdf.GetY(), trObj.translDef(fmt.Sprintf("Просечан резултат на улазном тесту био је %d%% тачних одговора, док је на излазном тесту", int(percentIn))))
 	pdf.Ln(4)
-	pdf.Text(15, pdf.GetY(), trObj.translDef(fmt.Sprintf("резултат био %d%% тачних одговора. Проценат успешности приказан је у наредној табели:", int((sum2/num2)*100))))
+	pdf.Text(15, pdf.GetY(), trObj.translDef(fmt.Sprintf("резултат био %d%% тачних одговора. Проценат успешности приказан је у наредној табели:", int(percentOut))))
 	pdf.Ln(8)
 
 	pdf.Rect(15, pdf.GetY(), 186, 5, "FD")
