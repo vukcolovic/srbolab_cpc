@@ -132,7 +132,12 @@ func (c *seminarDayService) CreateAllSeminarDaysForSeminar(seminarID int) ([]mod
 	}
 
 	seminarDays := []model.SeminarDay{}
-	dateForDay := util.IfWeekendGetFirstWorkDay(seminar.Start)
+	var dateForDay time.Time
+	if seminar.SeminarTheme.NumberOfDays == 1 {
+		dateForDay = seminar.Start
+	} else {
+		dateForDay = util.IfWeekendGetFirstWorkDay(seminar.Start)
+	}
 	dateForDay = time.Date(dateForDay.Year(), dateForDay.Month(), dateForDay.Day(), 8, 0, 0, 0, dateForDay.Location())
 	for i := 1; i <= seminar.SeminarTheme.NumberOfDays; i++ {
 		presences := []model.ClientPresence{}
