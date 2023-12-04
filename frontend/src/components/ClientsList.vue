@@ -11,9 +11,6 @@
         <button class="iconBtn" title="Izmeni" :disabled="!table.selectedClient" @click="$router.push({name: 'ClientEdit', query: {id: table.selectedClient.ID, action: 'update' }})">
           <i class="fa fa-user-md">
           </i></button>
-        <button class="iconBtn" title="Obriši" :disabled="!table.selectedClient" @click="deleteClient">
-          <i class="fa fa-trash">
-          </i></button>
         <label class="m-1" style="font-size: 1.2em; font-style: italic">Lista vozača</label>
         <button class="iconBtn ms-auto" title="Filter" type="button" data-bs-toggle="collapse" data-bs-target="#filter" aria-expanded="false" aria-controls="filter">
           <i class="fa fa-filter" aria-hidden="true">
@@ -23,6 +20,9 @@
           <i class="fa fa-search">
           </i>
         </button>
+        <button class="iconBtn" title="Obriši" :disabled="!table.selectedClient" @click="deleteClient">
+          <i class="fa fa-trash">
+          </i></button>
       </div>
     </div>
     <div class="collapse multi-collapse border" style="font-size: 0.7em" id="filter">
