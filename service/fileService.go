@@ -48,7 +48,7 @@ func (f *fileService) WriteFile(path string, content string) error {
 }
 
 func (f *fileService) GetFile(folder, clientID, filename string) (string, error) {
-	b, err := os.ReadFile(RootPath + fmt.Sprintf("%s/%s_%s", folder, clientID, filename))
+	b, err := os.ReadFile(RootPath + f.GetPath(folder, clientID, filename))
 	if err != nil {
 		logoped.ErrorLog.Println("Error getting file, error: ", err.Error())
 		return "", err
