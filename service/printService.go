@@ -1072,7 +1072,7 @@ func (p *printService) PrintPlanTreningRealization(day *model.SeminarDay) ([]byt
 	pdf.CellFormat(cw5, ch, trObj.translDef("Крај"), "1", 0, "C", true, 0, "")
 	pdf.SetFont("Arimo-Regular", "", 11)
 	pdf.Ln(ch)
-	splitWidth := 70
+	splitWidth := 40
 	lines, num := splitLine("Пријава и евидентирање полазника обуке", splitWidth)
 	current := pdf.GetY() + 4.5
 	for i, line := range lines {
