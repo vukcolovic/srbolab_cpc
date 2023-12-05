@@ -74,7 +74,6 @@ type printService struct {
 
 type printServiceInterface interface {
 	PrintSeminarStudentList(seminar *model.Seminar) ([]byte, error)
-	PrintConfirmationStatements(seminar *model.Seminar) ([]byte, error)
 	PrintConfirmations(seminar *model.Seminar) ([]byte, error)
 	PrintConfirmationReceives(seminar *model.Seminar) ([]byte, error)
 	PrintMuster(day *model.SeminarDay) ([]byte, error)
@@ -160,105 +159,6 @@ func (p *printService) PrintSeminarStudentList(seminar *model.Seminar) ([]byte, 
 			pdf.Text(130, current+float64(i)*4.0, trObj.translDef(line))
 		}
 		pdf.Ln(chc)
-	}
-
-	var buf bytes.Buffer
-	err = pdf.Output(&buf)
-	if err != nil {
-		return []byte{}, err
-	}
-
-	return buf.Bytes(), nil
-}
-
-func (p *printService) PrintConfirmationStatements(seminar *model.Seminar) ([]byte, error) {
-	pwd, err := os.Getwd()
-	if err != nil {
-		logoped.ErrorLog.Println("Error getting pwd: ", err)
-		return []byte{}, err
-	}
-	pdf := fpdf.New("P", "mm", "A4", filepath.Join(pwd, "font"))
-	pdf.AddFont("Arimo-Regular", "", "Arimo-Regular.json")
-	pdf.AddFont("Arimo-Bold", "", "Arimo-Bold.json")
-	pdf.AddFont("Helvetica", "", "helvetica_1251.json")
-	latTr := pdf.UnicodeTranslatorFromDescriptor("iso-8859-16")
-	cirTr := pdf.UnicodeTranslatorFromDescriptor("cp1251")
-	trObj := newTranslationDetails(pdf, "Helvetica", "Arimo-Regular", 11, latTr, cirTr)
-
-	pdf.SetMargins(marginLeft, 40, marginRight)
-
-	notPassedClientIds := make(map[uint]string)
-	for _, day := range seminar.Days {
-		for _, p := range day.Presence {
-			if !*p.Presence && !day.Date.After(time.Now()) {
-				notPassedClientIds[p.ClientID] = ""
-			}
-		}
-	}
-
-	for _, client := range seminar.Trainees {
-		if _, exist := notPassedClientIds[client.ClientID]; exist {
-			continue
-		}
-		pdf.AddPage()
-
-		pdf.SetFont("Arimo-Regular", "", 11)
-
-		pdf.Ln(5)
-		pdf.Text(10, pdf.GetY(), trObj.translDef("У складу са чланом 6. и чланом 7. уредбе ЕУ 2016/679 од 27. априла 2016. године и чланом 12. и чланом"))
-		pdf.Ln(5)
-		pdf.Text(10, pdf.GetY(), trObj.translDef("15. Закона о заштити пдатака о личности (СЛ. Гласник РС“, бр. 87/2018 од 13/11/2018) дајем пристанак за"))
-		pdf.Ln(5)
-		pdf.Text(10, pdf.GetY(), trObj.translDef("давање и обраду података о личности, где је руковалац обраде Срболаб."))
-		pdf.Ln(20)
-
-		pdf.SetFont("Arimo-Bold", "", 11)
-		pdf.Text(80, pdf.GetY(), trObj.translDef("ИЗЈАВА О ПРИСТАНКУ"))
-		pdf.Ln(20)
-
-		pdf.SetFont("Arimo-Regular", "", 11)
-		pdf.Text(10, pdf.GetY(), trObj.translDef("Ја"))
-		pdf.Line(17, pdf.GetY(), 77, pdf.GetY())
-		pdf.SetFont("Arimo-Bold", "", 11)
-		pdf.Text(18, pdf.GetY()-1, trObj.translDef(client.Client.Person.FullName()))
-		pdf.SetFont("Arimo-Regular", "", 11)
-		pdf.Text(77, pdf.GetY(), trObj.translDef("(име и презиме),"))
-		pdf.Line(108, pdf.GetY(), 165, pdf.GetY())
-		pdf.SetFont("Arimo-Bold", "", 11)
-		pdf.Text(110, pdf.GetY()-1, trObj.translDef(*client.Client.JMBG))
-		pdf.SetFont("Arimo-Regular", "", 11)
-		pdf.Text(167, pdf.GetY(), trObj.translDef("(ЈМБГ),"))
-
-		pdf.Ln(5)
-		pdf.SetFont("Arimo-Regular", "", 10)
-		pdf.Text(10, pdf.GetY(), trObj.translate("пристајем на давање и обраду следећих својих података о личности: подаци из личне карте/пасоша, подаци из", 10))
-		pdf.Ln(5)
-		pdf.Text(10, pdf.GetY(), trObj.translate("националне возачке дозволе, подаци из квалификационе картице возача, електронску адресу, контакт телефон", 10))
-		pdf.Ln(5)
-		pdf.Text(10, pdf.GetY(), trObj.translate("возача, подаци о стручној спреми, за потребе слања обавештења и информација.", 10))
-		pdf.Ln(15)
-
-		pdf.Text(10, pdf.GetY(), trObj.translate("Такође изјављујем да сам од Срболаб д.о.о. примио/ла сва неопходна обавештења, предвиђена чланом 23", 10))
-		pdf.Ln(5)
-		pdf.Text(10, pdf.GetY(), trObj.translate("Закона о заштити података о личности, као и обавештење да у сваком тренутку могу опозвати дат", 10))
-		pdf.Ln(5)
-		pdf.Text(10, pdf.GetY(), trObj.translate("пристанак, с тим да опозив пристанка не утиче на допуштеност обраде која је вршена на основу пристанка", 10))
-		pdf.Ln(5)
-		pdf.Text(10, pdf.GetY(), trObj.translate("пре опозива, као и да нисам у обавези да дам податке о личности који нису предвиђени као обавезни", 10))
-		pdf.Ln(5)
-		pdf.Text(10, pdf.GetY(), trObj.translate("законским и подзаконским актима и да исто неће бити од утицаја на прижање услуга од стране руковаоца.", 10))
-		pdf.Ln(25)
-
-		pdf.Text(15, pdf.GetY(), trObj.translDef("Датум: "))
-		pdf.Line(30, pdf.GetY(), 70, pdf.GetY())
-		//pdf.SetFont("Arimo-Bold", "", 11)
-		pdf.Text(35, pdf.GetY()-1, seminar.Start.Format("02.01.2006"))
-		pdf.SetFont("Arimo-Regular", "", 11)
-
-		pdf.Ln(15)
-
-		pdf.Text(15, pdf.GetY(), trObj.translDef("Потпис: "))
-		pdf.Line(30, pdf.GetY(), 70, pdf.GetY())
 	}
 
 	var buf bytes.Buffer
@@ -896,6 +796,67 @@ func (p *printService) PrintCheckIn(seminar *model.Seminar) ([]byte, error) {
 		pdf.Text(17, pdf.GetY(), trObj.translate("компетенцији и квалификационе картице возача, уколико сте покренули поступак издавања", 9))
 		pdf.Ln(4)
 		pdf.Text(17, pdf.GetY(), trObj.translate("квалификаионе картице и сертификата", 9))
+
+		//---------------------------------------------------
+		//confirmation statment
+		pdf.AddPage()
+		pdf.SetFont("Arimo-Regular", "", 11)
+
+		pdf.Ln(5)
+		pdf.Text(10, pdf.GetY(), trObj.translDef("У складу са чланом 6. и чланом 7. уредбе ЕУ 2016/679 од 27. априла 2016. године и чланом 12. и чланом"))
+		pdf.Ln(5)
+		pdf.Text(10, pdf.GetY(), trObj.translDef("15. Закона о заштити пдатака о личности (СЛ. Гласник РС“, бр. 87/2018 од 13/11/2018) дајем пристанак за"))
+		pdf.Ln(5)
+		pdf.Text(10, pdf.GetY(), trObj.translDef("давање и обраду података о личности, где је руковалац обраде Срболаб."))
+		pdf.Ln(20)
+
+		pdf.SetFont("Arimo-Bold", "", 11)
+		pdf.Text(80, pdf.GetY(), trObj.translDef("ИЗЈАВА О ПРИСТАНКУ"))
+		pdf.Ln(20)
+
+		pdf.SetFont("Arimo-Regular", "", 11)
+		pdf.Text(10, pdf.GetY(), trObj.translDef("Ја"))
+		pdf.Line(17, pdf.GetY(), 77, pdf.GetY())
+		pdf.SetFont("Arimo-Bold", "", 11)
+		pdf.Text(18, pdf.GetY()-1, trObj.translDef(client.Client.Person.FullName()))
+		pdf.SetFont("Arimo-Regular", "", 11)
+		pdf.Text(77, pdf.GetY(), trObj.translDef("(име и презиме),"))
+		pdf.Line(108, pdf.GetY(), 165, pdf.GetY())
+		pdf.SetFont("Arimo-Bold", "", 11)
+		pdf.Text(110, pdf.GetY()-1, trObj.translDef(*client.Client.JMBG))
+		pdf.SetFont("Arimo-Regular", "", 11)
+		pdf.Text(167, pdf.GetY(), trObj.translDef("(ЈМБГ),"))
+
+		pdf.Ln(5)
+		pdf.SetFont("Arimo-Regular", "", 10)
+		pdf.Text(10, pdf.GetY(), trObj.translate("пристајем на давање и обраду следећих својих података о личности: подаци из личне карте/пасоша, подаци из", 10))
+		pdf.Ln(5)
+		pdf.Text(10, pdf.GetY(), trObj.translate("националне возачке дозволе, подаци из квалификационе картице возача, електронску адресу, контакт телефон", 10))
+		pdf.Ln(5)
+		pdf.Text(10, pdf.GetY(), trObj.translate("возача, подаци о стручној спреми, за потребе слања обавештења и информација.", 10))
+		pdf.Ln(15)
+
+		pdf.Text(10, pdf.GetY(), trObj.translate("Такође изјављујем да сам од Срболаб д.о.о. примио/ла сва неопходна обавештења, предвиђена чланом 23", 10))
+		pdf.Ln(5)
+		pdf.Text(10, pdf.GetY(), trObj.translate("Закона о заштити података о личности, као и обавештење да у сваком тренутку могу опозвати дат", 10))
+		pdf.Ln(5)
+		pdf.Text(10, pdf.GetY(), trObj.translate("пристанак, с тим да опозив пристанка не утиче на допуштеност обраде која је вршена на основу пристанка", 10))
+		pdf.Ln(5)
+		pdf.Text(10, pdf.GetY(), trObj.translate("пре опозива, као и да нисам у обавези да дам податке о личности који нису предвиђени као обавезни", 10))
+		pdf.Ln(5)
+		pdf.Text(10, pdf.GetY(), trObj.translate("законским и подзаконским актима и да исто неће бити од утицаја на прижање услуга од стране руковаоца.", 10))
+		pdf.Ln(25)
+
+		pdf.Text(15, pdf.GetY(), trObj.translDef("Датум: "))
+		pdf.Line(30, pdf.GetY(), 70, pdf.GetY())
+		//pdf.SetFont("Arimo-Bold", "", 11)
+		pdf.Text(35, pdf.GetY()-1, seminar.Start.Format("02.01.2006"))
+		pdf.SetFont("Arimo-Regular", "", 11)
+
+		pdf.Ln(15)
+
+		pdf.Text(15, pdf.GetY(), trObj.translDef("Потпис: "))
+		pdf.Line(30, pdf.GetY(), 70, pdf.GetY())
 	}
 
 	var buf bytes.Buffer
@@ -1550,20 +1511,29 @@ func (p *printService) PrintSeminarReport(seminar *model.Seminar) ([]byte, error
 
 	teacherClassMap := map[string][]string{}
 	for _, c := range seminarDay.Classes {
-		classes, ok := teacherClassMap[c.Teacher.Person.FullName()]
+		teacher := ""
+		if c.Teacher != nil {
+			teacher = c.Teacher.Person.FullName()
+		}
+		classes, ok := teacherClassMap[teacher]
 		if ok {
 			classes = append(classes, c.Name)
-			teacherClassMap[c.Teacher.Person.FullName()] = classes
+			teacherClassMap[teacher] = classes
 		} else {
-			teacherClassMap[c.Teacher.Person.FullName()] = []string{c.Name}
+			teacherClassMap[teacher] = []string{c.Name}
 		}
 	}
 
 	pdf.Ln(25)
 	pdf.SetTextColor(47, 83, 150)
 	for k, classes := range teacherClassMap {
-		firstName := strings.Split(k, " ")[0]
-		lastName := strings.Split(k, " ")[1]
+		splitedTeacherName := strings.Split(k, " ")
+		firstName := ""
+		lastName := ""
+		if len(splitedTeacherName) > 1 {
+			firstName = strings.Split(k, " ")[0]
+			lastName = strings.Split(k, " ")[1]
+		}
 
 		lines, _ := splitLine(classes[0], 30)
 		if len(classes) == 1 && len(lines) == 1 {

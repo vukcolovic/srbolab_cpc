@@ -110,7 +110,6 @@ func RunServer(host string) {
 
 	s = r.PathPrefix("/api/print").Subrouter()
 	s.HandleFunc("/seminar/student-list/{seminar_id}", handlers.PrintSeminarStudentList).Methods("GET")
-	s.HandleFunc("/seminar/confirmation-statement/{seminar_id}", handlers.PrintConfirmationStatements).Methods("GET")
 	s.HandleFunc("/seminar/confirmation/{seminar_id}", handlers.PrintConfirmations).Methods("GET")
 	s.HandleFunc("/seminar/confirmation-receive/{seminar_id}", handlers.PrintConfirmationReceives).Methods("GET")
 	s.HandleFunc("/seminar/muster/{seminar_day_id}", handlers.PrintMuster).Methods("GET")
