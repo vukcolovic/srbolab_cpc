@@ -25,7 +25,7 @@ type questionServiceInterface interface {
 
 func (c *questionService) GetAllQuestions(skip, take int) ([]model.Question, error) {
 	var questions []model.Question
-	if err := db.Client.Order("id desc").Limit(take).Offset(skip).Preload("SeminarTheme").Preload("SeminarTheme.BaseSeminarType").Preload("Answers").Find(&questions).Error; err != nil {
+	if err := db.Client.Select("id", "content", "seminar_theme_id").Order("id desc").Limit(take).Offset(skip).Preload("SeminarTheme").Preload("SeminarTheme.BaseSeminarType").Find(&questions).Error; err != nil {
 		return nil, err
 	}
 	return questions, nil
