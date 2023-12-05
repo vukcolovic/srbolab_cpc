@@ -46,7 +46,7 @@
       </div>
       <div>
         <p v-if="isfinish" class="bg-info mt-1">Rezultat: {{(client_test.result * 100).toFixed(2)}}%</p>
-        <input v-if="!isfinish" class="btn btn-primary m-2" type="submit" value="Snimi">
+        <input v-if="!isfinish" :disabled="disableSaveButton" class="btn btn-primary m-2" type="submit" value="Snimi">
       </div>
     </form-tag>
 <!--    <h2 v-else>Test nije dozvoljen, obratite se rukovodiocu kursa.</h2>-->
@@ -87,7 +87,8 @@ export default {
       questions: [],
       seminarDayId: 0,
       isfinish: false,
-      allowed: false
+      allowed: false,
+      disableSaveButton: false,
     }
   },
   methods: {
@@ -133,7 +134,9 @@ export default {
       await this.createClientTest();
     },
     async createClientTest() {
+      this.disableSaveButton = true;
       this.seminarDay.date = this.getBackendFormat(this.seminarDay.date);
+      delete this.seminarDay.test.questions.forEach(q => q.image = "")
       this.client_test.seminar_day = this.seminarDay;
       this.client_test.test = this.seminarDay.test;
       await axios.post('/tests/client-test/create', JSON.stringify(this.client_test)).then((response) => {
