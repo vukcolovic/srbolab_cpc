@@ -619,6 +619,20 @@ func (p *printService) PrintMuster(day *model.SeminarDay) ([]byte, error) {
 
 	for i, cs := range day.Presence {
 		pdf.Ln(ch)
+		if pdf.GetY() > 177 {
+			pdf.Text(270, 200, strconv.Itoa(pdf.PageCount()))
+			pdf.CellFormat(10, ch, trObj.translDef("Р.Б."), "1", 0, "C", false, 0, "")
+			pdf.CellFormat(45, ch, trObj.translDef("Име и презиме / ЈМБГ"), "1", 0, "C", false, 0, "")
+			pdf.CellFormat(27, ch, trObj.translDef("1. час"), "1", 0, "C", false, 0, "")
+			pdf.CellFormat(27, ch, trObj.translDef("2. час"), "1", 0, "C", false, 0, "")
+			pdf.CellFormat(27, ch, trObj.translDef("3. час"), "1", 0, "C", false, 0, "")
+			pdf.CellFormat(27, ch, trObj.translDef("4. час"), "1", 0, "C", false, 0, "")
+			pdf.CellFormat(27, ch, trObj.translDef("5. час"), "1", 0, "C", false, 0, "")
+			pdf.CellFormat(27, ch, trObj.translDef("6. час"), "1", 0, "C", false, 0, "")
+			pdf.CellFormat(27, ch, trObj.translDef("7. час"), "1", 0, "C", false, 0, "")
+			pdf.CellFormat(31, ch, trObj.translDef("Напомена"), "1", 0, "C", false, 0, "")
+			pdf.Ln(ch)
+		}
 		pdf.CellFormat(10, ch, strconv.Itoa(i+1), "1", 0, "C", false, 0, "")
 		pdf.CellFormat(45, ch, "", "1", 0, "C", false, 0, "")
 		pdf.Text(22, pdf.GetY()+5, trObj.translDef(cs.Client.Person.FullName()))
@@ -631,6 +645,10 @@ func (p *printService) PrintMuster(day *model.SeminarDay) ([]byte, error) {
 		pdf.CellFormat(27, ch, "", "1", 0, "C", false, 0, "")
 		pdf.CellFormat(27, ch, "", "1", 0, "C", false, 0, "")
 		pdf.CellFormat(31, ch, "", "1", 0, "C", false, 0, "")
+	}
+
+	if pdf.GetY() < 177 {
+		pdf.Text(270, 200, strconv.Itoa(pdf.PageCount()))
 	}
 
 	var buf bytes.Buffer
