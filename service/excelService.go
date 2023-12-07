@@ -314,9 +314,11 @@ func (excelService) CreateSeminarsReportOfTeachers(seminars []model.Seminar) ([]
 	if err != nil {
 		return []byte{}, err
 	}
-	err = exc.SetCellStyle("Sheet1", "B3", columns[columnCounter-1]+"3", firstRowStyle)
-	if err != nil {
-		return []byte{}, err
+	if columnCounter > 0 {
+		err = exc.SetCellStyle("Sheet1", "B3", columns[columnCounter-1]+"3", firstRowStyle)
+		if err != nil {
+			return []byte{}, err
+		}
 	}
 
 	var buf bytes.Buffer
