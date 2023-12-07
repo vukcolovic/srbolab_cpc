@@ -28,6 +28,12 @@ type Seminar struct {
 	SerialNumberByLocation int             `json:"serial_number_by_location"`
 }
 
+type SeminarFilter struct {
+	LocationID int       `json:"location_id"`
+	DateFrom   time.Time `json:"date_from"`
+	DateTo     time.Time `json:"date_to"`
+}
+
 // Šifra obuke treba da se generiše automatski po principu: 7.3-226-LA-23-10-06
 // gde je 7 - oznaka za periodičnu obuku (kada je dodatna obuka umesto
 // 7.3 biće 35, kada je osnovna obuka biće 140),

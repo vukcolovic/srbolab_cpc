@@ -1,10 +1,12 @@
 package handlers
 
 import (
+	"encoding/json"
 	"errors"
 	"github.com/gorilla/mux"
 	"net/http"
 	"srbolab_cpc/logoped"
+	"srbolab_cpc/model"
 	"srbolab_cpc/service"
 	"strconv"
 )
@@ -69,6 +71,60 @@ func PrintListTraineesBySeminarDay(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logoped.ErrorLog.Println(err.Error())
 		SetErrorResponse(w, errors.New("Greška prilikom štampanja Excel izveštaja za spisak polaznika: "+err.Error()))
+		return
+	}
+
+	SetSuccessResponse(w, excel)
+}
+
+func PrintSeminarsReportOfClients(w http.ResponseWriter, r *http.Request) {
+	var filter model.SeminarFilter
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&filter)
+	if err != nil {
+		logoped.ErrorLog.Println("Error decoding seminar filter: ", err)
+		SetErrorResponse(w, NewJSONDecodeError("SeminarFilter"))
+		return
+	}
+
+	seminars, err := service.SeminarService.GetAllSeminarsWithTrainees(0, 10000, filter)
+	if err != nil {
+		logoped.ErrorLog.Println(err.Error())
+		SetErrorResponse(w, errors.New("Greška prilikom štampanja Excel izveštaja za statistiku polaznika: "+err.Error()))
+		return
+	}
+
+	excel, err := service.ExcelService.CreateSeminarsReportOfClients(seminars)
+	if err != nil {
+		logoped.ErrorLog.Println(err.Error())
+		SetErrorResponse(w, errors.New("Greška prilikom štampanja Excel izveštaja za statistiku polaznika: "+err.Error()))
+		return
+	}
+
+	SetSuccessResponse(w, excel)
+}
+
+func PrintSeminarsReportOfTeachers(w http.ResponseWriter, r *http.Request) {
+	var filter model.SeminarFilter
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&filter)
+	if err != nil {
+		logoped.ErrorLog.Println("Error decoding seminar filter: ", err)
+		SetErrorResponse(w, NewJSONDecodeError("SeminarFilter"))
+		return
+	}
+
+	seminars, err := service.SeminarService.GetAllSeminarsWithSeminarDays(0, 10000, filter)
+	if err != nil {
+		logoped.ErrorLog.Println(err.Error())
+		SetErrorResponse(w, errors.New("Greška prilikom štampanja Excel izveštaja za statistiku predavača: "+err.Error()))
+		return
+	}
+
+	excel, err := service.ExcelService.CreateSeminarsReportOfTeachers(seminars)
+	if err != nil {
+		logoped.ErrorLog.Println(err.Error())
+		SetErrorResponse(w, errors.New("Greška prilikom štampanja Excel izveštaja za statistiku predavača: "+err.Error()))
 		return
 	}
 

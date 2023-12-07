@@ -47,7 +47,7 @@ func RunServer(host string) {
 	s.HandleFunc("/create", handlers.CreateSeminar).Methods("POST")
 	s.HandleFunc("/update", handlers.UpdateSeminar).Methods("POST")
 	s.HandleFunc("/list/status/{status}", handlers.ListSeminarsByStatus).Methods("GET")
-	s.HandleFunc("/list", handlers.ListSeminars).Methods("GET")
+	s.HandleFunc("/list", handlers.ListSeminars).Methods("POST")
 	s.HandleFunc("/id/{id}", handlers.GetSeminarByID).Methods("GET")
 	s.HandleFunc("/delete/{id}", handlers.DeleteSeminar).Methods("GET")
 	s.HandleFunc("/count", handlers.CountSeminars).Methods("GET")
@@ -141,6 +141,8 @@ func RunServer(host string) {
 	s = r.PathPrefix("/api/excel").Subrouter()
 	s.HandleFunc("/client-tests/{seminar-day}", handlers.PrintClientTestsBySeminarDay).Methods("GET")
 	s.HandleFunc("/list_trainees/{seminar-day}", handlers.PrintListTraineesBySeminarDay).Methods("GET")
+	s.HandleFunc("/seminars-report/clients", handlers.PrintSeminarsReportOfClients).Methods("POST")
+	s.HandleFunc("/seminars-report/teachers", handlers.PrintSeminarsReportOfTeachers).Methods("POST")
 
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{"*"}, // All origins

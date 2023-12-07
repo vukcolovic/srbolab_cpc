@@ -7,6 +7,7 @@ import (
 	"srbolab_cpc/logoped"
 	"srbolab_cpc/model"
 	"strconv"
+	"strings"
 )
 
 const SeminarFolder = "seminars"
@@ -19,7 +20,9 @@ type seminarService struct {
 }
 
 type seminarServiceInterface interface {
-	GetAllSeminars(skip, take int) ([]model.Seminar, error)
+	GetAllSeminars(skip, take int, filter model.SeminarFilter) ([]model.Seminar, error)
+	GetAllSeminarsWithTrainees(skip, take int, filter model.SeminarFilter) ([]model.Seminar, error)
+	GetAllSeminarsWithSeminarDays(skip, take int, filter model.SeminarFilter) ([]model.Seminar, error)
 	GetAllSeminarsByStatus(statusCode string) ([]model.Seminar, error)
 	GetSeminarByID(id int) (*model.Seminar, error)
 	GetSeminarByIDWithClientFiles(id int) (*model.Seminar, error)
@@ -32,13 +35,65 @@ type seminarServiceInterface interface {
 	GetClientSeminarBySeminarIDAndClientID(seminarID, clientID uint) (*model.ClientSeminar, error)
 }
 
-func (c *seminarService) GetAllSeminars(skip, take int) ([]model.Seminar, error) {
+func (c *seminarService) GetAllSeminars(skip, take int, filter model.SeminarFilter) ([]model.Seminar, error) {
 	var seminars []model.Seminar
-	if err := db.Client.Order("start desc").Limit(take).Offset(skip).Preload("ClassRoom.Location").Joins("ClassRoom").Joins("SeminarTheme").Joins("SeminarTheme.BaseSeminarType").Joins("SeminarStatus").Find(&seminars).Error; err != nil {
+	query := buildQuery(filter)
+	if err := db.Client.Where(query).Order("start desc").Limit(take).Offset(skip).Preload("ClassRoom.Location").Joins("ClassRoom").Joins("SeminarTheme").Joins("SeminarTheme.BaseSeminarType").Joins("SeminarStatus").Find(&seminars).Error; err != nil {
 		logoped.ErrorLog.Println("Error getting all seminars " + err.Error())
 		return nil, err
 	}
 	return seminars, nil
+}
+
+func (c *seminarService) GetAllSeminarsWithTrainees(skip, take int, filter model.SeminarFilter) ([]model.Seminar, error) {
+	var seminars []model.Seminar
+	query := buildQuery(filter)
+	if err := db.Client.Where(query).Order("start desc").Limit(take).Offset(skip).Preload("ClassRoom.Location").Joins("ClassRoom").Joins("SeminarTheme").Joins("SeminarTheme.BaseSeminarType").Joins("SeminarStatus").Preload("Trainees").Find(&seminars).Error; err != nil {
+		logoped.ErrorLog.Println("Error getting all seminars " + err.Error())
+		return nil, err
+	}
+	return seminars, nil
+}
+
+func (c *seminarService) GetAllSeminarsWithSeminarDays(skip, take int, filter model.SeminarFilter) ([]model.Seminar, error) {
+	var seminars []model.Seminar
+	query := buildQuery(filter)
+	if err := db.Client.Where(query).Order("start desc").Limit(take).Offset(skip).Preload("ClassRoom.Location").Joins("ClassRoom").Joins("SeminarTheme").Joins("SeminarTheme.BaseSeminarType").Joins("SeminarStatus").Preload("Days").Preload("Days.Classes").Preload("Days.Classes.Teacher").Find(&seminars).Error; err != nil {
+		logoped.ErrorLog.Println("Error getting all seminars " + err.Error())
+		return nil, err
+	}
+	return seminars, nil
+}
+
+func buildQuery(filter model.SeminarFilter) string {
+	query := ""
+	if filter.LocationID > 0 {
+		classRooms, err := ClassRoomService.GetClassRoomsByLocationID(filter.LocationID)
+		if err != nil {
+			logoped.ErrorLog.Println("Error making seminar query: " + err.Error())
+		}
+		query = query + "class_room_id IN ("
+		for _, c := range classRooms {
+			query = query + strconv.Itoa(int(c.ID)) + ", "
+		}
+
+		query, _ = strings.CutSuffix(query, ", ")
+		query = query + ")"
+	}
+	if !filter.DateFrom.IsZero() {
+		if query != "" {
+			query = query + " AND "
+		}
+		query = query + "start >= " + "'" + filter.DateFrom.Format("2006-01-02") + "'" + "::date"
+	}
+	if !filter.DateTo.IsZero() {
+		if query != "" {
+			query = query + " AND "
+		}
+		query = query + "start < " + "'" + filter.DateTo.Format("2006-01-02") + "'" + "::date + " + "'1 day'::interval"
+	}
+
+	return query
 }
 
 func (c *seminarService) GetAllSeminarsByStatus(statusCode string) ([]model.Seminar, error) {

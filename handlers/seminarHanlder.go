@@ -32,6 +32,14 @@ func CreateSeminar(w http.ResponseWriter, r *http.Request) {
 }
 
 func ListSeminars(w http.ResponseWriter, r *http.Request) {
+	var filter model.SeminarFilter
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&filter)
+	if err != nil {
+		logoped.ErrorLog.Println("Error decoding seminar filter: ", err)
+		SetErrorResponse(w, NewJSONDecodeError("SeminarFilter"))
+		return
+	}
 	queryParams := r.URL.Query()
 	skipParam, ok := queryParams["skip"]
 	if !ok {
@@ -59,7 +67,7 @@ func ListSeminars(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	seminars, err := service.SeminarService.GetAllSeminars(skip, take)
+	seminars, err := service.SeminarService.GetAllSeminars(skip, take, filter)
 	if err != nil {
 		logoped.ErrorLog.Println(err.Error())
 		SetErrorResponse(w, errors.New("Greška prilikom povlačenja liste seminara: "+err.Error()))
