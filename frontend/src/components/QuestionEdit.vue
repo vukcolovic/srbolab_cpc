@@ -31,9 +31,11 @@
         <button v-if="question.image" class="iconBtn" title="Obriši" @click.prevent="removeImage()">
           <i class="fa fa-remove"></i>
         </button>
+        <button v-if="question.image" class="iconBtn" title="Preuzmi" @click.prevent="downloadFile(index)">
+          <i class="fa fa-download"></i>
+        </button>
         <br>
         <input id="fileId" ref="file" type="file" @change="uploadFile()"/>
-
         <hr>
         <h6>Ponuđeni odgovori:</h6>
         <div class="row" v-for="answer in question.answers" :key="answer.ID">
@@ -100,6 +102,17 @@ export default {
     }
   },
   methods: {
+    downloadFile() {
+      const arr = this.question.image.split(',')
+      var sampleArr = this.base64ToArrayBuffer(arr[1]);
+      const blob = new Blob([sampleArr])
+
+      const link = document.createElement('a')
+      link.href = URL.createObjectURL(blob)
+      link.download = "slika.png";
+      link.click()
+      URL.revokeObjectURL(link.href)
+    },
     removeImage() {
       this.question.image = "";
     },

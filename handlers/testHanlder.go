@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/gorilla/mux"
 	"net/http"
 	"srbolab_cpc/logoped"
@@ -181,13 +182,17 @@ func SaveClientTest(w http.ResponseWriter, r *http.Request) {
 		SetErrorResponse(w, NewJSONDecodeError("ClientTest"))
 		return
 	}
+	logoped.InfoLog.Println(fmt.Sprintf("Saving client test, client %s, seminar day %d, test %d",
+		clientTest.Jmbg, clientTest.SeminarDay.ID, clientTest.Test.ID))
 
 	msg, err := isTestValid(&clientTest)
 	if err != nil {
+		logoped.ErrorLog.Println("Error saving client test, test is not valid, error: ", err.Error())
 		SetErrorResponse(w, errors.New("Greška prilikom snimanja testa: "+err.Error()))
 		return
 	}
 	if len(msg) > 0 {
+		logoped.ErrorLog.Println("Error saving client test, test is not valid, message: ", msg)
 		SetErrorResponse(w, errors.New(msg))
 		return
 	}
