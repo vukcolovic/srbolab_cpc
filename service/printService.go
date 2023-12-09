@@ -1632,7 +1632,7 @@ func (p *printService) PrintSeminarReport(seminar *model.Seminar) ([]byte, error
 
 	}
 
-	pdf.Ln(10)
+	pdf.AddPage()
 	ch = 10.0
 	pdf.Text(15, pdf.GetY(), trObj.translDef("Списак полазника:"))
 	pdf.Ln(3)
@@ -1657,7 +1657,7 @@ func (p *printService) PrintSeminarReport(seminar *model.Seminar) ([]byte, error
 		pdf.Ln(ch)
 	}
 
-	pdf.Ln(10)
+	pdf.AddPage()
 	pdf.Text(15, pdf.GetY(), trObj.translDef("Евалуација наставе:"))
 	pdf.Ln(3)
 
@@ -1668,7 +1668,7 @@ func (p *printService) PrintSeminarReport(seminar *model.Seminar) ([]byte, error
 	pdf.Ln(5)
 
 	ch = 5
-	pdf.CellFormat(80, ch, trObj.translDef("Простор је био пријатан за рад(осветлење,"), "TLR", 0, "L", false, 0, "")
+	pdf.CellFormat(80, ch, trObj.translDef("Простор је био пријатан за рад(осветљење,"), "TLR", 0, "L", false, 0, "")
 	pdf.CellFormat(13, ch, "", "TLR", 0, "L", false, 0, "")
 	pdf.CellFormat(80, ch, trObj.translDef("Предавачи су се придржавали сатнице"), "TLR", 0, "L", false, 0, "")
 	pdf.CellFormat(13, ch, "", "TLR", 0, "L", false, 0, "")
