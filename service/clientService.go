@@ -30,35 +30,61 @@ type clientServiceInterface interface {
 	UpdateClient(client model.Client, userID int) (*model.Client, error)
 }
 
-func makeFilterMap(filter model.ClientFilter) map[string]interface{} {
-	filterMap := make(map[string]interface{})
+func buildClientQuery(filter model.ClientFilter) string {
+	query := ""
 	if len(filter.FirstName) > 0 {
-		filterMap["first_name"] = filter.FirstName
+		if query != "" {
+			query = query + " AND "
+		}
+		query = query + ` first_name ILIKE ` + "'" + filter.FirstName + "%'"
 	}
 	if len(filter.LastName) > 0 {
-		filterMap["last_name"] = filter.LastName
+		if query != "" {
+			query = query + " AND "
+		}
+		query = query + ` last_name ILIKE ` + "'" + filter.LastName + "%'"
 	}
 	if len(filter.JMBG) > 0 {
-		filterMap["jmbg"] = filter.JMBG
+		if query != "" {
+			query = query + " AND "
+		}
+		query = query + ` jmbg ILIKE ` + "'" + filter.JMBG + "%'"
 	}
-
+	if filter.CompanyID > 0 {
+		if query != "" {
+			query = query + " AND "
+		}
+		query = query + ` company_id = ` + strconv.Itoa(filter.CompanyID)
+	}
 	if len(filter.Verified) > 0 {
 		if filter.Verified == "true" {
-			filterMap["verified"] = true
+			if query != "" {
+				query = query + " AND "
+			}
+			query = query + ` verified = true`
 		} else {
-			filterMap["verified"] = false
+			if query != "" {
+				query = query + " AND "
+			}
+			query = query + ` verified = false`
 		}
 	}
 
 	if len(filter.WaitSeminar) > 0 {
 		if filter.WaitSeminar == "true" {
-			filterMap["wait_seminar"] = true
+			if query != "" {
+				query = query + " AND "
+			}
+			query = query + ` wait_seminar = true`
 		} else {
-			filterMap["wait_seminar"] = false
+			if query != "" {
+				query = query + " AND "
+			}
+			query = query + ` wait_seminar = false`
 		}
 	}
 
-	return filterMap
+	return query
 }
 
 func (c *clientService) GetAllClients(skip, take int, filter model.ClientFilter) ([]model.Client, error) {
@@ -83,8 +109,8 @@ func (c *clientService) GetAllClients(skip, take int, filter model.ClientFilter)
 		return clients, nil
 	}
 
-	filterMap := makeFilterMap(filter)
-	if err := db.Client.Where(filterMap).Order("id desc").Limit(take).Offset(skip).Find(&clients).Error; err != nil {
+	query := buildClientQuery(filter)
+	if err := db.Client.Where(query).Order("id desc").Limit(take).Offset(skip).Find(&clients).Error; err != nil {
 		return nil, err
 	}
 

@@ -56,6 +56,7 @@ type ClientFilter struct {
 	JMBG        string `json:"jmbg"`
 	WaitSeminar string `json:"wait_seminar"`
 	Verified    string `json:"verified"`
+	CompanyID   int    `json:"company_id"`
 	WaitingRoom bool   `json:"waiting_room"`
 }
 

@@ -39,6 +39,19 @@
           <label for="jmbg" style="margin-right: 5px">JMBG</label>
           <input type="text" id="jmbg" name="jmbg" v-model="filter.jmbg" />
         </div>
+        <div class="col-sm-4">
+        </div>
+        <div class="col-sm-3">
+          <label :style="styleLabelSmall" class="mb-1">Firma</label>
+          <v-select
+              v-model="filter.company_id"
+              :options="companies"
+              :style="styleInputSmall"
+              :reduce="opt => opt.ID"
+              label="name_pib"
+              placeholder="Traži">
+          </v-select>
+        </div>
         <div class="col-sm-2 my-1">
           <label for="verified" style="margin-right: 5px">Verifikovan:</label>
           <v-select
@@ -92,14 +105,15 @@ import {styleMixin} from "@/mixins/styleMixin";
 import vSelect from "vue-select";
 import {commonMixin} from "@/mixins/commonMixin";
 import router from "@/router";
+import {apiMixin} from "@/mixins/apiMixin";
 
 export default {
   name: 'ClientsList',
-  mixins: [styleMixin, commonMixin],
+  mixins: [styleMixin, commonMixin, apiMixin],
   components: {vSelect, VueTableLite },
   data() {
     return {
-      filter: {verified: "", wait_seminar: "", jmbg: "", first_name: "", last_name: ""},
+      filter: {verified: "", wait_seminar: "", jmbg: "", first_name: "", last_name: "", company_id: null},
       pageSize: 50,
     }
   },
@@ -246,6 +260,7 @@ export default {
   },
   async created() {
     await this.countClients();
+    await this.getAllCompanies();
     await this.doSearch(0, this.pageSize, 'id', 'asc');
   }
 }
