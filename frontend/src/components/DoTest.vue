@@ -10,7 +10,7 @@
           type="text">
       </text-input>
       <br>
-      <button type="button" @click="sendJmbg()" class="btn btn-primary">Pošalji</button>
+      <button type="button" :disabled="disableJMBGButton" @click="sendJmbg()" class="btn btn-primary">Pošalji</button>
     </div>
 
     <form-tag v-if="allowed" event="formEvent" name="myForm" @formEvent="submitHandler">
@@ -89,10 +89,15 @@ export default {
       isfinish: false,
       allowed: false,
       disableSaveButton: false,
+      disableJMBGButton: false,
     }
   },
   methods: {
     async sendJmbg() {
+      if (this.disableJMBGButton) {
+        return;
+      }
+      this.disableJMBGButton = true;
       await axios.get('/seminar-days/jmbg/' + this.client_test.jmbg).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");
