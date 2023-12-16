@@ -1393,7 +1393,7 @@ func (p *printService) PrintSeminarReport(seminar *model.Seminar) ([]byte, error
 
 	pdf.Text(15, pdf.GetY(), trObj.translDef(fmt.Sprintf("Семинар унапређења знања реализован %s године са почетком у %s и завршетком у", seminar.Start.Format("02.01.2006."), seminarDay.Date.Format("15:04"))))
 	pdf.Ln(5)
-	pdf.Text(15, pdf.GetY(), trObj.translDef(fmt.Sprintf("%s, на адреси Центра за обуку у Србобрану, Туријски пут 17. Семинару је присуствовало %s", seminarDay.Date.Add(375*time.Minute).Format("15:04"), strconv.Itoa(presenceTrue))))
+	pdf.Text(15, pdf.GetY(), trObj.translDef(fmt.Sprintf("%s, на адреси Центра за обуку %s, %s. Семинару је присуствовало %s", seminarDay.Date.Add(375*time.Minute).Format("15:04"), seminar.ClassRoom.Location.Address.Place, seminar.ClassRoom.Location.Address.GetStreetWithNumber(), strconv.Itoa(presenceTrue))))
 
 	sentence := fmt.Sprintf("од најављених %s полазника", strconv.Itoa(len(seminarDay.Presence)))
 	if len(notPresendet) == 0 {
@@ -1799,7 +1799,7 @@ func (p *printService) PrintSeminarReport(seminar *model.Seminar) ([]byte, error
 	pdf.Text(15, pdf.GetY()+4, trObj.translDef("Семинар унапређења знања успешно је реализован уз активно учешће полазника."))
 
 	pdf.Ln(15)
-	pdf.Text(175, pdf.GetY(), trObj.translDef("Србобран,"))
+	pdf.Text(160, pdf.GetY(), trObj.translDef(seminar.ClassRoom.Location.Address.Place+","))
 	pdf.Ln(4)
 	pdf.Text(160, pdf.GetY(), trObj.translDef(seminar.Start.Format("02.01.2006.")+" године"))
 
