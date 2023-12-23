@@ -3,8 +3,6 @@ package service
 import (
 	"bytes"
 	"fmt"
-	"github.com/go-pdf/fpdf"
-	"github.com/skip2/go-qrcode"
 	"os"
 	"path/filepath"
 	"sort"
@@ -15,6 +13,9 @@ import (
 	"strings"
 	"time"
 	"unicode"
+
+	"github.com/go-pdf/fpdf"
+	"github.com/skip2/go-qrcode"
 )
 
 var (
@@ -1426,9 +1427,9 @@ func (p *printService) PrintSeminarReport(seminar *model.Seminar) ([]byte, error
 		pdf.Text(15, pdf.GetY(), trObj.translDef(line))
 
 	}
-	pdf.Ln(10)
+	pdf.Ln(7)
 
-	ch := 6.0
+	ch := 5.0
 	pdf.SetTextColor(0, 0, 0)
 	pdf.SetFillColor(146, 208, 80)
 	pdf.CellFormat(45, ch, trObj.translDef("Тема семинара:"), "TLR", 0, "C", true, 0, "")
@@ -1444,7 +1445,7 @@ func (p *printService) PrintSeminarReport(seminar *model.Seminar) ([]byte, error
 	pdf.CellFormat(28, ch, trObj.translDef("полазника:"), "BLR", 0, "C", true, 0, "")
 
 	pdf.Ln(ch)
-	ch = 7.0
+	ch = 5.0
 	pdf.SetTextColor(47, 83, 150)
 	lines, _ = splitLine(seminarDay.Name, 22)
 	for i, line := range lines {
@@ -1633,7 +1634,7 @@ func (p *printService) PrintSeminarReport(seminar *model.Seminar) ([]byte, error
 	}
 
 	pdf.AddPage()
-	ch = 10.0
+	ch = 7.0
 	pdf.Text(15, pdf.GetY(), trObj.translDef("Списак полазника:"))
 	pdf.Ln(3)
 
