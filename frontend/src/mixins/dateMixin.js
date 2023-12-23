@@ -49,6 +49,12 @@ export const dateMixin = {
             var t = date.split('T')[1];
             return t.split(':')[0] + ":" + t.split(':')[1];
         },
+        //expected format 2023-12-23T00:00:00+01:00
+        sameDayFromString(d1, d2) {
+            var arr1 = d1.split("T");
+            var arr2 = d2.split("T");
+            return arr1.length > 0 && arr2.length > 0 && arr1[0] === arr2[0];
+          },
         formatDateWithPoints(inputDate) {
             if (inputDate == null) {
                 return null;

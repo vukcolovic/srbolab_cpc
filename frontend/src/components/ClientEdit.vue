@@ -789,6 +789,10 @@ export default {
         if (this.selectedOpenSeminar.pay_date) {
           payDate = this.selectedOpenSeminar.pay_date;
         }
+        if (this.client.seminars.find(s => this.sameDayFromString(s.seminar.start_date, this.selectedOpenSeminar.start_date))) {
+          this.toast.warning("Ne možete izabrati seminar sa koji je istog dana kao seminar na koji ste već prijavljeni!");
+          return;
+        }
         if (!this.client.seminars.find(s => s.seminar_id === this.selectedOpenSeminar.ID)) {
           this.client.seminars.push({"client_id": this.client.ID, "seminar_id": this.selectedOpenSeminar.ID, payed: this.selectedOpenSeminar.payed, payed_by: this.selectedOpenSeminar.payed_by, pay_date: payDate});
         }
@@ -799,6 +803,10 @@ export default {
         var payDateInProg = null;
         if (this.selectedInProgressSeminar.pay_date) {
           payDateInProg = this.selectedInProgressSeminar.pay_date;
+        }
+        if (this.client.seminars.find(s => this.sameDayFromString(s.seminar.start_date, this.selectedInProgressSeminar.start_date))) {
+          this.toast.warning("Ne možete izabrati seminar sa koji je istog dana kao seminar na koji ste već prijavljeni!");
+          return;
         }
         if (!this.client.seminars.find(s => s.seminar_id === this.selectedInProgressSeminar.ID)) {
           this.client.seminars.push({"client_id": this.client.ID, "seminar_id": this.selectedInProgressSeminar.ID, payed: this.selectedInProgressSeminar.payed, payed_by: this.selectedInProgressSeminar.payed_by, pay_date: payDateInProg});
