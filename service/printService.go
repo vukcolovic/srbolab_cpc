@@ -223,19 +223,19 @@ func (p *printService) PrintConfirmations(seminar *model.Seminar) ([]byte, error
 		if client.ConfirmationNumber == 0 {
 			maxConfNum++
 			client.ConfirmationNumber = maxConfNum
-			//var t = true
-			//switch client.Seminar.SeminarTheme.Code {
-			//case "1":
-			//	client.Client.PassedCheckboxes.Burden = &t
-			//case "2":
-			//	client.Client.PassedCheckboxes.Burden = &t
-			//case "3":
-			//	client.Client.PassedCheckboxes.Burden = &t
-			//case "4":
-			//	client.Client.PassedCheckboxes.Burden = &t
-			//case "5":
-			//	client.Client.PassedCheckboxes.Burden = &t
-			//}
+			var t = true
+			switch seminar.SeminarTheme.Code {
+			case "1":
+				client.Client.PassedCheckboxes.WorkTimeAndTahografs = &t
+			case "2":
+				client.Client.PassedCheckboxes.ThemeDocuments = &t
+			case "3":
+				client.Client.PassedCheckboxes.Burden = &t
+			case "4":
+				client.Client.PassedCheckboxes.Regulations = &t
+			case "5":
+				client.Client.PassedCheckboxes.Tahografs2 = &t
+			}
 			_, err = ClientSeminarService.UpdateClientSeminar(client)
 			if err != nil {
 				return nil, err
