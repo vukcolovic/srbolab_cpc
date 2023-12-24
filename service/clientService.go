@@ -2,11 +2,12 @@ package service
 
 import (
 	"errors"
-	"gorm.io/gorm"
 	"srbolab_cpc/db"
 	"srbolab_cpc/model"
 	"strconv"
 	"strings"
+
+	"gorm.io/gorm"
 )
 
 const ClientFolder = "clients"
@@ -247,6 +248,10 @@ func (c *clientService) UpdateClient(client model.Client, userID int) (*model.Cl
 				FileService.DeleteFile(FileService.GetPath(ClientFolder, strconv.Itoa(int(client.ID)), od.Name))
 			}
 			result := db.Client.Exec("DELETE FROM client_file WHERE client_id = ? AND file_id = ?", client.ID, od.ID)
+			if result.Error != nil {
+				return nil, result.Error
+			}
+			result = db.Client.Exec("DELETE FROM files WHERE id = ?", od.ID)
 			if result.Error != nil {
 				return nil, result.Error
 			}

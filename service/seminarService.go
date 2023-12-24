@@ -2,12 +2,13 @@ package service
 
 import (
 	"errors"
-	"gorm.io/gorm"
 	"srbolab_cpc/db"
 	"srbolab_cpc/logoped"
 	"srbolab_cpc/model"
 	"strconv"
 	"strings"
+
+	"gorm.io/gorm"
 )
 
 const SeminarFolder = "seminars"
@@ -217,6 +218,10 @@ func (c *seminarService) UpdateSeminar(seminar model.Seminar) (*model.Seminar, e
 			result := db.Client.Exec("DELETE FROM seminar_file WHERE seminar_id = ? AND file_id = ?", seminar.ID, od.ID)
 			if result.Error != nil {
 				logoped.ErrorLog.Println("Error updating seminar, delete from seminar file")
+				return nil, result.Error
+			}
+			result = db.Client.Exec("DELETE FROM files WHERE id = ?", od.ID)
+			if result.Error != nil {
 				return nil, result.Error
 			}
 		}

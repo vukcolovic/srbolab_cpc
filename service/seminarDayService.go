@@ -2,12 +2,13 @@ package service
 
 import (
 	"errors"
-	"gorm.io/gorm"
 	"srbolab_cpc/db"
 	"srbolab_cpc/model"
 	"srbolab_cpc/util"
 	"strconv"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 const SeminarDayFolder = "seminar_days"
@@ -84,6 +85,10 @@ func (c *seminarDayService) UpdateSeminarDay(seminarDay model.SeminarDay) (*mode
 				FileService.DeleteFile(FileService.GetPath(SeminarDayFolder, strconv.Itoa(int(seminarDay.ID)), od.Name))
 			}
 			result := db.Client.Exec("DELETE FROM seminarday_file WHERE seminar_day_id = ? AND file_id = ?", seminarDay.ID, od.ID)
+			if result.Error != nil {
+				return nil, result.Error
+			}
+			result = db.Client.Exec("DELETE FROM files WHERE id = ?", od.ID)
 			if result.Error != nil {
 				return nil, result.Error
 			}
