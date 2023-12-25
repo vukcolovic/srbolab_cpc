@@ -1830,19 +1830,19 @@ func (p *printService) PrintSeminarReport2(seminar *model.Seminar) ([]byte, erro
 	pdf.SetMargins(15.0, marginTop, marginRight)
 	pdf.AddPage()
 
-	pdf.Ln(20)
+	pdf.Ln(5)
 	pdf.SetTextColor(47, 83, 150)
 	pdf.Text(85, pdf.GetY(), trObj.translate("Срболаб доо", 15))
-	pdf.Ln(12)
+	pdf.Ln(9)
 
 	pdf.Text(55, pdf.GetY(), trObj.translate("Центар за едукацију и развој Срболаб", 17))
-	pdf.Ln(12)
+	pdf.Ln(9)
 
 	pdf.Text(40, pdf.GetY(), trObj.translate("Извештај о реализованој периодичној обуци", 19))
-	pdf.Ln(12)
+	pdf.Ln(9)
 
 	pdf.Text(65, pdf.GetY(), trObj.translate(fmt.Sprintf("Центар за обуку у %s", seminar.ClassRoom.Location.GetLocationForSentence()), 15))
-	pdf.Ln(20)
+	pdf.Ln(12)
 
 	pdf.Text(20, pdf.GetY(), trObj.translate("1. Основни подаци о Центру и времену одржавања", 13))
 	pdf.Ln(5)
@@ -1881,7 +1881,7 @@ func (p *printService) PrintSeminarReport2(seminar *model.Seminar) ([]byte, erro
 	}
 
 	pdf.CellFormat(115, ch, trObj.translDef(fmt.Sprintf("%s до %s", start, end)), "1", 0, "L", true, 0, "")
-	pdf.Ln(20)
+	pdf.Ln(15)
 
 	pdf.SetTextColor(47, 83, 150)
 	pdf.Text(20, pdf.GetY(), trObj.translate(fmt.Sprintf("2.  Полазници (%s)", seminar.GetCode()), 13))
@@ -1921,6 +1921,7 @@ func (p *printService) PrintSeminarReport2(seminar *model.Seminar) ([]byte, erro
 
 	pdf.SetFont("Helvetica", "", 10)
 	pdf.SetFillColor(255, 255, 255)
+	ch = 5
 	firstLine := true
 	borderGlobal := "LR"
 	mapRowNum := 0
@@ -1930,7 +1931,7 @@ func (p *printService) PrintSeminarReport2(seminar *model.Seminar) ([]byte, erro
 			k = "Физичко лице"
 		}
 
-		lines, _ := splitLine(k, 19)
+		lines, _ := splitLine(k, 18)
 		for i, line := range lines {
 			date := ""
 			total := ""
@@ -1946,7 +1947,6 @@ func (p *printService) PrintSeminarReport2(seminar *model.Seminar) ([]byte, erro
 				numByCompany = strconv.Itoa(v)
 				border = "TLR"
 			} else {
-				ch = 5
 			}
 
 			if mapRowNum == len(companyMap) && i+1 == len(lines) {
@@ -1965,17 +1965,17 @@ func (p *printService) PrintSeminarReport2(seminar *model.Seminar) ([]byte, erro
 			pdf.CellFormat(30, ch, "", border, 0, "C", true, 0, "")
 			pdf.CellFormat(30, ch, "", border, 0, "C", true, 0, "")
 			pdf.Ln(ch)
-
-			ch = 7
 		}
 	}
+
+	ch = 7
 
 	pdf.SetFillColor(232, 238, 248)
 	pdf.SetTextColor(47, 83, 150)
 	pdf.Rect(15, pdf.GetY(), 25, ch, "FD")
 	pdf.Text(21, pdf.GetY()+5, trObj.translate("Укупно", 12))
 	pdf.Rect(40, pdf.GetY(), 25, ch, "FD")
-	pdf.Text(44, pdf.GetY()+5, strconv.Itoa(totalNum))
+	pdf.Text(50, pdf.GetY()+5, strconv.Itoa(totalNum))
 	pdf.Rect(65, pdf.GetY(), 130, ch, "FD")
 	pdf.Text(74, pdf.GetY()+5, trObj.translate("Напомена:", 12))
 
