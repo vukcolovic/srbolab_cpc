@@ -617,6 +617,10 @@ export default {
       location.reload();
     },
     finishSeminar() {
+      const response = confirm("Da li ste sigurni da želite da završite seminar?");
+      if (!response) {
+        return;
+      }
       this.seminar.seminar_status = this.seminarStatuses.find(ss => ss.ID == this.SEMINAR_STATUSES.CLOSED);
       this.updateSeminar();
     }
