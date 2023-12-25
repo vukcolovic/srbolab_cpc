@@ -167,7 +167,7 @@ func (c *seminarDayService) CreateAllSeminarDaysForSeminar(seminarID int) ([]mod
 			return []model.SeminarDay{}, result.Error
 		}
 
-		seminarDays = append(seminarDays)
+		seminarDays = append(seminarDays, day)
 		dateForDay = util.IfWeekendGetFirstWorkDay(dateForDay.AddDate(0, 0, 1))
 	}
 
