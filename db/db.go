@@ -2,11 +2,12 @@ package db
 
 import (
 	"fmt"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 	"srbolab_cpc/config"
 	"srbolab_cpc/model"
 	"strconv"
+
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 var Client *gorm.DB
@@ -36,6 +37,9 @@ func Connect(conf config.Config) error {
 		&model.ClientTest{},
 		&model.SeminarClassName{},
 		&model.SeminarDayThemeName{},
+		&model.Survey{},
+		&model.ClientSurvey{},
+		&model.SurveyQuestionAnswer{},
 	)
 	if err != nil {
 		return err

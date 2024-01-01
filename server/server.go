@@ -1,11 +1,12 @@
 package server
 
 import (
-	"github.com/gorilla/mux"
-	"github.com/rs/cors"
 	"net/http"
 	"srbolab_cpc/handlers"
 	"srbolab_cpc/middleware"
+
+	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 )
 
 func RunServer(host string) {
@@ -143,6 +144,16 @@ func RunServer(host string) {
 	s.HandleFunc("/list_trainees/{seminar-day}", handlers.PrintListTraineesBySeminarDay).Methods("GET")
 	s.HandleFunc("/seminars-report/clients", handlers.PrintSeminarsReportOfClients).Methods("POST")
 	s.HandleFunc("/seminars-report/teachers", handlers.PrintSeminarsReportOfTeachers).Methods("POST")
+
+	s = r.PathPrefix("/api/survey-questions").Subrouter()
+	s.HandleFunc("/list", handlers.ListSurveyQuestions).Methods("GET")
+	s.HandleFunc("/create", handlers.CreateSurveyQuestion).Methods("POST")
+	s.HandleFunc("/id/{id}", handlers.GetSurveyQuestionByID).Methods("GET")
+
+	s = r.PathPrefix("/api/surveys").Subrouter()
+	s.HandleFunc("/list", handlers.ListSurveys).Methods("GET")
+	s.HandleFunc("/create", handlers.CreateSurvey).Methods("POST")
+	s.HandleFunc("/id/{id}", handlers.GetSurveyByID).Methods("GET")
 
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{"*"}, // All origins

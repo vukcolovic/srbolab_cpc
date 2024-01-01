@@ -70,6 +70,12 @@
               <li>
                 <router-link class="dropdown-item" to="/theme-names">Nazivi tema</router-link>
               </li>
+              <li>
+                <router-link class="dropdown-item" to="/survey-questions">Pitanja za anketu</router-link>
+              </li>
+              <li>
+                <router-link class="dropdown-item" to="/surveys">Ankete</router-link>
+              </li>
             </ul>
           </li>
           <li class="nav-item">

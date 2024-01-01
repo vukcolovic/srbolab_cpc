@@ -40,8 +40,6 @@
                   :readonly=true
               ></text-area-input>
             </div>
-
-
           </div>
         </div>
       </div>

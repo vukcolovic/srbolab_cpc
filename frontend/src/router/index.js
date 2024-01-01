@@ -26,6 +26,10 @@ import ClassNamesList from '../components/ClassNamesList.vue'
 import ClassNameEdit from '../components/ClassNameEdit.vue'
 import ThemeNamesList from '../components/ThemeNamesList.vue'
 import ThemeNameEdit from '../components/ThemeNameEdit.vue'
+import SurveyQuestionsList from '../components/SurveyQuestionsList.vue'
+import SurveyQuestionEdit from '../components/SurveyQuestionEdit.vue'
+import SurveysList from '../components/SurveysList.vue'
+import SurveyEdit from '../components/SurveyEdit.vue'
 
 const routes = [
   {
@@ -173,6 +177,28 @@ const routes = [
     path: '/theme-name',
     name: 'ThemeNameEdit',
     component: ThemeNameEdit,
+    props: true,
+  },
+  {
+    path: '/survey-questions',
+    name: 'SurveyQuestions',
+    component: SurveyQuestionsList,
+  },
+  {
+    path: '/survey-question',
+    name: 'SurveyQuestionEdit',
+    component: SurveyQuestionEdit,
+    props: true,
+  },
+  {
+    path: '/surveys',
+    name: 'Surveys',
+    component: SurveysList,
+  },
+  {
+    path: '/survey',
+    name: 'SurveyEdit',
+    component: SurveyEdit,
     props: true,
   },
 ]
