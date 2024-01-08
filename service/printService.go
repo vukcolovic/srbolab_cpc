@@ -1668,39 +1668,158 @@ func (p *printService) PrintSeminarReport(seminar *model.Seminar) ([]byte, error
 	pdf.SetTextColor(47, 83, 150)
 	pdf.Ln(5)
 
-	ch = 5
-	pdf.CellFormat(80, ch, trObj.translDef("Простор је био пријатан за рад(осветљење,"), "TLR", 0, "L", false, 0, "")
-	pdf.CellFormat(13, ch, "", "TLR", 0, "L", false, 0, "")
-	pdf.CellFormat(80, ch, trObj.translDef("Предавачи су се придржавали сатнице"), "TLR", 0, "L", false, 0, "")
-	pdf.CellFormat(13, ch, "", "TLR", 0, "L", false, 0, "")
-	pdf.Ln(5)
-	pdf.CellFormat(80, ch, trObj.translDef("температура, столица, акустика)"), "BLR", 0, "L", false, 0, "")
-	pdf.CellFormat(13, ch, "", "BLR", 0, "L", false, 0, "")
-	pdf.CellFormat(80, ch, trObj.translDef("(почетка/завршетка часа)"), "BLR", 0, "L", false, 0, "")
-	pdf.CellFormat(13, ch, "", "BLR", 0, "L", false, 0, "")
-	pdf.Ln(5)
+	clientSurveys, err := SurveyService.GetClientSurveysBySeminarDayID(int(seminarDay.ID))
+	if err != nil {
+		logoped.ErrorLog.Println("Error getting client surveys by seminar day id: ", err)
+		return []byte{}, err
+	}
 
-	pdf.CellFormat(80, ch, trObj.translDef("Атмосфера током семинара је била"), "1", 0, "L", false, 0, "")
-	pdf.CellFormat(13, ch, "", "1", 0, "L", false, 0, "")
-	pdf.CellFormat(80, ch, trObj.translDef("Трајање пауза је било одговарајуће"), "1", 0, "L", false, 0, "")
-	pdf.CellFormat(13, ch, "", "1", 0, "L", false, 0, "")
-	pdf.Ln(5)
-	pdf.CellFormat(80, ch, trObj.translDef("Храна током обуке је била одговарајућа"), "1", 0, "L", false, 0, "")
-	pdf.CellFormat(13, ch, "", "1", 0, "L", false, 0, "")
-	pdf.CellFormat(80, ch, trObj.translDef("Пиће током обуке је било одговарајуће"), "1", 0, "L", false, 0, "")
-	pdf.CellFormat(13, ch, "", "1", 0, "L", false, 0, "")
-	pdf.Ln(5)
+	type SurveyQuest struct {
+		ID       uint
+		Sum      int
+		Num      int
+		Question string
+	}
 
-	pdf.CellFormat(80, ch, trObj.translDef("Предавачи су подржавали комуникацију и"), "TLR", 0, "L", false, 0, "")
-	pdf.CellFormat(13, ch, "", "TLR", 0, "L", false, 0, "")
-	pdf.CellFormat(80, ch, trObj.translDef("У којој мери је обука испунила Ваша"), "TLR", 0, "L", false, 0, "")
-	pdf.CellFormat(13, ch, "", "TLR", 0, "L", false, 0, "")
-	pdf.Ln(5)
-	pdf.CellFormat(80, ch, trObj.translDef("интеракцију полазника"), "BLR", 0, "L", false, 0, "")
-	pdf.CellFormat(13, ch, "", "BLR", 0, "L", false, 0, "")
-	pdf.CellFormat(80, ch, trObj.translDef("очекивања"), "BLR", 0, "L", false, 0, "")
-	pdf.CellFormat(13, ch, "", "BLR", 0, "L", false, 0, "")
+	var survey model.Survey
+	csMap := map[uint]SurveyQuest{}
+	if len(clientSurveys) > 0 {
+		survey = clientSurveys[0].Survey
 
+		for _, cs := range clientSurveys {
+			for _, q := range cs.SurveyQuestionAnswers {
+				num := 0
+				grade := 0
+				if q.Grade > 0 {
+					num++
+					grade = q.Grade
+				}
+				_, ok := csMap[q.SurveyQuestionID]
+				if !ok {
+					csMap[q.SurveyQuestionID] = SurveyQuest{ID: q.SurveyQuestionID, Num: num, Sum: grade, Question: q.SurveyQuestion.Content}
+				} else {
+					s := SurveyQuest{
+						Num:      csMap[q.SurveyQuestionID].Num + num,
+						Sum:      csMap[q.SurveyQuestionID].Sum + grade,
+						ID:       q.SurveyQuestionID,
+						Question: csMap[q.SurveyQuestionID].Question,
+					}
+					csMap[q.SurveyQuestionID] = s
+				}
+			}
+		}
+	}
+
+	//question id - length (num of rows)
+	type QuesLen struct {
+		ID  uint
+		Len float64
+	}
+
+	questeionLengths := []QuesLen{}
+	lineLen := 45
+
+	pdf.SetTextColor(47, 83, 150)
+	if survey.ID != 0 {
+		for _, q := range survey.Questions {
+			_, l := splitLine(q.Content, lineLen)
+			questeionLengths = append(questeionLengths, QuesLen{ID: q.ID, Len: l})
+		}
+
+		sort.Slice(questeionLengths, func(i, j int) bool {
+			return questeionLengths[i].Len > questeionLengths[j].Len
+		})
+
+		previousLen := 0.0
+		isSecond := false
+		last := false
+		for i, ql := range questeionLengths {
+			if len(questeionLengths) == i+1 {
+				last = true
+			}
+			isSecond = false
+			if i%2 == 1 {
+				isSecond = true
+			}
+
+			content := ""
+			grade := 0.0
+			v, ok := csMap[ql.ID]
+			if ok {
+				content = v.Question
+				grade = float64(float64(v.Sum) / float64(v.Num))
+			}
+
+			h := 5.0
+			if isSecond {
+				if ql.Len < float64(previousLen) {
+					h = h * previousLen
+				} else {
+					h = h * ql.Len
+				}
+
+				sentences, _ := splitLine(content, lineLen)
+				for i, s := range sentences {
+					pdf.Text(109, pdf.GetY()+4+float64(i*5.0), trObj.translate(s, 10))
+				}
+				pdf.Rect(108, pdf.GetY(), 80, h, "")
+
+				pdf.Rect(188, pdf.GetY(), 13, h, "")
+				pdf.Text(192, pdf.GetY()+4, trObj.translate(strconv.FormatFloat(grade, 'f', 1, 64), 10))
+			} else {
+				previousLen = ql.Len
+				h = h * ql.Len
+				if len(questeionLengths) > i+1 && questeionLengths[i+1].Len > ql.Len {
+					h = h * questeionLengths[i+1].Len
+				}
+				sentences, _ := splitLine(content, lineLen)
+				for i, s := range sentences {
+					pdf.Text(16, pdf.GetY()+4+float64(i*5.0), trObj.translate(s, 10))
+				}
+				pdf.Rect(15, pdf.GetY(), 80, h, "")
+				pdf.Rect(95, pdf.GetY(), 13, h, "")
+				pdf.Text(99, pdf.GetY()+4, trObj.translate(strconv.FormatFloat(grade, 'f', 1, 64), 10))
+			}
+
+			if isSecond || last {
+				pdf.Ln(h)
+			}
+		}
+
+	} else {
+		ch = 5
+		pdf.CellFormat(80, ch, trObj.translDef("Простор је био пријатан за рад(осветљење,"), "TLR", 0, "L", false, 0, "")
+		pdf.CellFormat(13, ch, "", "TLR", 0, "L", false, 0, "")
+		pdf.CellFormat(80, ch, trObj.translDef("Предавачи су се придржавали сатнице"), "TLR", 0, "L", false, 0, "")
+		pdf.CellFormat(13, ch, "", "TLR", 0, "L", false, 0, "")
+		pdf.Ln(5)
+		pdf.CellFormat(80, ch, trObj.translDef("температура, столица, акустика)"), "BLR", 0, "L", false, 0, "")
+		pdf.CellFormat(13, ch, "", "BLR", 0, "L", false, 0, "")
+		pdf.CellFormat(80, ch, trObj.translDef("(почетка/завршетка часа)"), "BLR", 0, "L", false, 0, "")
+		pdf.CellFormat(13, ch, "", "BLR", 0, "L", false, 0, "")
+		pdf.Ln(5)
+
+		pdf.CellFormat(80, ch, trObj.translDef("Атмосфера током семинара је била"), "1", 0, "L", false, 0, "")
+		pdf.CellFormat(13, ch, "", "1", 0, "L", false, 0, "")
+		pdf.CellFormat(80, ch, trObj.translDef("Трајање пауза је било одговарајуће"), "1", 0, "L", false, 0, "")
+		pdf.CellFormat(13, ch, "", "1", 0, "L", false, 0, "")
+		pdf.Ln(5)
+		pdf.CellFormat(80, ch, trObj.translDef("Храна током обуке је била одговарајућа"), "1", 0, "L", false, 0, "")
+		pdf.CellFormat(13, ch, "", "1", 0, "L", false, 0, "")
+		pdf.CellFormat(80, ch, trObj.translDef("Пиће током обуке је било одговарајуће"), "1", 0, "L", false, 0, "")
+		pdf.CellFormat(13, ch, "", "1", 0, "L", false, 0, "")
+		pdf.Ln(5)
+
+		pdf.CellFormat(80, ch, trObj.translDef("Предавачи су подржавали комуникацију и"), "TLR", 0, "L", false, 0, "")
+		pdf.CellFormat(13, ch, "", "TLR", 0, "L", false, 0, "")
+		pdf.CellFormat(80, ch, trObj.translDef("У којој мери је обука испунила Ваша"), "TLR", 0, "L", false, 0, "")
+		pdf.CellFormat(13, ch, "", "TLR", 0, "L", false, 0, "")
+		pdf.Ln(5)
+		pdf.CellFormat(80, ch, trObj.translDef("интеракцију полазника"), "BLR", 0, "L", false, 0, "")
+		pdf.CellFormat(13, ch, "", "BLR", 0, "L", false, 0, "")
+		pdf.CellFormat(80, ch, trObj.translDef("очекивања"), "BLR", 0, "L", false, 0, "")
+		pdf.CellFormat(13, ch, "", "BLR", 0, "L", false, 0, "")
+	}
 	pdf.Ln(15)
 	pdf.Text(15, pdf.GetY(), trObj.translDef("За време семинара унапређења знања спроведено је и улазно и излазно тестирање полазника."))
 	pdf.Ln(4)

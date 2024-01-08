@@ -154,6 +154,8 @@ func RunServer(host string) {
 	s.HandleFunc("/list", handlers.ListSurveys).Methods("GET")
 	s.HandleFunc("/create", handlers.CreateSurvey).Methods("POST")
 	s.HandleFunc("/id/{id}", handlers.GetSurveyByID).Methods("GET")
+	s.HandleFunc("/active", handlers.GetActiveSurvey).Methods("GET")
+	s.HandleFunc("/client-survey/create", handlers.SaveClientSurvey).Methods("POST")
 
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{"*"}, // All origins

@@ -123,3 +123,44 @@ func CreateSurvey(w http.ResponseWriter, r *http.Request) {
 
 	SetSuccessResponse(w, createdSurvey)
 }
+
+func GetActiveSurvey(w http.ResponseWriter, req *http.Request) {
+	survey, err := service.SurveyService.GetActiveSurvey()
+	if err != nil {
+		logoped.ErrorLog.Println(err.Error())
+		SetErrorResponse(w, errors.New("Greška prilikom povlačenja ankete: "+err.Error()))
+		return
+	}
+
+	SetSuccessResponse(w, survey)
+}
+
+func SaveClientSurvey(w http.ResponseWriter, r *http.Request) {
+	var clientSurvey model.ClientSurvey
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&clientSurvey)
+	if err != nil {
+		logoped.ErrorLog.Println("unable to retrieve the just parsed code")
+		SetErrorResponse(w, NewJSONDecodeError("ClientSurvey"))
+		return
+	}
+
+	client, err := service.ClientService.GetClientByJMBG(clientSurvey.JMBG)
+	if err != nil {
+		logoped.ErrorLog.Println("Error creating client survey " + err.Error())
+		SetErrorResponse(w, errors.New("Greška prilikom kreiranja ankete: "+err.Error()))
+		return
+	}
+
+	clientSurvey.Client = *client
+	clientSurvey.ClientID = client.ID
+
+	createdClientSurvey, err := service.SurveyService.CreateClientSurvey(clientSurvey)
+	if err != nil {
+		logoped.ErrorLog.Println("Error creating client survey " + err.Error())
+		SetErrorResponse(w, errors.New("Greška prilikom kreiranja ankete: "+err.Error()))
+		return
+	}
+
+	SetSuccessResponse(w, createdClientSurvey)
+}

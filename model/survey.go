@@ -11,6 +11,7 @@ type Survey struct {
 
 type ClientSurvey struct {
 	gorm.Model
+	JMBG                  string                 `json:"jmbg" gorm:"-:all"`
 	Client                Client                 `json:"client"`
 	ClientID              uint                   `json:"client_id"`
 	Survey                Survey                 `json:"survey"`

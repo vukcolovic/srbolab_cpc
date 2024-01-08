@@ -3,14 +3,15 @@ package middleware
 import (
 	"encoding/json"
 	"errors"
-	"github.com/dgrijalva/jwt-go"
-	"github.com/gorilla/mux"
 	"net/http"
 	"srbolab_cpc/handlers"
 	"srbolab_cpc/logoped"
 	"srbolab_cpc/util"
 	"strings"
 	"time"
+
+	"github.com/dgrijalva/jwt-go"
+	"github.com/gorilla/mux"
 )
 
 const (
@@ -30,7 +31,7 @@ func init() {
 
 func AuthToken(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if strings.Contains(r.URL.Path, "login") || strings.Contains(r.URL.Path, "corporate-ip") || strings.Contains(r.URL.Path, "create-not-verified") || strings.Contains(r.URL.Path, "seminar-days/jmbg") || strings.Contains(r.URL.Path, "/client-test/create") {
+		if strings.Contains(r.URL.Path, "login") || strings.Contains(r.URL.Path, "corporate-ip") || strings.Contains(r.URL.Path, "create-not-verified") || strings.Contains(r.URL.Path, "seminar-days/jmbg") || strings.Contains(r.URL.Path, "/client-test/create") || strings.Contains(r.URL.Path, "/surveys/active") || strings.Contains(r.URL.Path, "/surveys/client-survey/create") {
 			w.Header().Set("Access-Control-Allow-Origin", "*")
 			next.ServeHTTP(w, r)
 			return

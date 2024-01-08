@@ -14,16 +14,17 @@ type Test struct {
 
 type ClientTest struct {
 	gorm.Model
-	Jmbg           string           `json:"jmbg"`
-	Client         Client           `json:"client"`
-	ClientID       uint             `json:"client_id"`
-	Test           Test             `json:"test"`
-	TestID         uint             `json:"test_id"`
-	SeminarDay     SeminarDay       `json:"seminar_day"`
-	SeminarDayID   uint             `json:"seminar_day_id"`
-	Result         float64          `json:"result"`
-	ResultStr      string           `json:"result_str"`
-	QuestionAnswer []QuestionAnswer `json:"questions_answers" gorm:"-:all"`
+	Jmbg             string           `json:"jmbg"`
+	Client           Client           `json:"client"`
+	ClientID         uint             `json:"client_id"`
+	Test             Test             `json:"test"`
+	TestID           uint             `json:"test_id"`
+	SeminarDay       SeminarDay       `json:"seminar_day"`
+	SeminarDayID     uint             `json:"seminar_day_id"`
+	Result           float64          `json:"result"`
+	ResultStr        string           `json:"result_str"`
+	QuestionAnswer   []QuestionAnswer `json:"questions_answers" gorm:"-:all"`
+	IsSecondFinished bool             `json:"isSecondFinished" gorm:"-:all"`
 }
 
 type QuestionAnswer struct {

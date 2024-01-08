@@ -4,13 +4,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/gorilla/mux"
 	"net/http"
 	"srbolab_cpc/logoped"
 	"srbolab_cpc/model"
 	"srbolab_cpc/service"
 	"strconv"
 	"time"
+
+	"github.com/gorilla/mux"
 )
 
 func ListTests(w http.ResponseWriter, r *http.Request) {
@@ -185,7 +186,7 @@ func SaveClientTest(w http.ResponseWriter, r *http.Request) {
 	logoped.InfoLog.Println(fmt.Sprintf("Saving client test, client %s, seminar day %d, test %d",
 		clientTest.Jmbg, clientTest.SeminarDay.ID, clientTest.Test.ID))
 
-	msg, err := isTestValid(&clientTest)
+	msg, isSecond, err := isTestValid(&clientTest)
 	if err != nil {
 		logoped.ErrorLog.Println("Error saving client test, test is not valid, error: ", err.Error())
 		SetErrorResponse(w, errors.New("Greška prilikom snimanja testa: "+err.Error()))
@@ -203,22 +204,25 @@ func SaveClientTest(w http.ResponseWriter, r *http.Request) {
 		SetErrorResponse(w, errors.New("Greška prilikom kreiranja testa: "+err.Error()))
 		return
 	}
+	if isSecond {
+		createdClientTest.IsSecondFinished = true
+	}
 
 	SetSuccessResponse(w, createdClientTest)
 }
 
-func isTestValid(clientTest *model.ClientTest) (string, error) {
+func isTestValid(clientTest *model.ClientTest) (string, bool, error) {
 	client, err := service.ClientService.GetClientByJMBG(clientTest.Jmbg)
 	if err != nil {
-		return "", err
+		return "", false, err
 	}
 	if client == nil {
-		return "Korisnik sa ovim jmbg-om ne postoji u sistemu.", nil
+		return "Korisnik sa ovim jmbg-om ne postoji u sistemu.", false, nil
 	}
 
 	day, err := service.SeminarDayService.GetSeminarDayByID(int(clientTest.SeminarDay.ID))
 	if err != nil {
-		return "", err
+		return "", false, err
 	}
 
 	found := false
@@ -230,38 +234,40 @@ func isTestValid(clientTest *model.ClientTest) (string, error) {
 	}
 
 	if !found {
-		return "Korisnik sa ovim jmbg-om nije učesnik seminara.", nil
+		return "Korisnik sa ovim jmbg-om nije učesnik seminara.", false, nil
 	}
 
 	dayTime := clientTest.SeminarDay.Date
 	now := time.Now()
 	if now.Day() != dayTime.Day() || now.Month() != dayTime.Month() || now.Year() != dayTime.Year() {
-		return "Ovaj test nije dozvoljeno raditi danas.", nil
+		return "Ovaj test nije dozvoljeno raditi danas.", false, nil
 	}
 
 	if clientTest.SeminarDay.Seminar.SeminarStatusID != model.SEMINAR_STATUS_IN_PROGRESS {
-		return "Ovaj test nije dozvoljeno raditi, seminar nije u toku.", nil
+		return "Ovaj test nije dozvoljeno raditi, seminar nije u toku.", false, nil
 	}
 
 	if clientTest.SeminarDay.TestID == nil {
-		return "Ovaj test nije dozvoljeno raditi, test nije odabran.", nil
+		return "Ovaj test nije dozvoljeno raditi, test nije odabran.", false, nil
 	}
 
 	tests, err := service.TestService.GetClientTestBySeminarDayIDAndJMBG(int(clientTest.SeminarDay.ID), *client.JMBG)
 	if err != nil {
-		return "", err
+		return "", false, err
 	}
 
 	if len(tests) > 1 {
-		return "Ovaj test nije dozvoljeno, klijent je već odradio dva testa u toku dana.", nil
+		return "Ovaj test nije dozvoljeno, klijent je već odradio dva testa u toku dana.", false, nil
 	}
 
+	second := false
 	if len(tests) == 1 {
 		if !tests[0].CreatedAt.Add(2 * time.Hour).Before(time.Now()) {
-			return "Nije dozvoljeno snimiti test, rađen je skoro.", nil
+			//return "Nije dozvoljeno snimiti test, rađen je skoro.", nil
 		}
+		second = true
 	}
 
 	clientTest.Client = *client
-	return "", nil
+	return "", second, nil
 }

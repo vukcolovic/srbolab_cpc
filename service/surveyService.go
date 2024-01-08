@@ -19,6 +19,9 @@ type surveyServiceInterface interface {
 	GetAllSurveyQuestions() ([]model.SurveyQuestion, error)
 	GetSurveyQuestionByID(id int) (*model.SurveyQuestion, error)
 	CreateSurveyQuestion(question model.SurveyQuestion) (*model.SurveyQuestion, error)
+	GetActiveSurvey() (*model.Survey, error)
+	CreateClientSurvey(cs model.ClientSurvey) (*model.ClientSurvey, error)
+	GetClientSurveysBySeminarDayID(seminarDayID int) ([]model.ClientSurvey, error)
 }
 
 func (c *surveyService) GetAllSurveys() ([]model.Survey, error) {
@@ -71,4 +74,31 @@ func (c *surveyService) CreateSurveyQuestion(question model.SurveyQuestion) (*mo
 	}
 
 	return &question, nil
+}
+
+func (c *surveyService) GetActiveSurvey() (*model.Survey, error) {
+	var survey *model.Survey
+	if err := db.Client.Where("active = ?", true).Preload("Questions").Last(&survey).Error; err != nil {
+		return nil, err
+	}
+
+	return survey, nil
+}
+
+func (c *surveyService) CreateClientSurvey(cs model.ClientSurvey) (*model.ClientSurvey, error) {
+	result := db.Client.Create(&cs)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &cs, nil
+}
+
+func (c *surveyService) GetClientSurveysBySeminarDayID(seminarDayID int) ([]model.ClientSurvey, error) {
+	var clientSurveys []model.ClientSurvey
+	if err := db.Client.Where("seminar_day_id = ?", seminarDayID).Preload("SurveyQuestionAnswers.SurveyQuestion").Preload("Client").Preload("Survey.Questions").Find(&clientSurveys).Error; err != nil {
+		return nil, err
+	}
+
+	return clientSurveys, nil
 }
