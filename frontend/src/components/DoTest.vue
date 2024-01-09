@@ -171,8 +171,17 @@ export default {
         }
         this.allowed = true;
         this.questions = this.seminarDay.test.questions;
-        this.questions.sort((a, b) => (a - b))
+        this.questions.sort((a, b) => (a - b));
         this.questions.forEach(q => {
+        q.answers = q.answers.sort((a, b) => {
+          if (a.letter < b.letter) {
+            return -1;
+          }
+          if (a.letter > b.letter) {
+            return 1;
+          }
+          return 0;
+        });
           const obj = {question_id: q.ID, answer: ""};
           this.client_test.questions_answers.push(obj);
         })
