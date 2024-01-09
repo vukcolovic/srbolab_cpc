@@ -176,12 +176,12 @@ func GetSeminarDayWithTestByJMBG(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		// if len(tests) == 1 {
-		// 	if !tests[0].CreatedAt.Add(2 * time.Hour).Before(time.Now()) {
-		// 		SetErrorResponse(w, errors.New("Nije dozvoljeno snimiti test, rađen je skoro."))
-		// 		return
-		// 	}
-		// }
+		if len(tests) == 1 {
+			if !tests[0].CreatedAt.Add(2 * time.Hour).Before(time.Now()) {
+				SetErrorResponse(w, errors.New("Nije dozvoljeno snimiti test, rađen je skoro."))
+				return
+			}
+		}
 
 		fullSeminarDay, err := service.SeminarDayService.GetSeminarDayWithTestByID(int(day.ID))
 		if err != nil {
