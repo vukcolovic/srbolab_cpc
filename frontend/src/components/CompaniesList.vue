@@ -60,11 +60,16 @@ export default {
         {
           label: 'Naziv',
           field: 'name',
-          width: '10%',
+          width: '55%',
         },
         {
           label: 'PIB',
           field: 'pib',
+          width: '30%',
+        },
+        {
+          label: 'Ugovor',
+          field: 'contractStr',
           width: '10%',
         }
       ],
@@ -107,6 +112,9 @@ export default {
           return;
         }
         this.table.rows = JSON.parse(response.data.Data);
+        this.table.rows.forEach(r => {
+          r.contractStr = r.contract ? "Da" : "Ne";
+        });
       }, (error) => {
         this.errorToast(error, "/companies/list")
       });

@@ -29,6 +29,11 @@
               :readonly="readonly">
           </text-input>
 
+          <div class="my-1 col-sm-4">
+            <label :style=styleLabel for="contract">Ugovor: &nbsp;</label>
+            <input id="contract" type="checkbox" v-model="company.contract" />
+          </div>
+
           <input type="submit" v-if="this.action === 'add'" class="btn btn-primary m-2" value="Snimi">
           <input type="submit" v-if="this.action === 'update'" class="btn btn-primary m-2" value="Snimi">
         </div>
@@ -58,7 +63,7 @@ export default {
   },
   data() {
     return {
-      company: {name: "", pib: ""},
+      company: {name: "", pib: "", contract: false},
       action: "",
     }
   },

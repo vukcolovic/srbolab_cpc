@@ -4,6 +4,7 @@ import "gorm.io/gorm"
 
 type Company struct {
 	gorm.Model
-	Name string `json:"name"`
-	PIB  string `json:"pib"`
+	Name     string `json:"name"`
+	PIB      string `json:"pib"`
+	Contract *bool  `json:"contract"`
 }
