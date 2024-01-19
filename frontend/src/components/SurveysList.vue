@@ -58,7 +58,12 @@ export default {
         {
           label: 'Naziv',
           field: 'name',
-          width: '70%',
+          width: '50%',
+        },
+        {
+          label: 'Tip',
+          field: 'type_name',
+          width: '20%',
         },
         {
           label: 'Aktivna',
@@ -105,6 +110,13 @@ export default {
           return;
         }
         this.table.rows = JSON.parse(response.data.Data);
+        this.table.rows.forEach(s => {
+          if (s.type == this.SURVEY_TYPES.TEACHER) {
+            s.type_name = "Predavači";
+          } else {
+            s.type_name = "Generalna";
+          }
+        });
       }, (error) => {
         this.errorToast(error, "/surveys/list");
       });

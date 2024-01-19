@@ -2,11 +2,17 @@ package model
 
 import "gorm.io/gorm"
 
+const (
+	GENERAL = iota
+	TEACHER
+)
+
 type Survey struct {
 	gorm.Model
 	Name      string           `json:"name"`
 	Questions []SurveyQuestion `json:"questions" gorm:"many2many:survey_question;"`
 	Active    *bool            `json:"active"`
+	Type      int              `json:"type" gorm:"default:0"`
 }
 
 type ClientSurvey struct {
@@ -18,6 +24,8 @@ type ClientSurvey struct {
 	SurveyID              uint                   `json:"survey_id"`
 	SeminarDay            SeminarDay             `json:"seminar_day"`
 	SeminarDayID          uint                   `json:"seminar_day_id"`
+	TeacherID             *int                   `json:"teacher_id" gorm:"default:null"`
+	Teacher               *User                  `json:"teacher"`
 	SurveyQuestionAnswers []SurveyQuestionAnswer `json:"survey_questions_answers"`
 }
 

@@ -7,10 +7,16 @@ const SEMINAR_STATUSES = {
     CLOSED: 4
 };
 
+const SURVEY_TYPES = {
+    GENERAL: 0,
+    TEACHER: 1,
+};
+
 export const commonMixin = {
     data() {
         return {
             SEMINAR_STATUSES: SEMINAR_STATUSES,
+            SURVEY_TYPES: SURVEY_TYPES,
             yesNoOptions: [{label: 'ДА', value: 'true'}, {label: 'НЕ', value: 'false'}],
         }
     },

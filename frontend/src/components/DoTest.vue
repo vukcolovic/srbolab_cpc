@@ -2,12 +2,7 @@
   <div class="container">
     <div v-if="!allowed">
       <br>
-      <text-input
-          v-model="client_test.jmbg"
-          :required=true
-          label="Upišite vaš JMBG"
-          name="jmbg"
-          type="text">
+      <text-input v-model="client_test.jmbg" :required=true label="Upišite vaš JMBG" name="jmbg" type="text">
       </text-input>
       <br>
       <button type="button" :disabled="disableJMBGButton" @click="sendJmbg()" class="btn btn-primary">Pošalji</button>
@@ -25,11 +20,14 @@
           <div v-for="(question, index) in questions" :key="question.ID" class="row mt-2" style="margin-bottom: 3px">
             <div class="col-xs-12 col-sm-12 col-md-12">
               <p> {{ index + 1 }}. {{ question.content }}</p>
-              <img v-if="question.image" id="img"  :src="question.image" alt="" style="margin-bottom: 3px; max-width: 100%; height: auto" />
+              <img v-if="question.image" id="img" :src="question.image" alt=""
+                style="margin-bottom: 3px; max-width: 100%; height: auto" />
               <div v-for="(answer) in question.answers" :key="answer.ID" class="row no-gutters">
-                <div class="col-2 col-sm-2 col-md-1" :style= "[(isSecondFinished && answer.correct)  ? {'background': 'green'} : {}]">
+                <div class="col-2 col-sm-2 col-md-1"
+                  :style="[(isSecondFinished && answer.correct) ? { 'background': 'green' } : {}]">
                   {{ answer.letter }}
-                  <input style="margin-left: 5px" id={{question.ID}} v-model="client_test.questions_answers[index].answer" :value= answer.letter type="radio">
+                  <input style="margin-left: 5px" id={{question.ID}} v-model="client_test.questions_answers[index].answer"
+                    :value=answer.letter type="radio">
                 </div>
                 <div class="col-10 col-sm-10 col-md-10">{{ answer.content }}</div>
               </div>
@@ -43,28 +41,61 @@
       <div>
         <div v-if="isfinish">
           <p v-if="readyForSurvey" class="bg-secondary mt-1">Molimo vas da popunite anketu u nastavku.</p>
-          <p class="bg-info mt-1">Rezultat: {{(client_test.result * 100).toFixed(2)}}%</p>
+          <p class="bg-info mt-1">Rezultat: {{ (client_test.result * 100).toFixed(2) }}%</p>
         </div>
 
-        <div v-if="readyForSurvey">
+        <div v-if="readyForSurvey && surveyDataReady">
           <h6>Anketa</h6>
-          <p>1 - у потпуности се не слажем, 5 - у потпуности се слажем </p>
-          <div v-for="(question, index) in survey_questions" :key="question.ID" class="row mt-2" style="margin-bottom: 3px">
+          <p>1 - у потпуности се не слажем, 5 - у потпуности се слажем </p> 
+          <div v-for="(question, index) in surveys[0].questions" :key="question.ID" class="row mt-2"
+            style="margin-bottom: 3px">
             <div class="col-xs-12 col-sm-12 col-md-12">
               <p> {{ index + 1 }}. {{ question.content }}</p>
-                <div class="col-6 col-sm-12 col-md-6" >
-                  1<input style="margin-left: 5px" id={{question.ID}} v-model="client_survey.survey_questions_answers[index].grade" :value=1 type="radio">
-                  2<input style="margin-left: 5px" id={{question.ID}} v-model="client_survey.survey_questions_answers[index].grade" :value=2 type="radio">
-                  3<input style="margin-left: 5px" id={{question.ID}} v-model="client_survey.survey_questions_answers[index].grade" :value=3 type="radio">
-                  4<input style="margin-left: 5px" id={{question.ID}} v-model="client_survey.survey_questions_answers[index].grade" :value=4 type="radio">
-                  5<input style="margin-left: 5px" id={{question.ID}} v-model="client_survey.survey_questions_answers[index].grade" :value=5 type="radio">
-                </div>
+              <div class="col-6 col-sm-12 col-md-6">
+                1<input style="margin-left: 5px" id={{question.ID}}
+                  v-model="clientSurveys[0].survey_questions_answers[index].grade" :value=1 type="radio">
+                2<input style="margin-left: 5px" id={{question.ID}}
+                  v-model="clientSurveys[0].survey_questions_answers[index].grade" :value=2 type="radio">
+                3<input style="margin-left: 5px" id={{question.ID}}
+                  v-model="clientSurveys[0].survey_questions_answers[index].grade" :value=3 type="radio">
+                4<input style="margin-left: 5px" id={{question.ID}}
+                  v-model="clientSurveys[0].survey_questions_answers[index].grade" :value=4 type="radio">
+                5<input style="margin-left: 5px" id={{question.ID}}
+                  v-model="clientSurveys[0].survey_questions_answers[index].grade" :value=5 type="radio">
+              </div>
             </div>
           </div>
 
-          <input :disabled="disableSaveSurveyButton" class="btn btn-primary m-2" value="Snimi" @click.prevent="createClientSurvey()">
+          <hr>
+          <h6>Anketa o predavačima</h6>
+
+          <div v-for="(teacher, i) in teachers" :key="teacher.ID" class="row mt-2" style="margin-bottom: 3px">
+            <hr>
+            <p style="font-weight:bold;">{{ teacher.person.first_name }} {{ teacher.person.last_name }}</p>
+            <div v-for="(question, index) in surveys[1].questions" :key="question.ID" class="row mt-2"
+              style="margin-bottom: 3px">
+              <div class="col-xs-12 col-sm-12 col-md-12">
+                <p> {{ index + 1 }}. {{ question.content }}</p>
+                <div class="col-6 col-sm-12 col-md-6">
+                  1<input style="margin-left: 5px" id={{question.ID}}
+                    v-model="clientSurveys[i + 1].survey_questions_answers[index].grade" :value=1 type="radio">
+                  2<input style="margin-left: 5px" id={{question.ID}}
+                    v-model="clientSurveys[i + 1].survey_questions_answers[index].grade" :value=2 type="radio">
+                  3<input style="margin-left: 5px" id={{question.ID}}
+                    v-model="clientSurveys[i + 1].survey_questions_answers[index].grade" :value=3 type="radio">
+                  4<input style="margin-left: 5px" id={{question.ID}}
+                    v-model="clientSurveys[i + 1].survey_questions_answers[index].grade" :value=4 type="radio">
+                  5<input style="margin-left: 5px" id={{question.ID}}
+                    v-model="clientSurveys[i + 1].survey_questions_answers[index].grade" :value=5 type="radio">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <input :disabled="disableSaveSurveyButton" class="btn btn-primary m-2" value="Snimi"
+            @click.prevent="createClientSurvey()">
         </div>
-      
+
       </div>
     </form-tag>
   </div>
@@ -73,18 +104,18 @@
 <script>
 import FormTag from "@/components/forms/FormTag";
 import axios from "axios";
-import {apiMixin} from "@/mixins/apiMixin";
-import {styleMixin} from "@/mixins/styleMixin";
-import {useToast} from "vue-toastification";
+import { apiMixin } from "@/mixins/apiMixin";
+import { styleMixin } from "@/mixins/styleMixin";
+import { useToast } from "vue-toastification";
 import TextInput from "@/components/forms/TextInput.vue";
-import {dateMixin} from "@/mixins/dateMixin";
-import {commonMixin} from "@/mixins/commonMixin";
-import {fileMixin} from "@/mixins/fileMixin";
+import { dateMixin } from "@/mixins/dateMixin";
+import { commonMixin } from "@/mixins/commonMixin";
+import { fileMixin } from "@/mixins/fileMixin";
 
 export default {
   name: 'DoTest',
   mixins: [apiMixin, styleMixin, dateMixin, commonMixin, fileMixin],
-  components: {TextInput, FormTag},
+  components: { TextInput, FormTag },
   data() {
     return {
       client_test: {
@@ -103,23 +134,17 @@ export default {
         test: null,
       },
       questions: [],
-      survey_questions: [],
+      surveys: [],
+      teachers: [],
       seminarDayId: 0,
       isfinish: false,
+      surveyDataReady: false,
       isSecondFinished: false,
       allowed: false,
       disableSaveButton: false,
       disableSaveSurveyButton: false,
       disableJMBGButton: false,
-      client_survey: {
-        jmbg: "",
-        client_id: 0,
-        survey: null,
-        survey_id: 0,
-        seminar_day: null,
-        seminar_day_id: 0,
-        survey_questions_answers: [],
-      }
+      clientSurveys: [],
     }
   },
   computed: {
@@ -130,18 +155,24 @@ export default {
   methods: {
     async createClientSurvey() {
       this.disableSaveSurveyButton = true;
-      this.client_survey.seminar_day = this.client_test.seminar_day;
-      this.client_survey.seminar_day_id = this.client_test.seminar_day_id;
-      await axios.post('/surveys/client-survey/create', JSON.stringify(this.client_survey)).then((response) => {
+      var showSuccess = true;
+      this.clientSurveys.forEach(cs => {
+      cs.seminar_day = this.client_test.seminar_day;
+      cs.seminar_day_id = this.client_test.seminar_day_id;
+      axios.post('/surveys/client-survey/create', JSON.stringify(cs)).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
+          showSuccess = false;
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;
         }
-
-        this.toast.info("Uspešno snimljena anketa!");
       }, (error) => {
+        showSuccess = false;
         this.errorToast(error, "/surveys/client-survey/create");
       });
+      });
+      if (showSuccess) {
+        this.toast.info("Uspešno snimljena anketa!");
+      }
     },
     async sendJmbg() {
       if (this.disableJMBGButton) {
@@ -155,7 +186,7 @@ export default {
         }
 
         this.seminarDay = JSON.parse(response.data.Data);
-        this.seminarDay.date= this.getDateInMMDDYYYYFormat(this.seminarDay.date);
+        this.seminarDay.date = this.getDateInMMDDYYYYFormat(this.seminarDay.date);
 
         if (!this.isToday(new Date(this.seminarDay.date))) {
           this.toast.warning("Ovaj test danas nije dozvoljen!");
@@ -173,16 +204,16 @@ export default {
         this.questions = this.seminarDay.test.questions;
         this.questions.sort((a, b) => (a - b));
         this.questions.forEach(q => {
-        q.answers = q.answers.sort((a, b) => {
-          if (a.letter < b.letter) {
-            return -1;
-          }
-          if (a.letter > b.letter) {
-            return 1;
-          }
-          return 0;
-        });
-          const obj = {question_id: q.ID, answer: ""};
+          q.answers = q.answers.sort((a, b) => {
+            if (a.letter < b.letter) {
+              return -1;
+            }
+            if (a.letter > b.letter) {
+              return 1;
+            }
+            return 0;
+          });
+          const obj = { question_id: q.ID, answer: "" };
           this.client_test.questions_answers.push(obj);
         })
 
@@ -198,8 +229,8 @@ export default {
       await this.createClientTest();
 
       if (this.readyForSurvey) {
-        console.log("tu smo anketa");
-        this.getActiveSurvey();
+        await this.getTeachersBySeminarDay();
+        await this.getActiveSurveys();
       }
     },
     async createClientTest() {
@@ -223,29 +254,74 @@ export default {
         this.errorToast(error, "/tests/client-test/create");
       });
     },
-    async getActiveSurvey() {
+    async getActiveSurveys() {
       await axios.get('/surveys/active').then((response) => {
         if (response.data === null || response.data.Status === 'error') {
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;
         }
-        const survey = JSON.parse(response.data.Data);
-        this.client_survey.jmbg = this.client_test.jmbg;
-        this.client_survey.survey = survey;
-        this.client_survey.survey_id = survey.id;
-        this.survey_questions = survey.questions;
-        this.survey_questions.forEach(q => {
-          const obj = {survey_question_id: q.ID, grade: 0};
-          this.client_survey.survey_questions_answers.push(obj);
-        })
+        const result = JSON.parse(response.data.Data);
+
+        var generalSurvey = result.find((s) => s.type == this.SURVEY_TYPES.GENERAL);
+        this.surveys.push(generalSurvey);
+        var teacherSurvey = result.find((s) => s.type == this.SURVEY_TYPES.TEACHER);
+        this.surveys.push(teacherSurvey);
+
+        //general survey
+        var generalClientSurvey = {}
+        generalClientSurvey.jmbg = this.client_test.jmbg;
+        generalClientSurvey.survey = generalSurvey;
+        generalClientSurvey.survey_id = generalSurvey.id;
+        var question_answers = [];
+        generalSurvey.questions.forEach(q => {
+          const obj = { survey_question_id: q.ID, grade: 0 };
+          question_answers.push(obj);
+        });
+
+        generalClientSurvey.survey_questions_answers = question_answers;
+
+        this.clientSurveys.push(generalClientSurvey);
+
+        //teacher surveys
+        this.teachers.forEach(t => {
+          var clientSurvey = {};
+          clientSurvey.jmbg = this.client_test.jmbg;
+          clientSurvey.survey = teacherSurvey;
+          clientSurvey.survey_id = teacherSurvey.id;
+          clientSurvey.teacher_id = t.id;
+          clientSurvey.teacher = t;
+          var question_answers = [];
+          teacherSurvey.questions.forEach(q => {
+            const obj = { survey_question_id: q.ID, grade: 0 };
+            question_answers.push(obj);
+
+          });
+          clientSurvey.survey_questions_answers = question_answers;
+
+          this.clientSurveys.push(clientSurvey);
+        });
+        console.log(this.clientSurveys);
+        this.surveyDataReady = true;
       }, (error) => {
         this.errorToast(error, "/surveys/active");
+      });
+    },
+    async getTeachersBySeminarDay() {
+      await axios.get('/seminar-days/teachers/id/' + this.client_test.seminar_day.ID.toString()).then((response) => {
+        if (response.data === null || response.data.Status === 'error') {
+          this.toast.error(response.data != null ? response.data.ErrorMessage : "");
+          return;
+        }
+        this.teachers = JSON.parse(response.data.Data);
+        console.log(this.teachers);
+      }, (error) => {
+        this.errorToast(error, "/seminar-days/teachers/id/");
       });
     }
   },
   setup() {
     const toast = useToast();
-    return {toast}
+    return { toast }
   },
   async mounted() {
 
@@ -298,5 +374,4 @@ export default {
 
 .styled-table tbody tr:nth-of-type(even) {
   background-color: #f3f3f3;
-}
-</style>
+}</style>

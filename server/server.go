@@ -63,6 +63,7 @@ func RunServer(host string) {
 	s.HandleFunc("/update", handlers.UpdateSeminarDay).Methods("POST")
 	s.HandleFunc("/list/{seminar_id}", handlers.ListSeminarDays).Methods("GET")
 	s.HandleFunc("/id/{id}", handlers.GetSeminarDayByID).Methods("GET")
+	s.HandleFunc("/teachers/id/{id}", handlers.GetTeachersFromSeminarDay).Methods("GET")
 	s.HandleFunc("/jmbg/{jmbg}", handlers.GetSeminarDayWithTestByJMBG).Methods("GET")
 	s.HandleFunc("/download/id/{id}/filename/{filename}", handlers.DownloadSeminarDayFile).Methods("GET")
 	//s.HandleFunc("/delete/{id}", handlers.DeleteSeminarDay).Methods("GET")
@@ -154,7 +155,7 @@ func RunServer(host string) {
 	s.HandleFunc("/list", handlers.ListSurveys).Methods("GET")
 	s.HandleFunc("/create", handlers.CreateSurvey).Methods("POST")
 	s.HandleFunc("/id/{id}", handlers.GetSurveyByID).Methods("GET")
-	s.HandleFunc("/active", handlers.GetActiveSurvey).Methods("GET")
+	s.HandleFunc("/active", handlers.GetActiveSurveys).Methods("GET")
 	s.HandleFunc("/client-survey/create", handlers.SaveClientSurvey).Methods("POST")
 
 	c := cors.New(cors.Options{

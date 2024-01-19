@@ -22,6 +22,7 @@ type seminarDayService struct {
 
 type seminarDayServiceInterface interface {
 	GetSeminarDayByID(seminarDayID int) (*model.SeminarDay, error)
+	GetTeachersFromSeminarDay(seminarDayID int) ([]model.User, error)
 	GetSeminarDayWithTestByID(seminarDayID int) (*model.SeminarDay, error)
 	GetSeminarDaysBySeminarID(seminarID int) ([]model.SeminarDay, error)
 	CreateSeminarDay(seminarDay model.SeminarDay) (*model.SeminarDay, error)
@@ -36,6 +37,23 @@ func (c *seminarDayService) GetSeminarDaysBySeminarID(seminarID int) ([]model.Se
 		return nil, err
 	}
 	return days, nil
+}
+
+func (c *seminarDayService) GetTeachersFromSeminarDay(seminarDayID int) ([]model.User, error) {
+	var teacherIds []uint
+	err := db.Client.Raw("select distinct teacher_id  from seminar_classes sc where seminar_day_id = ? AND teacher_id IS NOT NULL", seminarDayID).Scan(&teacherIds).Error
+	if err != nil {
+		return []model.User{}, err
+	}
+
+	if len(teacherIds) == 0 {
+		return []model.User{}, nil
+	}
+
+	users := []model.User{}
+	db.Client.Find(&users, teacherIds)
+
+	return users, nil
 }
 
 func (c *seminarDayService) GetSeminarDayByID(seminarDayID int) (*model.SeminarDay, error) {

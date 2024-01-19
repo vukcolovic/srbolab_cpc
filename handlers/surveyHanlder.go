@@ -124,15 +124,15 @@ func CreateSurvey(w http.ResponseWriter, r *http.Request) {
 	SetSuccessResponse(w, createdSurvey)
 }
 
-func GetActiveSurvey(w http.ResponseWriter, req *http.Request) {
-	survey, err := service.SurveyService.GetActiveSurvey()
+func GetActiveSurveys(w http.ResponseWriter, req *http.Request) {
+	surveys, err := service.SurveyService.GetActiveSurveys()
 	if err != nil {
 		logoped.ErrorLog.Println(err.Error())
-		SetErrorResponse(w, errors.New("Greška prilikom povlačenja ankete: "+err.Error()))
+		SetErrorResponse(w, errors.New("Greška prilikom povlačenja aktivnih anketa: "+err.Error()))
 		return
 	}
 
-	SetSuccessResponse(w, survey)
+	SetSuccessResponse(w, surveys)
 }
 
 func SaveClientSurvey(w http.ResponseWriter, r *http.Request) {

@@ -19,7 +19,8 @@ type surveyServiceInterface interface {
 	GetAllSurveyQuestions() ([]model.SurveyQuestion, error)
 	GetSurveyQuestionByID(id int) (*model.SurveyQuestion, error)
 	CreateSurveyQuestion(question model.SurveyQuestion) (*model.SurveyQuestion, error)
-	GetActiveSurvey() (*model.Survey, error)
+	GetActiveSurveyByType(surveyType int) (*model.Survey, error)
+	GetActiveSurveys() ([]model.Survey, error)
 	CreateClientSurvey(cs model.ClientSurvey) (*model.ClientSurvey, error)
 	GetClientSurveysBySeminarDayID(seminarDayID int) ([]model.ClientSurvey, error)
 }
@@ -76,13 +77,30 @@ func (c *surveyService) CreateSurveyQuestion(question model.SurveyQuestion) (*mo
 	return &question, nil
 }
 
-func (c *surveyService) GetActiveSurvey() (*model.Survey, error) {
+func (c *surveyService) GetActiveSurveyByType(surveyType int) (*model.Survey, error) {
 	var survey *model.Survey
-	if err := db.Client.Where("active = ?", true).Preload("Questions").Last(&survey).Error; err != nil {
+	if err := db.Client.Where("active = ? AND type = ?", true, surveyType).Preload("Questions").Last(&survey).Error; err != nil {
 		return nil, err
 	}
 
 	return survey, nil
+}
+
+func (c *surveyService) GetActiveSurveys() ([]model.Survey, error) {
+	result := []model.Survey{}
+	generalSurvey, err := c.GetActiveSurveyByType(model.GENERAL)
+	if err != nil {
+		return []model.Survey{}, err
+	}
+	result = append(result, *generalSurvey)
+
+	teacherSurvey, err := c.GetActiveSurveyByType(model.TEACHER)
+	if err != nil {
+		return []model.Survey{}, err
+	}
+	result = append(result, *teacherSurvey)
+
+	return result, nil
 }
 
 func (c *surveyService) CreateClientSurvey(cs model.ClientSurvey) (*model.ClientSurvey, error) {

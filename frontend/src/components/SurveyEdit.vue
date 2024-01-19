@@ -17,6 +17,17 @@
               type="text">
           </text-input>
 
+          <label :style="styleLabel" class="mb-1 mt-1">Tip ankete</label>
+            <v-select
+                v-model="survey.type"
+                :disabled=readonly
+                :options="surveyTypes"
+                :style="styleInput"
+                label="name"
+                :reduce="opt => opt.value"
+                placeholder="Traži">
+            </v-select>
+
           <label :style=styleLabelSmall for="active">Anketa je aktivna:&nbsp;&nbsp;</label>
           <input id="verified" v-model="survey.active" :disabled="readonly" type="checkbox"/>
       </div>
@@ -70,10 +81,12 @@ export default {
         name: "",
         questions: [],
         active: false,
+        type: 0,
       },
       action: "view",
       surveyId: "",
       questions: [],
+      surveyTypes: [{name: "Generalna", value: 0}, {name: "Predavači", value: 1},]
     }
   },
   methods: {
@@ -111,7 +124,6 @@ export default {
           return;
         }
         this.questions = JSON.parse(response.data.Data);
-        console.log(this.questions);
       }, (error) => {
         this.errorToast(error, "/surveys/list");
       });

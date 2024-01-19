@@ -221,3 +221,29 @@ func DownloadSeminarDayFile(w http.ResponseWriter, req *http.Request) {
 
 	SetSuccessResponse(w, content)
 }
+
+func GetTeachersFromSeminarDay(w http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	seminarDayIdParam, ok := vars["id"]
+	if !ok {
+		logoped.ErrorLog.Println("missing parameter id")
+		SetErrorResponse(w, NewMissingRequestParamError("id"))
+		return
+	}
+
+	seminarDayId, err := strconv.Atoi(seminarDayIdParam)
+	if err != nil {
+		logoped.ErrorLog.Println(err.Error())
+		SetErrorResponse(w, NewWrongParamFormatErrorError("seminarDayId", seminarDayIdParam))
+		return
+	}
+
+	teachers, err := service.SeminarDayService.GetTeachersFromSeminarDay(seminarDayId)
+	if err != nil {
+		logoped.ErrorLog.Println(err.Error())
+		SetErrorResponse(w, errors.New("Greška prilikom povlačenja predavača: "+err.Error()))
+		return
+	}
+
+	SetSuccessResponse(w, teachers)
+}
