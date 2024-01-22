@@ -1543,6 +1543,39 @@ func (p *printService) PrintSeminarReport(seminar *model.Seminar) ([]byte, error
 		}
 	}
 
+	clientTeacherSurveys, err := SurveyService.GetClientSurveysBySeminarDayIDAndType(int(seminarDay.ID), int(model.TEACHER))
+	if err != nil {
+		logoped.ErrorLog.Println("Error getting client surveys by seminar day id: ", err)
+		return []byte{}, err
+	}
+
+	type TeacherQuestion struct {
+		teacher  string
+		question string
+	}
+
+	type SurveyResult struct {
+		Sum int
+		Num int
+	}
+
+	teacherClassGradeMap := map[TeacherQuestion]*SurveyResult{}
+	for _, cts := range clientTeacherSurveys {
+		for _, q := range cts.SurveyQuestionAnswers {
+			if cts.TeacherID == nil || q.Grade < 1 {
+				continue
+			}
+			result, ok := teacherClassGradeMap[TeacherQuestion{teacher: cts.Teacher.Person.FullName(), question: q.SurveyQuestion.Content}]
+			if ok {
+				result.Num++
+				result.Sum = result.Sum + q.Grade
+			} else {
+				res := SurveyResult{Num: 1, Sum: q.Grade}
+				teacherClassGradeMap[TeacherQuestion{teacher: cts.Teacher.Person.FullName(), question: q.SurveyQuestion.Content}] = &res
+			}
+		}
+	}
+
 	pdf.Ln(25)
 	pdf.SetTextColor(47, 83, 150)
 	for k, classes := range teacherClassMap {
@@ -1590,8 +1623,44 @@ func (p *printService) PrintSeminarReport(seminar *model.Seminar) ([]byte, error
 			lines, _ = splitLine(class, 30)
 			for i, line := range lines {
 				name := ""
+				question1Res := ""
+				question2Res := ""
+				question3Res := ""
+				question4Res := ""
+				questionsAvg := ""
+				questionSum := 0.0
+				questionNum := 0.0
 				if !nameDone {
 					name = firstName
+					res1, ok := teacherClassGradeMap[TeacherQuestion{teacher: k, question: "Час држи на интересантан начин:"}]
+					if ok && res1.Num > 0 {
+						questionSum = questionSum + float64(res1.Sum)
+						questionNum = questionNum + float64(res1.Num)
+						question1Res = fmt.Sprintf("%.1f", float64(res1.Sum)/float64(res1.Num))
+					}
+					res2, ok := teacherClassGradeMap[TeacherQuestion{teacher: k, question: "Успешно објашњава градиво:"}]
+					if ok && res2.Num > 0 {
+						questionSum = questionSum + float64(res2.Sum)
+						questionNum = questionNum + float64(res2.Num)
+						question2Res = fmt.Sprintf("%.1f", float64(res2.Sum)/float64(res2.Num))
+					}
+					res3, ok := teacherClassGradeMap[TeacherQuestion{teacher: k, question: "Спреман је да одговара на питања:"}]
+					if ok && res3.Num > 0 {
+						questionSum = questionSum + float64(res3.Sum)
+						questionNum = questionNum + float64(res3.Num)
+						question3Res = fmt.Sprintf("%.1f", float64(res3.Sum)/float64(res3.Num))
+					}
+					res4, ok := teacherClassGradeMap[TeacherQuestion{teacher: k, question: "Користио је добре примере:"}]
+					if ok && res4.Num > 0 {
+						questionSum = questionSum + float64(res4.Sum)
+						questionNum = questionNum + float64(res4.Num)
+						question4Res = fmt.Sprintf("%.1f", float64(res4.Sum)/float64(res4.Num))
+					}
+
+					if questionNum > 0 {
+						questionsAvg = fmt.Sprintf("%.1f", questionSum/questionNum)
+					}
+
 					nameDone = true
 					borderStr = "TLR"
 				} else if !lastNameDone {
@@ -1622,11 +1691,11 @@ func (p *printService) PrintSeminarReport(seminar *model.Seminar) ([]byte, error
 				pdf.CellFormat(30, ch, trObj.translDef(name), borderStrName, 0, "C", false, 0, "")
 				pdf.CellFormat(65, ch, trObj.translDef(line), borderStr, 0, "L", false, 0, "")
 				pdf.CellFormat(15, ch, classesNum, borderStrMarks, 0, "C", false, 0, "")
-				pdf.CellFormat(15, ch, "", borderStrMarks, 0, "C", false, 0, "")
-				pdf.CellFormat(15, ch, "", borderStrMarks, 0, "C", false, 0, "")
-				pdf.CellFormat(15, ch, "", borderStrMarks, 0, "C", false, 0, "")
-				pdf.CellFormat(15, ch, "", borderStrMarks, 0, "C", false, 0, "")
-				pdf.CellFormat(15, ch, "", borderStrMarks, 0, "C", false, 0, "")
+				pdf.CellFormat(15, ch, question1Res, borderStrMarks, 0, "C", false, 0, "")
+				pdf.CellFormat(15, ch, question2Res, borderStrMarks, 0, "C", false, 0, "")
+				pdf.CellFormat(15, ch, question3Res, borderStrMarks, 0, "C", false, 0, "")
+				pdf.CellFormat(15, ch, question4Res, borderStrMarks, 0, "C", false, 0, "")
+				pdf.CellFormat(15, ch, questionsAvg, borderStrMarks, 0, "C", false, 0, "")
 				pdf.Ln(ch)
 			}
 		}
@@ -1668,7 +1737,7 @@ func (p *printService) PrintSeminarReport(seminar *model.Seminar) ([]byte, error
 	pdf.SetTextColor(47, 83, 150)
 	pdf.Ln(5)
 
-	clientSurveys, err := SurveyService.GetClientSurveysBySeminarDayID(int(seminarDay.ID))
+	clientSurveys, err := SurveyService.GetClientSurveysBySeminarDayIDAndType(int(seminarDay.ID), int(model.GENERAL))
 	if err != nil {
 		logoped.ErrorLog.Println("Error getting client surveys by seminar day id: ", err)
 		return []byte{}, err

@@ -22,7 +22,7 @@ type surveyServiceInterface interface {
 	GetActiveSurveyByType(surveyType int) (*model.Survey, error)
 	GetActiveSurveys() ([]model.Survey, error)
 	CreateClientSurvey(cs model.ClientSurvey) (*model.ClientSurvey, error)
-	GetClientSurveysBySeminarDayID(seminarDayID int) ([]model.ClientSurvey, error)
+	GetClientSurveysBySeminarDayIDAndType(seminarDayID int, surveyType int) ([]model.ClientSurvey, error)
 }
 
 func (c *surveyService) GetAllSurveys() ([]model.Survey, error) {
@@ -112,11 +112,19 @@ func (c *surveyService) CreateClientSurvey(cs model.ClientSurvey) (*model.Client
 	return &cs, nil
 }
 
-func (c *surveyService) GetClientSurveysBySeminarDayID(seminarDayID int) ([]model.ClientSurvey, error) {
+func (c *surveyService) GetClientSurveysBySeminarDayIDAndType(seminarDayID int, surveyType int) ([]model.ClientSurvey, error) {
 	var clientSurveys []model.ClientSurvey
-	if err := db.Client.Where("seminar_day_id = ?", seminarDayID).Preload("SurveyQuestionAnswers.SurveyQuestion").Preload("Client").Preload("Survey.Questions").Find(&clientSurveys).Error; err != nil {
+	if err := db.Client.Where("seminar_day_id = ?", seminarDayID).Preload("SurveyQuestionAnswers.SurveyQuestion").Preload("Client").Preload("Survey.Questions").Preload("Teacher").Find(&clientSurveys).Error; err != nil {
 		return nil, err
 	}
 
-	return clientSurveys, nil
+	clientSurveysByType := []model.ClientSurvey{}
+
+	for _, cs := range clientSurveys {
+		if cs.Survey.Type == surveyType {
+			clientSurveysByType = append(clientSurveysByType, cs)
+		}
+	}
+
+	return clientSurveysByType, nil
 }
