@@ -3,7 +3,6 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"srbolab_cpc/logoped"
 	"srbolab_cpc/model"
@@ -183,8 +182,6 @@ func SaveClientTest(w http.ResponseWriter, r *http.Request) {
 		SetErrorResponse(w, NewJSONDecodeError("ClientTest"))
 		return
 	}
-	logoped.InfoLog.Println(fmt.Sprintf("Saving client test, client %s, seminar day %d, test %d",
-		clientTest.Jmbg, clientTest.SeminarDay.ID, clientTest.Test.ID))
 
 	msg, isSecond, err := isTestValid(&clientTest)
 	if err != nil {

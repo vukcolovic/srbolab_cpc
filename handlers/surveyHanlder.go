@@ -8,6 +8,7 @@ import (
 	"srbolab_cpc/model"
 	"srbolab_cpc/service"
 	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -145,6 +146,18 @@ func SaveClientSurvey(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	msg, err := isSurveyValid(&clientSurvey)
+	if err != nil {
+		logoped.ErrorLog.Println("Error saving client survey, survey is not valid, error: ", err.Error())
+		SetErrorResponse(w, errors.New("Greška prilikom snimanja ankete: "+err.Error()))
+		return
+	}
+	if len(msg) > 0 {
+		logoped.ErrorLog.Println("Error saving client survey, survey is not valid, message: ", msg)
+		SetErrorResponse(w, errors.New(msg))
+		return
+	}
+
 	client, err := service.ClientService.GetClientByJMBG(clientSurvey.JMBG)
 	if err != nil {
 		logoped.ErrorLog.Println("Error creating client survey " + err.Error())
@@ -163,4 +176,52 @@ func SaveClientSurvey(w http.ResponseWriter, r *http.Request) {
 	}
 
 	SetSuccessResponse(w, createdClientSurvey)
+}
+
+func isSurveyValid(clientSurvey *model.ClientSurvey) (string, error) {
+	client, err := service.ClientService.GetClientByJMBG(clientSurvey.JMBG)
+	if err != nil {
+		return "", err
+	}
+	if client == nil {
+		return "Korisnik sa ovim jmbg-om ne postoji u sistemu.", nil
+	}
+
+	day, err := service.SeminarDayService.GetSeminarDayByID(int(clientSurvey.SeminarDay.ID))
+	if err != nil {
+		return "", err
+	}
+
+	found := false
+	for _, tr := range day.Seminar.Trainees {
+		if tr.ClientID == client.ID {
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		return "Korisnik sa ovim jmbg-om nije učesnik seminara.", nil
+	}
+
+	dayTime := clientSurvey.SeminarDay.Date
+	now := time.Now()
+	if now.Day() != dayTime.Day() || now.Month() != dayTime.Month() || now.Year() != dayTime.Year() {
+		return "Ovu ankety nije dozvoljeno raditi danas.", nil
+	}
+
+	if clientSurvey.SeminarDay.Seminar.SeminarStatusID != model.SEMINAR_STATUS_IN_PROGRESS {
+		return "Ovu anketu nije dozvoljeno raditi, seminar nije u toku.", nil
+	}
+
+	clientSurveys, err := service.SurveyService.GetClientSurveysBySeminarDayIDAndClientID(int(clientSurvey.SeminarDay.ID), int(client.ID))
+	if err != nil {
+		return "", err
+	}
+
+	if len(clientSurveys) > 8 {
+		return "Ovu anketu nije dozvoljeno raditi, klijent je već odradio anketu u toku dana.", nil
+	}
+
+	return "", nil
 }

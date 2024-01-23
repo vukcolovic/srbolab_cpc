@@ -23,6 +23,7 @@ type surveyServiceInterface interface {
 	GetActiveSurveys() ([]model.Survey, error)
 	CreateClientSurvey(cs model.ClientSurvey) (*model.ClientSurvey, error)
 	GetClientSurveysBySeminarDayIDAndType(seminarDayID int, surveyType int) ([]model.ClientSurvey, error)
+	GetClientSurveysBySeminarDayIDAndClientID(seminarDayID int, clientID int) ([]model.ClientSurvey, error)
 }
 
 func (c *surveyService) GetAllSurveys() ([]model.Survey, error) {
@@ -127,4 +128,13 @@ func (c *surveyService) GetClientSurveysBySeminarDayIDAndType(seminarDayID int, 
 	}
 
 	return clientSurveysByType, nil
+}
+
+func (c *surveyService) GetClientSurveysBySeminarDayIDAndClientID(seminarDayID int, clientID int) ([]model.ClientSurvey, error) {
+	var clientSurveys []model.ClientSurvey
+	if err := db.Client.Where("seminar_day_id = ? AND client_id = ?", seminarDayID, clientID).Find(&clientSurveys).Error; err != nil {
+		return nil, err
+	}
+
+	return clientSurveys, nil
 }
