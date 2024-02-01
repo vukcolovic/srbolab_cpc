@@ -23,6 +23,9 @@
         <button class="iconBtn" title="Obriši" :disabled="!table.selectedClient" @click="deleteClient">
           <i class="fa fa-trash">
           </i></button>
+        <button class="iconBtn" title="Dodaj vozače na seminar" :disabled="!selectedSeminar" @click.prevent="saveToSeminar()">
+          <i class="fa fa-floppy-o"></i>
+        </button>
       </div>
     </div>
     <div class="collapse multi-collapse border" style="font-size: 0.7em" id="filter">
@@ -75,12 +78,25 @@
           </v-select>
         </div>
 
+        <div v-if="table.selectedClientIds.length" class="col-sm-4 my-1">
+        <label :style=styleLabelSmall for="seminar">Seminar:&nbsp;&nbsp;</label>
+        <v-select
+              v-model="selectedSeminar"
+              :disabled=readonly
+              :options="openedSeminars"
+              :style="styleInputSmall"
+              label="base_info"
+              placeholder="Traži">
+          </v-select>
+        </div>
+
       </div>
     </div>
 
     <div class="row mt-2">
       <vue-table-lite
           ref="localTable"
+          :has-checkbox="true"
           @row-clicked="selectClient"
           @dblclick="doubleClick"
           :total= "table.totalCount"
@@ -91,6 +107,7 @@
           @do-search="doSearch"
           :rowClasses=table.rowClasess
           :is-loading="table.isLoading"
+          @return-checked-rows="updateCheckedRows"
       ></vue-table-lite>
     </div>
   </div>
@@ -115,12 +132,15 @@ export default {
     return {
       filter: {verified: "", wait_seminar: "", jmbg: "", first_name: "", last_name: "", company_id: null},
       pageSize: 50,
+      openedSeminars: [],
+      selectedSeminar: null,
     }
   },
   setup() {
     // Table config
     const table = reactive({
       selectedClient: null,
+      selectedClientIds: [],
       isLoading: false,
       isReSearch: false,
       rowClasess: (row) => { return ['is-rows-el', 'row_id_' + row.ID]},
@@ -148,9 +168,9 @@ export default {
           width: '10%',
         },
         {
-          label: 'Email',
-          field: 'email',
-          width: '10%',
+          label: 'Firma',
+          field: 'company_name',
+          width: '15%',
         },
         {
           label: 'JMBG',
@@ -199,15 +219,40 @@ export default {
       router.push("/client?action=update&id=" + table.selectedClient.ID);
     }
 
+     /**
+     * Row checked event
+     */
+     const updateCheckedRows = (rowsKey) => {
+      table.selectedClientIds = rowsKey;
+      console.log(table.selectedClientIds);
+    };
+
     const toast = useToast();
     return {
       toast,
       table,
       selectClient,
       doubleClick,
+      updateCheckedRows,
     };
   },
   methods: {
+    async saveToSeminar() {
+      const response = confirm("Da li ste sigurni da želite da dodate vozače na seminar?");
+      if (response) {
+        var bulkRequest = {seminar_id: this.selectedSeminar.ID, client_ids: this.table.selectedClientIds}
+        await axios.post('/client-seminar/insert-bulk', JSON.stringify(bulkRequest)).then((response) => {
+          if (response.data === null || response.data.Status === 'error') {
+            this.toast.error(response.data != null ? response.data.ErrorMessage : "");
+            return;
+          }
+          location.reload();
+          this.toast.info("Uspešno dodati vozači na seminar.");
+        }, (error) => {
+          this.errorToast(error, "/clients/delete");
+        });
+      }  
+    },
     async deleteClient() {
       const response = confirm("Da li ste sigurni da želite da obrišete vozača?");
       if (response) {
@@ -237,6 +282,7 @@ export default {
           vs.email = vs.person.email;
           vs.place = vs.address.place;
           vs.phone_number = vs.person.phone_number;
+          vs.company_name = vs.company.name;
           vs.verified_text = vs.verified ? "Da" : "Ne";
           vs.waiting_seminar_text = vs.wait_seminar ? "Da" : "Ne";
         });
@@ -262,6 +308,7 @@ export default {
     await this.countClients();
     await this.getAllCompanies();
     await this.doSearch(0, this.pageSize, 'id', 'asc');
+    await this.getSeminarsByStatusCode("OPENED").then(result => this.openedSeminars = result);
   }
 }
 </script>

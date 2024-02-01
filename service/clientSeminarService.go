@@ -1,9 +1,13 @@
 package service
 
 import (
-	"gorm.io/gorm"
+	"errors"
 	"srbolab_cpc/db"
 	"srbolab_cpc/model"
+
+	"golang.org/x/exp/slices"
+
+	"gorm.io/gorm"
 )
 
 var (
@@ -17,6 +21,7 @@ type clientSeminarServiceInterface interface {
 	UpdateClientSeminar(clientSeminar model.ClientSeminar) (*model.ClientSeminar, error)
 	GetMaxConfirmationNumber() (int, error)
 	GetNumberOfPassedSeminars(clientID uint) (int, error)
+	CreateBulk(seminarID int, clientIDs []int) error
 }
 
 func (c *clientSeminarService) UpdateClientSeminar(clientSeminar model.ClientSeminar) (*model.ClientSeminar, error) {
@@ -54,4 +59,36 @@ func (c *clientSeminarService) GetNumberOfPassedSeminars(clientID uint) (int, er
 	}
 
 	return *count, nil
+}
+
+func (c *clientSeminarService) CreateBulk(seminarID int, clientIDs []int) error {
+	if seminarID == 0 {
+		return errors.New("seminar ne može biti prazan")
+	}
+	if len(clientIDs) == 0 {
+		return errors.New("lista klijenata je prazna")
+	}
+
+	alreadyAddedClients := []uint{}
+	err := db.Client.Raw("select client_id from client_seminars cs where cs.seminar_id = ? and client_id in (?)", seminarID, clientIDs).Scan(&alreadyAddedClients).Error
+	if err != nil {
+		return err
+	}
+
+	tx := db.Client.Begin()
+
+	for _, id := range clientIDs {
+		if slices.Contains(alreadyAddedClients, uint(id)) {
+			continue
+		}
+		err = tx.Raw("INSERT INTO client_seminars (seminar_id, client_id, created_at) VALUES (?, ?, now())", seminarID, id).Scan(&alreadyAddedClients).Error
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	tx.Commit()
+
+	return nil
 }

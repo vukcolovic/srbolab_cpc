@@ -92,7 +92,7 @@ func (c *clientService) GetAllClients(skip, take int, filter model.ClientFilter)
 	var clients []model.Client
 
 	if filter.WaitingRoom {
-		if err := db.Client.Where("verified = ?", false).Or("wait_seminar = ?", true).Limit(take).Offset(skip).Find(&clients).Error; err != nil {
+		if err := db.Client.Where("verified = ?", false).Or("wait_seminar = ?", true).Limit(take).Offset(skip).Preload("Company").Find(&clients).Error; err != nil {
 			return nil, err
 		}
 
@@ -111,7 +111,7 @@ func (c *clientService) GetAllClients(skip, take int, filter model.ClientFilter)
 	}
 
 	query := buildClientQuery(filter)
-	if err := db.Client.Where(query).Order("id desc").Limit(take).Offset(skip).Find(&clients).Error; err != nil {
+	if err := db.Client.Where(query).Order("id desc").Limit(take).Offset(skip).Preload("Company").Find(&clients).Error; err != nil {
 		return nil, err
 	}
 
