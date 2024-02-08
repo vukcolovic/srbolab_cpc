@@ -1,13 +1,14 @@
 package service
 
 import (
-	"github.com/dgrijalva/jwt-go"
-	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
 	"srbolab_cpc/db"
 	"srbolab_cpc/logoped"
 	"srbolab_cpc/model"
 	"strconv"
+
+	"github.com/dgrijalva/jwt-go"
+	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
 var (

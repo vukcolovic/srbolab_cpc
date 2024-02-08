@@ -3,12 +3,13 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
-	"github.com/gorilla/mux"
 	"net/http"
 	"srbolab_cpc/logoped"
 	"srbolab_cpc/model"
 	"srbolab_cpc/service"
 	"strconv"
+
+	"github.com/gorilla/mux"
 )
 
 func Register(w http.ResponseWriter, r *http.Request) {
@@ -133,7 +134,7 @@ func DeleteUser(w http.ResponseWriter, req *http.Request) {
 	err = service.UsersService.DeleteUser(userIdInt)
 	if err != nil {
 		logoped.ErrorLog.Println("error deleting user ", err.Error())
-		SetErrorResponse(w, errors.New("Greska prilikom brisanja korisnika: "+err.Error()))
+		SetErrorResponse(w, errors.New("Greška prilikom brisanja korisnika: "+err.Error()))
 		return
 	}
 

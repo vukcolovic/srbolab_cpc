@@ -25,7 +25,7 @@
               <div v-for="(answer) in question.answers" :key="answer.ID" class="row no-gutters">
                 <div class="col-2 col-sm-2 col-md-1"
                   :style="[(isSecondFinished && answer.correct) ? { 'background': 'green' } : {}]">
-                  {{ answer.letter }}
+                  <!-- {{ answer.letter }} -->
                   <input style="margin-left: 5px" id={{question.ID}} v-model="client_test.questions_answers[index].answer"
                     :value=answer.letter type="radio">
                 </div>
@@ -204,15 +204,6 @@ export default {
         this.questions = this.seminarDay.test.questions;
         this.questions.sort((a, b) => (a - b));
         this.questions.forEach(q => {
-          q.answers = q.answers.sort((a, b) => {
-            if (a.letter < b.letter) {
-              return -1;
-            }
-            if (a.letter > b.letter) {
-              return 1;
-            }
-            return 0;
-          });
           const obj = { question_id: q.ID, answer: "" };
           this.client_test.questions_answers.push(obj);
         })

@@ -11,6 +11,9 @@
         <button class="iconBtn" title="Izmeni" :disabled="!table.selectedUser" @click="$router.push({name: 'UserEdit', query: {id: table.selectedUser.ID, action: 'update' }})">
           <i class="fa fa-user-md">
           </i></button>
+          <button class="iconBtn" title="Obriši" :disabled="!table.selectedUser" @click="deleteUser">
+          <i class="fa fa-trash">
+          </i></button>
         <label class="m-1" style="font-size: 1.2em; font-style: italic">Korisnici</label>
       </div>
     </div>
@@ -111,6 +114,20 @@ export default {
     };
   },
   methods: {
+    async deleteUser() {
+      const response = confirm("Da li ste sigurni da želite da obrišete korisnika?");
+      if (response) {
+        await axios.get('/users/delete/' + this.table.selectedUser.ID).then((response) => {
+          if (response.data === null || response.data.Status === 'error') {
+            this.toast.error(response.data != null ? response.data.ErrorMessage : "");
+            return;
+          }
+          location.reload();
+        }, (error) => {
+          this.errorToast(error, "/users/delete");
+        });
+      }
+    },
     async doSearch(offset, limit, order, sort) {
       console.log(order, sort)
       this.isLoading = true;
