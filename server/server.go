@@ -143,6 +143,7 @@ func RunServer(host string) {
 
 	s = r.PathPrefix("/api/excel").Subrouter()
 	s.HandleFunc("/client-tests/{seminar-day}", handlers.PrintClientTestsBySeminarDay).Methods("GET")
+	s.HandleFunc("/clients", handlers.PrintListOfCients).Methods("GET")
 	s.HandleFunc("/list_trainees/{seminar-day}", handlers.PrintListTraineesBySeminarDay).Methods("GET")
 	s.HandleFunc("/seminars-report/clients", handlers.PrintSeminarsReportOfClients).Methods("POST")
 	s.HandleFunc("/seminars-report/teachers", handlers.PrintSeminarsReportOfTeachers).Methods("POST")

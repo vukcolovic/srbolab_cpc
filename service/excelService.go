@@ -3,12 +3,13 @@ package service
 import (
 	"bytes"
 	"fmt"
-	"github.com/xuri/excelize/v2"
 	"sort"
 	"srbolab_cpc/model"
 	"srbolab_cpc/util"
 	"strconv"
 	"time"
+
+	"github.com/xuri/excelize/v2"
 )
 
 var (
@@ -23,6 +24,7 @@ type excelServiceInterface interface {
 	CreateListClientsBySeminarDayReport(seminarDay *model.SeminarDay) ([]byte, error)
 	CreateSeminarsReportOfClients(seminars []model.Seminar) ([]byte, error)
 	CreateSeminarsReportOfTeachers(seminars []model.Seminar) ([]byte, error)
+	CreateClientsReport() ([]byte, error)
 }
 
 func (excelService) CreateClientTestsBySeminarDayReport(tests []model.ClientTest) ([]byte, error) {
@@ -318,6 +320,109 @@ func (excelService) CreateSeminarsReportOfTeachers(seminars []model.Seminar) ([]
 		err = exc.SetCellStyle("Sheet1", "B3", columns[columnCounter-1]+"3", firstRowStyle)
 		if err != nil {
 			return []byte{}, err
+		}
+	}
+
+	var buf bytes.Buffer
+	err = exc.Write(&buf)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return buf.Bytes(), nil
+}
+
+func (excelService) CreateClientsReport() ([]byte, error) {
+	exc := excelize.NewFile()
+	firstRowStyle, err := exc.NewStyle(&excelize.Style{
+		Border:    []excelize.Border{excelize.Border{Type: "center", Style: 1, Color: "#000000"}, excelize.Border{Type: "right", Style: 1, Color: "#000000"}, excelize.Border{Type: "left", Style: 1, Color: "#000000"}, excelize.Border{Type: "bottom", Style: 1, Color: "#000000"}, excelize.Border{Type: "top", Style: 1, Color: "#000000"}},
+		Fill:      excelize.Fill{Type: "pattern", Color: []string{"#D8D8D8"}, Pattern: 1},
+		Alignment: &excelize.Alignment{Horizontal: "center"},
+	})
+	if err != nil {
+		return []byte{}, err
+	}
+
+	sheetRowMap := map[uint]int{}
+
+	locationSheetMap := map[uint]string{}
+	locationSheetMap[0] = "Sheet1"
+	sheetRowMap[0] = 2
+
+	locations, err := LocationService.GetAllLocations()
+	if err != nil {
+		return []byte{}, err
+	}
+
+	for _, l := range locations {
+		sheet := l.Code + "-" + l.Address.Place
+		locationSheetMap[l.ID] = sheet
+		sheetRowMap[l.ID] = 2
+		exc.NewSheet(sheet)
+	}
+
+	for _, sheet := range locationSheetMap {
+		err = exc.SetCellStyle(sheet, "B1", "H1", firstRowStyle)
+		if err != nil {
+			return []byte{}, err
+		}
+		exc.SetRowHeight(sheet, 1, 25.0)
+
+		exc.SetColWidth(sheet, "B", "B", 20.0)
+		exc.SetColWidth(sheet, "C", "C", 12.0)
+		exc.SetColWidth(sheet, "D", "D", 15.0)
+		exc.SetColWidth(sheet, "E", "E", 15.0)
+		exc.SetColWidth(sheet, "F", "F", 15.0)
+		exc.SetColWidth(sheet, "G", "G", 15.0)
+		exc.SetColWidth(sheet, "H", "H", 15.0)
+
+		exc.SetCellValue(sheet, "B1", "Ime i prezime")
+		exc.SetCellValue(sheet, "C1", "Broj telefona")
+		exc.SetCellValue(sheet, "D1", "Radno vreme")
+		exc.SetCellValue(sheet, "E1", "Dokumenta")
+		exc.SetCellValue(sheet, "F1", "Teret")
+		exc.SetCellValue(sheet, "G1", "Propisi")
+		exc.SetCellValue(sheet, "H1", "Tahografi 2")
+	}
+
+	clientCount, err := ClientService.GetClientsCount()
+	if err != nil {
+		return []byte{}, err
+	}
+
+	var batch int64 = 200
+	pages := clientCount/batch + 1
+
+	for i := 0; i < int(pages); i++ {
+		clients, err := ClientService.GetAllClientsWithSeminarsAndBasePersonalInfo(i*int(batch), int(batch))
+		if err != nil {
+			return []byte{}, err
+		}
+
+		for _, c := range clients {
+			var location uint
+			if len(c.Seminars) > 0 {
+				location = c.Seminars[0].Seminar.ClassRoom.LocationID
+			}
+			exc.SetCellValue(locationSheetMap[location], "B"+strconv.Itoa(sheetRowMap[location]), c.Person.FullName())
+			exc.SetCellValue(locationSheetMap[location], "C"+strconv.Itoa(sheetRowMap[location]), c.Person.PhoneNumber)
+
+			for _, s := range c.Seminars {
+				switch s.Seminar.SeminarTheme.Code {
+				case "1":
+					exc.SetCellValue(locationSheetMap[location], "D"+strconv.Itoa(sheetRowMap[location]), s.Seminar.Start.Format("02.01.2006."))
+				case "2":
+					exc.SetCellValue(locationSheetMap[location], "E"+strconv.Itoa(sheetRowMap[location]), s.Seminar.Start.Format("02.01.2006."))
+				case "3":
+					exc.SetCellValue(locationSheetMap[location], "F"+strconv.Itoa(sheetRowMap[location]), s.Seminar.Start.Format("02.01.2006."))
+				case "4":
+					exc.SetCellValue(locationSheetMap[location], "G"+strconv.Itoa(sheetRowMap[location]), s.Seminar.Start.Format("02.01.2006."))
+				case "5":
+					exc.SetCellValue(locationSheetMap[location], "H"+strconv.Itoa(sheetRowMap[location]), s.Seminar.Start.Format("02.01.2006."))
+				}
+			}
+
+			sheetRowMap[location] = sheetRowMap[location] + 1
 		}
 	}
 

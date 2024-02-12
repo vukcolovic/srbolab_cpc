@@ -26,6 +26,9 @@
         <button class="iconBtn" title="Dodaj vozače na seminar" :disabled="!selectedSeminar" @click.prevent="saveToSeminar()">
           <i class="fa fa-floppy-o"></i>
         </button>
+        <button class="iconBtn" title="Lista vozača" @click.prevent="downloadExcelWithClientsList()">
+          <i class="fa fa-file-excel-o"></i>
+        </button>
       </div>
     </div>
     <div class="collapse multi-collapse border" style="font-size: 0.7em" id="filter">
@@ -123,10 +126,11 @@ import vSelect from "vue-select";
 import {commonMixin} from "@/mixins/commonMixin";
 import router from "@/router";
 import {apiMixin} from "@/mixins/apiMixin";
+import { fileMixin } from "@/mixins/fileMixin";
 
 export default {
   name: 'ClientsList',
-  mixins: [styleMixin, commonMixin, apiMixin],
+  mixins: [styleMixin, commonMixin, apiMixin, fileMixin],
   components: {vSelect, VueTableLite },
   data() {
     return {
@@ -237,6 +241,21 @@ export default {
     };
   },
   methods: {
+    async downloadExcelWithClientsList() {
+      axios.get('/excel/clients')
+          .then(response => {
+            var fileContent = JSON.parse(response.data.Data);
+            var sampleArr = this.base64ToArrayBuffer(fileContent);
+            const blob = new Blob([sampleArr], { type: 'application/xlsx' })
+
+            const link = document.createElement('a')
+            link.href = URL.createObjectURL(blob)
+            link.download = "vozaci.xlsx"
+            link.click()
+            URL.revokeObjectURL(link.href)
+            //FIXME add notie
+          }).catch(console.error)
+    },
     async saveToSeminar() {
       const response = confirm("Da li ste sigurni da želite da dodate vozače na seminar?");
       if (response) {

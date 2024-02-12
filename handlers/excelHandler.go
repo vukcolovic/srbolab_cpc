@@ -3,12 +3,13 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
-	"github.com/gorilla/mux"
 	"net/http"
 	"srbolab_cpc/logoped"
 	"srbolab_cpc/model"
 	"srbolab_cpc/service"
 	"strconv"
+
+	"github.com/gorilla/mux"
 )
 
 func PrintClientTestsBySeminarDay(w http.ResponseWriter, r *http.Request) {
@@ -125,6 +126,17 @@ func PrintSeminarsReportOfTeachers(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logoped.ErrorLog.Println(err.Error())
 		SetErrorResponse(w, errors.New("Greška prilikom štampanja Excel izveštaja za statistiku predavača: "+err.Error()))
+		return
+	}
+
+	SetSuccessResponse(w, excel)
+}
+
+func PrintListOfCients(w http.ResponseWriter, r *http.Request) {
+	excel, err := service.ExcelService.CreateClientsReport()
+	if err != nil {
+		logoped.ErrorLog.Println(err.Error())
+		SetErrorResponse(w, errors.New("Greška prilikom štampanja Excel izveštaja za vozače: "+err.Error()))
 		return
 	}
 
