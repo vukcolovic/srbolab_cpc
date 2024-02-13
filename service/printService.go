@@ -2150,10 +2150,13 @@ func (p *printService) PrintSeminarReport2(seminar *model.Seminar) ([]byte, erro
 
 			numByCompany := ""
 			border := "LR"
+			discount := ""
+			payType := ""
 			if i == 0 {
 				numByCompany = strconv.Itoa(v)
 				border = "TLR"
-			} else {
+				discount = "са попустом"
+				payType = companyContractMap[k]
 			}
 
 			if mapRowNum == len(companyMap) && i+1 == len(lines) {
@@ -2169,8 +2172,8 @@ func (p *printService) PrintSeminarReport2(seminar *model.Seminar) ([]byte, erro
 			pdf.CellFormat(25, ch, total, borderGlobal, 0, "C", true, 0, "")
 			pdf.CellFormat(50, ch, trObj.translate(line, 9), border, 0, "L", true, 0, "")
 			pdf.CellFormat(25, ch, numByCompany, border, 0, "C", true, 0, "")
-			pdf.CellFormat(25, ch, trObj.translate("са попустом", 9), border, 0, "C", true, 0, "")
-			pdf.CellFormat(30, ch, trObj.translate(companyContractMap[k], 9), border, 0, "C", true, 0, "")
+			pdf.CellFormat(25, ch, trObj.translate(discount, 9), border, 0, "C", true, 0, "")
+			pdf.CellFormat(30, ch, trObj.translate(payType, 9), border, 0, "C", true, 0, "")
 			pdf.Ln(ch)
 		}
 	}
