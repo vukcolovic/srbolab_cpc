@@ -407,6 +407,22 @@ func (excelService) CreateClientsReport() ([]byte, error) {
 			exc.SetCellValue(locationSheetMap[location], "B"+strconv.Itoa(sheetRowMap[location]), c.Person.FullName())
 			exc.SetCellValue(locationSheetMap[location], "C"+strconv.Itoa(sheetRowMap[location]), c.Person.PhoneNumber)
 
+			if c.PassedCheckboxes.WorkTimeAndTahografs != nil && *c.PassedCheckboxes.WorkTimeAndTahografs {
+				exc.SetCellValue(locationSheetMap[location], "D"+strconv.Itoa(sheetRowMap[location]), "+")
+			}
+			if c.PassedCheckboxes.ThemeDocuments != nil && *c.PassedCheckboxes.ThemeDocuments {
+				exc.SetCellValue(locationSheetMap[location], "E"+strconv.Itoa(sheetRowMap[location]), "+")
+			}
+			if c.PassedCheckboxes.Burden != nil && *c.PassedCheckboxes.Burden {
+				exc.SetCellValue(locationSheetMap[location], "F"+strconv.Itoa(sheetRowMap[location]), "+")
+			}
+			if c.PassedCheckboxes.Regulations != nil && *c.PassedCheckboxes.Regulations {
+				exc.SetCellValue(locationSheetMap[location], "G"+strconv.Itoa(sheetRowMap[location]), "+")
+			}
+			if c.PassedCheckboxes.Tahografs2 != nil && *c.PassedCheckboxes.Tahografs2 {
+				exc.SetCellValue(locationSheetMap[location], "H"+strconv.Itoa(sheetRowMap[location]), "+")
+			}
+
 			for _, s := range c.Seminars {
 				switch s.Seminar.SeminarTheme.Code {
 				case "1":

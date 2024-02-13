@@ -2112,8 +2112,18 @@ func (p *printService) PrintSeminarReport2(seminar *model.Seminar) ([]byte, erro
 
 	totalNum := len(seminar.Trainees)
 	companyMap := map[string]int{}
+	companyContractMap := map[string]string{}
+	companyContractMap["Физичко лице"] = "готовина"
 	for _, t := range seminar.Trainees {
 		companyMap[t.Client.Company.Name]++
+		if _, ok := companyContractMap[t.Client.Company.Name]; !ok && t.Client.CompanyID != nil && *t.Client.CompanyID > 0 {
+			if t.Client.Company.Contract != nil && *t.Client.Company.Contract {
+				companyContractMap[t.Client.Company.Name] = "уговор"
+			} else {
+				companyContractMap[t.Client.Company.Name] = "профактура"
+			}
+
+		}
 	}
 
 	pdf.SetFont("Helvetica", "", 10)
@@ -2159,8 +2169,8 @@ func (p *printService) PrintSeminarReport2(seminar *model.Seminar) ([]byte, erro
 			pdf.CellFormat(25, ch, total, borderGlobal, 0, "C", true, 0, "")
 			pdf.CellFormat(50, ch, trObj.translate(line, 9), border, 0, "L", true, 0, "")
 			pdf.CellFormat(25, ch, numByCompany, border, 0, "C", true, 0, "")
-			pdf.CellFormat(25, ch, "", border, 0, "C", true, 0, "")
-			pdf.CellFormat(30, ch, "", border, 0, "C", true, 0, "")
+			pdf.CellFormat(25, ch, trObj.translate("са попустом", 9), border, 0, "C", true, 0, "")
+			pdf.CellFormat(30, ch, trObj.translate(companyContractMap[k], 9), border, 0, "C", true, 0, "")
 			pdf.Ln(ch)
 		}
 	}
