@@ -7,8 +7,8 @@
       </div>
     </div>
     <br>
-    Stranica je u pripremi...
-    <form-tag v-if="false" @formEvent="submitHandler" name="myForm" event="formEvent">
+    <p style="color: blue;">Молимо вас да податке све податке осим емаил адресе попуните ћирилицом.</p>
+    <form-tag @formEvent="submitHandler" name="myForm" event="formEvent">
       <div class="row">
         <div class="col-sm-6">
           <div class="row">
@@ -324,8 +324,8 @@ export default {
       if (file == null) {
         return;
       }
-      if (file.size > 10000000) {
-        this.toast.warning("Fajlovi veći od 10 MB nisu dozvoljeni!");
+      if (file.size > 5000000) {
+        this.toast.warning("Fajlovi veći od 5 MB nisu dozvoljeni!");
         return;
       }
 
@@ -349,8 +349,8 @@ export default {
       if (!this.client.educational_profile && (!this.client.cpc_number && this.isDateEmpty(this.client.cpc_date))) {
         return "Obrazovni profil ili podaci o cpc kartici moraju biti popunjeni";
       }
-      if (this.client.documents.length > 5) {
-        return "Maksimalan broj ubačnih dokumenata može biti 5";
+      if (this.client.documents.length > 4) {
+        return "Maksimalan broj ubačnih dokumenata može biti 4";
       }
 
       return "";
