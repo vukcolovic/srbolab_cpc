@@ -2,7 +2,7 @@
   <div class="container">
     <div v-if="!allowed">
       <br>
-      <text-input v-model="client_test.jmbg" :required=true label="Upišite vaš JMBG" name="jmbg" type="text">
+      <text-input v-model.trim="client_test.jmbg" :required=true label="Upišite vaš JMBG" name="jmbg" type="text">
       </text-input>
       <br>
       <button type="button" :disabled="disableJMBGButton" @click="sendJmbg()" class="btn btn-primary">Pošalji</button>
@@ -174,6 +174,9 @@ export default {
         this.toast.info("Uspešno snimljena anketa!");
       }
     },
+    shuffleArrayOfAnswers(array) { 
+    return array.sort(()=>Math.random()-0.5 );
+    },
     async sendJmbg() {
       if (this.disableJMBGButton) {
         return;
@@ -204,6 +207,8 @@ export default {
         this.questions = this.seminarDay.test.questions;
         this.questions.sort((a, b) => (a - b));
         this.questions.forEach(q => {
+          q.answers = this.shuffleArrayOfAnswers(q.answers);
+
           const obj = { question_id: q.ID, answer: "" };
           this.client_test.questions_answers.push(obj);
         })

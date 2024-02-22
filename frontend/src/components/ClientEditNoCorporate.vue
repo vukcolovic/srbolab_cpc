@@ -356,6 +356,10 @@ export default {
       return "";
     },
     async submitHandler() {
+      const response = confirm("Da li ste sigurni da želite da snimite?");
+      if (!response) {
+        return;
+      }
       const errMsg = this.validateClient();
       if (errMsg) {
         this.toast.warning(errMsg);
