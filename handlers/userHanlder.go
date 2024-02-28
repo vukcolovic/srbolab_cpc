@@ -70,6 +70,17 @@ func ListUsers(w http.ResponseWriter, r *http.Request) {
 	SetSuccessResponse(w, users)
 }
 
+func ListTeachers(w http.ResponseWriter, req *http.Request) {
+	teachers, err := service.UsersService.GetAllTeachers()
+	if err != nil {
+		logoped.ErrorLog.Println(err.Error())
+		SetErrorResponse(w, errors.New("Greška prilikom povlačenja liste predavača: "+err.Error()))
+		return
+	}
+
+	SetSuccessResponse(w, teachers)
+}
+
 func GetUserByID(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	userIdParam, ok := vars["id"]

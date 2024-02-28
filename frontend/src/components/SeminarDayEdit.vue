@@ -129,7 +129,7 @@
           <td>
           <v-select
               v-model="cls.teacher"
-              :options="users"
+              :options="teachers"
               :style="styleInput"
               label="full_name"
               placeholder="Traži">
@@ -411,7 +411,7 @@ export default {
     return {toast}
   },
   async mounted() {
-    this.getAllUsers();
+    this.getAllTeachers();
     this.seminarDayId = this.$route.query.id;
     await this.getSeminarDayById();
     await this.getTestsBySeminarTheme();

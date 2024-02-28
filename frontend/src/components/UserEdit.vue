@@ -65,6 +65,12 @@
               :required="requiredPassword"
               :readonly="readonly">
           </text-input>
+
+          <div style="margin-top: 5px;">
+            <label>Predavač:&nbsp;</label>
+            <input id="is_teacher" v-model="user.is_teacher" class="form-check-input"
+                    type="checkbox">
+          </div>
         </div>
 
         <div class="col-sm-1"></div>
@@ -115,7 +121,7 @@ export default {
   data() {
     return {
       user: {
-        person: {first_name: "", middle_name: "", last_name: "", email: "", phone_number: ""},
+        person: {first_name: "", middle_name: "", last_name: "", email: "", phone_number: "", is_teacher: false},
         password: "",
         roles: [],
       },

@@ -27,6 +27,7 @@ type usersServiceInterface interface {
 	DeleteUser(id int) error
 	CreateUser(user model.User) (*model.User, error)
 	UpdateUser(user model.User) (*model.User, error)
+	GetAllTeachers() ([]model.User, error)
 }
 
 func (s *userService) GetUserIDByToken(token string) (int, error) {
@@ -52,6 +53,19 @@ func (s *userService) GetUserIDByToken(token string) (int, error) {
 func (s *userService) GetAllUsers(skip, take int) ([]model.User, error) {
 	var users []model.User
 	if err := db.Client.Limit(take).Offset(skip).Find(&users).Error; err != nil {
+		return nil, err
+	}
+
+	for _, u := range users {
+		u.Password = ""
+	}
+
+	return users, nil
+}
+
+func (s *userService) GetAllTeachers() ([]model.User, error) {
+	var users []model.User
+	if err := db.Client.Where("is_teacher = ?", true).Find(&users).Error; err != nil {
 		return nil, err
 	}
 

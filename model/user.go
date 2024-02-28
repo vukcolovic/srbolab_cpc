@@ -1,8 +1,9 @@
 package model
 
 import (
-	"gorm.io/gorm"
 	"strconv"
+
+	"gorm.io/gorm"
 )
 
 type Person struct {
@@ -36,9 +37,10 @@ func (c Client) GetBirthDate() string {
 
 type User struct {
 	gorm.Model
-	Person   Person `json:"person" gorm:"embedded"`
-	Password string `json:"password"`
-	Roles    []Role `json:"roles" gorm:"many2many:user_role;"`
+	Person    Person `json:"person" gorm:"embedded"`
+	Password  string `json:"password"`
+	Roles     []Role `json:"roles" gorm:"many2many:user_role;"`
+	IsTeacher *bool  `json:"is_teacher"`
 }
 
 //func (u *User) AfterFind(tx *gorm.DB) (err error) {

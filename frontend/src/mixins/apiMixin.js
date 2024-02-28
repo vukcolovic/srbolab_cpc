@@ -13,6 +13,7 @@ export const apiMixin = {
             seminarStatuses: [],
             companies: [],
             users: [],
+            teachers: [],
         }
     },
     methods: {
@@ -32,6 +33,24 @@ export const apiMixin = {
                 });
             }, (error) => {
                 this.errorToast(error, "/users/list");
+            });
+        },
+        async getAllTeachers() {
+            await axios.get('/users/teachers').then((response) => {
+                if (response.data === null || response.data.Status === 'error') {
+                    this.toast.error(response.data != null ? response.data.ErrorMessage : "");
+                    return;
+                }
+                this.teachers = JSON.parse(response.data.Data);
+                this.teachers.forEach(vs => {
+                    vs.first_name = vs.person.first_name;
+                    vs.last_name = vs.person.last_name;
+                    vs.email = vs.person.email;
+                    vs.phone_number = vs.person.phone_number;
+                    vs.full_name = vs.person.first_name + " " + vs.person.last_name;
+                });
+            }, (error) => {
+                this.errorToast(error, "/users/teachers");
             });
         },
         async getAllLocations() {
