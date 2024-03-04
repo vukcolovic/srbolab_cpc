@@ -56,6 +56,15 @@
               :readonly="readonly">
           </text-input>
 
+          <text-input v-if="action=='update'"
+              :hidden="readonly"
+              v-model.trim="user.current_password"
+              label="Trenutna šifra"
+              type="password"
+              name="current_password"
+              :readonly="readonly">
+          </text-input>
+
           <text-input
               :hidden="readonly"
               v-model.trim="user.password"

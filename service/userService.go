@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"srbolab_cpc/db"
 	"srbolab_cpc/logoped"
 	"srbolab_cpc/model"
@@ -52,7 +53,7 @@ func (s *userService) GetUserIDByToken(token string) (int, error) {
 
 func (s *userService) GetAllUsers(skip, take int) ([]model.User, error) {
 	var users []model.User
-	if err := db.Client.Limit(take).Offset(skip).Find(&users).Error; err != nil {
+	if err := db.Client.Order("id desc").Limit(take).Offset(skip).Find(&users).Error; err != nil {
 		return nil, err
 	}
 
@@ -83,6 +84,15 @@ func (s *userService) GetUserByID(id int) (*model.User, error) {
 	}
 
 	user.Password = ""
+
+	return user, nil
+}
+
+func getUserByIDWithPassword(id int) (*model.User, error) {
+	var user *model.User
+	if err := db.Client.Preload("Roles").First(&user, id).Error; err != nil {
+		return nil, err
+	}
 
 	return user, nil
 }
@@ -126,15 +136,36 @@ func (s *userService) CreateUser(user model.User) (*model.User, error) {
 }
 
 func (s *userService) UpdateUser(user model.User) (*model.User, error) {
-	oldUser, err := s.GetUserByID(int(user.ID))
+	oldUser, err := getUserByIDWithPassword(int(user.ID))
 	if err != nil {
 		return nil, err
 	}
 
-	user.Password = oldUser.Password
+	if user.Password == "" {
+		user.Password = oldUser.Password
+	} else {
+		if bcrypt.CompareHashAndPassword([]byte(oldUser.Password), []byte(user.Password)) != nil {
+			if user.CurrentPassword == "" {
+				return nil, errors.New("ne možete menjati šifru ako niste uneli trenutnu šifru")
+			}
+
+			if bcrypt.CompareHashAndPassword([]byte(oldUser.Password), []byte(user.CurrentPassword)) != nil {
+				return nil, errors.New("prethodna šifra je pogrešna")
+			}
+
+			hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), 14)
+			if err != nil {
+				logoped.ErrorLog.Println("Error creating user, hashing password error: ", err)
+				return nil, err
+			}
+
+			user.Password = string(hashedPassword)
+		} else {
+			user.Password = oldUser.Password
+		}
+	}
 
 	result := db.Client.Session(&gorm.Session{FullSaveAssociations: true}).Updates(&user)
-
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -157,5 +188,6 @@ func (s *userService) UpdateUser(user model.User) (*model.User, error) {
 	}
 
 	user.Password = ""
+	user.CurrentPassword = ""
 	return &user, nil
 }
