@@ -2110,11 +2110,24 @@ func (p *printService) PrintSeminarReport2(seminar *model.Seminar) ([]byte, erro
 
 	pdf.Ln(18)
 
+	notPassedClientIds := make(map[uint]string)
+	for _, day := range seminar.Days {
+		for _, p := range day.Presence {
+			if !*p.Presence && !day.Date.After(time.Now()) {
+				notPassedClientIds[p.ClientID] = ""
+			}
+		}
+	}
+
 	totalNum := len(seminar.Trainees)
 	companyMap := map[string]int{}
 	companyContractMap := map[string]string{}
 	companyContractMap["Физичко лице"] = "готовина"
 	for _, t := range seminar.Trainees {
+		if _, exist := notPassedClientIds[t.ClientID]; exist {
+			totalNum = totalNum - 1
+			continue
+		}
 		companyMap[t.Client.Company.Name]++
 		if _, ok := companyContractMap[t.Client.Company.Name]; !ok && t.Client.CompanyID != nil && *t.Client.CompanyID > 0 {
 			if t.Client.Company.Contract != nil && *t.Client.Company.Contract {

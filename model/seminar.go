@@ -1,9 +1,10 @@
 package model
 
 import (
-	"gorm.io/gorm"
 	"strconv"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 const (
@@ -86,6 +87,9 @@ func (l Location) GetLocationForSentence() string {
 	}
 	if l.Address.Place == "Велики Црљени" {
 		return "Лазаревцу"
+	}
+	if l.Address.Place == "Пожаревац" {
+		return "Пожаревцу"
 	}
 	return ""
 }
