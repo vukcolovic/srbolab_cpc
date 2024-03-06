@@ -113,7 +113,7 @@ func (c *seminarService) GetAllSeminarsByStatus(statusCode string) ([]model.Semi
 
 func (c *seminarService) GetSeminarByID(id int) (*model.Seminar, error) {
 	var seminar *model.Seminar
-	if err := db.Client.Preload("Trainees").Preload("Trainees.Client").Preload("Trainees.Client.Company").Preload("Days").Preload("Days.Presence").Preload("Documents").Preload("ClassRoom.Location").Joins("SeminarTheme.BaseSeminarType").Joins("SeminarStatus").First(&seminar, id).Error; err != nil {
+	if err := db.Client.Preload("Trainees").Preload("Trainees.Client").Preload("Trainees.Client.Company").Preload("Days").Preload("Days.Presence").Preload("Documents").Preload("ClassRoom.Location").Preload("Admin").Joins("SeminarTheme.BaseSeminarType").Joins("SeminarStatus").First(&seminar, id).Error; err != nil {
 		logoped.ErrorLog.Println("Error getting seminar by id " + err.Error())
 		return nil, err
 	}

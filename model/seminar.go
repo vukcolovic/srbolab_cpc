@@ -27,6 +27,8 @@ type Seminar struct {
 	Days                   []SeminarDay    `json:"days"`
 	Documents              []*File         `json:"documents" gorm:"many2many:seminar_file;"`
 	SerialNumberByLocation int             `json:"serial_number_by_location"`
+	Admin                  User            `json:"admin"`
+	AdminID                *uint           `json:"admin_id"`
 }
 
 type SeminarFilter struct {

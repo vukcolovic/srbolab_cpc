@@ -77,6 +77,15 @@
               placeholder="Traži">
           </v-select>
 
+          <label :style="styleLabel" class="mb-1 mt-1">Administrator </label>
+          <v-select
+              v-model="seminar.admin"
+              :options="users"
+              :style="styleInput"
+              label="full_name"
+              placeholder="Traži">
+          </v-select>
+
           <label :style="styleLabelSmall" class="mb-2 mt-2">Početak seminara </label>
           <Datepicker
               v-model="seminar.start_date"
@@ -264,6 +273,7 @@ export default {
         seminar_theme: null,
         seminar_status: null,
         serial_number_by_location: 0,
+        admin: null,
         trainees: [],
         documents: [],
         days: []
@@ -557,6 +567,10 @@ export default {
         if (this.seminar.trainees == null) {
           this.seminar.trainees = [];
         }
+        if (this.seminar.admin && this.seminar.admin.ID) {
+          this.seminar.admin.full_name = this.seminar.admin.person.first_name + " " + this.seminar.admin.person.last_name;
+        }
+    
         this.seminar.trainees.forEach(t => t.pay_date = this.getFullDate(t.pay_date));
         if (this.seminar.documents == null) {
           this.seminar.documents = [];
@@ -638,6 +652,7 @@ export default {
     await this.getAllLocations();
     await this.getAllBaseSeminarTypes();
     await this.getAllSeminarStatuses();
+    await this.getAllUsers();
   }
 }
 </script>
