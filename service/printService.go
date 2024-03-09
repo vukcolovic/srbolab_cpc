@@ -1415,7 +1415,7 @@ func (p *printService) PrintSeminarReport(seminar *model.Seminar) ([]byte, error
 		sentence = sentence + ")."
 	}
 
-	sentenceSplited, _ := splitLine(sentence, 130)
+	sentenceSplited, _ := splitLine(sentence, 90)
 	for _, s := range sentenceSplited {
 		pdf.Ln(5)
 		pdf.Text(15, pdf.GetY(), trObj.translDef(s))
@@ -1717,8 +1717,22 @@ func (p *printService) PrintSeminarReport(seminar *model.Seminar) ([]byte, error
 		return *seminar.Trainees[i].Client.JMBG < *seminar.Trainees[j].Client.JMBG
 	})
 
+	notPassedClientIds := make(map[uint]string)
+	for _, day := range seminar.Days {
+		for _, p := range day.Presence {
+			if !*p.Presence && !day.Date.After(time.Now()) {
+				notPassedClientIds[p.ClientID] = ""
+			}
+		}
+	}
+
+	num := 1
 	for i := 0; i < len(seminar.Trainees); i++ {
-		pdf.CellFormat(10, ch, strconv.Itoa(i+1), "1", 0, "C", false, 0, "")
+		if _, exist := notPassedClientIds[seminar.Trainees[i].ClientID]; exist {
+			continue
+		}
+		pdf.CellFormat(10, ch, strconv.Itoa(num), "1", 0, "C", false, 0, "")
+		num++
 		pdf.CellFormat(47, ch, trObj.translDef(seminar.Trainees[i].Client.Person.FullName()), "1", 0, "C", false, 0, "")
 		pdf.CellFormat(35, ch, *seminar.Trainees[i].Client.JMBG, "1", 0, "C", false, 0, "")
 		pdf.CellFormat(10, ch, "", "1", 0, "C", false, 0, "")
@@ -1959,9 +1973,14 @@ func (p *printService) PrintSeminarReport(seminar *model.Seminar) ([]byte, error
 	pdf.SetTextColor(47, 83, 150)
 	pdf.Ln(5)
 
+	num = 1
 	for i := 0; i < len(seminar.Trainees); i++ {
+		if _, exist := notPassedClientIds[seminar.Trainees[i].ClientID]; exist {
+			fmt.Println("Preskocio")
+			continue
+		}
 		p := ""
-		p = fmt.Sprintf("Полазник %d", i+1)
+		p = fmt.Sprintf("Полазник %d", num)
 
 		tests, _ := testsMap[*seminar.Trainees[i].Client.JMBG]
 
@@ -1988,9 +2007,10 @@ func (p *printService) PrintSeminarReport(seminar *model.Seminar) ([]byte, error
 		pdf.CellFormat(12, 5, fmt.Sprintf("%.f%%", t2), "1", 0, "L", false, 0, "")
 		pdf.CellFormat(12, 5, fmt.Sprintf("%.f%%", d), "1", 0, "L", false, 0, "")
 
-		if (i+1)%3 == 0 {
+		if (num)%3 == 0 {
 			pdf.Ln(5)
 		}
+		num++
 	}
 
 	pdf.Ln(7)
