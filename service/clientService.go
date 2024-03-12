@@ -329,7 +329,7 @@ func (c *clientService) UpdateClient(client model.Client, userID int) (*model.Cl
 func (c *clientService) GetAllClientsWithSeminarsAndBasePersonalInfo(skip, take int) ([]model.Client, error) {
 	var clients []model.Client
 
-	if err := db.Client.Order("id desc").Limit(take).Offset(skip).Preload("Seminars").Preload("Seminars.Seminar").Preload("Seminars.Seminar.ClassRoom").Preload("Seminars.Seminar.SeminarTheme").Find(&clients).Error; err != nil {
+	if err := db.Client.Order("id desc").Limit(take).Offset(skip).Preload("Company").Preload("Seminars").Preload("Seminars.Seminar").Preload("Seminars.Seminar.ClassRoom").Preload("Seminars.Seminar.SeminarTheme").Find(&clients).Error; err != nil {
 		return nil, err
 	}
 

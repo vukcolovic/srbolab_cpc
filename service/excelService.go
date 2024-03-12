@@ -362,27 +362,29 @@ func (excelService) CreateClientsReport() ([]byte, error) {
 	}
 
 	for _, sheet := range locationSheetMap {
-		err = exc.SetCellStyle(sheet, "B1", "H1", firstRowStyle)
+		err = exc.SetCellStyle(sheet, "B1", "J1", firstRowStyle)
 		if err != nil {
 			return []byte{}, err
 		}
 		exc.SetRowHeight(sheet, 1, 25.0)
 
 		exc.SetColWidth(sheet, "B", "B", 20.0)
-		exc.SetColWidth(sheet, "C", "C", 12.0)
-		exc.SetColWidth(sheet, "D", "D", 15.0)
+		exc.SetColWidth(sheet, "C", "C", 23.0)
+		exc.SetColWidth(sheet, "D", "D", 12.0)
 		exc.SetColWidth(sheet, "E", "E", 15.0)
 		exc.SetColWidth(sheet, "F", "F", 15.0)
 		exc.SetColWidth(sheet, "G", "G", 15.0)
 		exc.SetColWidth(sheet, "H", "H", 15.0)
+		exc.SetColWidth(sheet, "I", "I", 15.0)
 
 		exc.SetCellValue(sheet, "B1", "Ime i prezime")
-		exc.SetCellValue(sheet, "C1", "Broj telefona")
-		exc.SetCellValue(sheet, "D1", "Radno vreme")
-		exc.SetCellValue(sheet, "E1", "Dokumenta")
-		exc.SetCellValue(sheet, "F1", "Teret")
-		exc.SetCellValue(sheet, "G1", "Propisi")
-		exc.SetCellValue(sheet, "H1", "Tahografi 2")
+		exc.SetCellValue(sheet, "C1", "Firma")
+		exc.SetCellValue(sheet, "D1", "Broj telefona")
+		exc.SetCellValue(sheet, "E1", "Radno vreme")
+		exc.SetCellValue(sheet, "F1", "Dokumenta")
+		exc.SetCellValue(sheet, "G1", "Teret")
+		exc.SetCellValue(sheet, "H1", "Propisi")
+		exc.SetCellValue(sheet, "I1", "Tahografi 2")
 	}
 
 	clientCount, err := ClientService.GetClientsCount()
@@ -405,36 +407,41 @@ func (excelService) CreateClientsReport() ([]byte, error) {
 				location = c.Seminars[0].Seminar.ClassRoom.LocationID
 			}
 			exc.SetCellValue(locationSheetMap[location], "B"+strconv.Itoa(sheetRowMap[location]), c.Person.FullName())
-			exc.SetCellValue(locationSheetMap[location], "C"+strconv.Itoa(sheetRowMap[location]), c.Person.PhoneNumber)
+			company := c.Company.Name
+			if len(company) > 23 {
+				company = company[0:20] + ".."
+			}
+			exc.SetCellValue(locationSheetMap[location], "C"+strconv.Itoa(sheetRowMap[location]), company)
+			exc.SetCellValue(locationSheetMap[location], "D"+strconv.Itoa(sheetRowMap[location]), c.Person.PhoneNumber)
 
 			if c.PassedCheckboxes.WorkTimeAndTahografs != nil && *c.PassedCheckboxes.WorkTimeAndTahografs {
-				exc.SetCellValue(locationSheetMap[location], "D"+strconv.Itoa(sheetRowMap[location]), "+")
-			}
-			if c.PassedCheckboxes.ThemeDocuments != nil && *c.PassedCheckboxes.ThemeDocuments {
 				exc.SetCellValue(locationSheetMap[location], "E"+strconv.Itoa(sheetRowMap[location]), "+")
 			}
-			if c.PassedCheckboxes.Burden != nil && *c.PassedCheckboxes.Burden {
+			if c.PassedCheckboxes.ThemeDocuments != nil && *c.PassedCheckboxes.ThemeDocuments {
 				exc.SetCellValue(locationSheetMap[location], "F"+strconv.Itoa(sheetRowMap[location]), "+")
 			}
-			if c.PassedCheckboxes.Regulations != nil && *c.PassedCheckboxes.Regulations {
+			if c.PassedCheckboxes.Burden != nil && *c.PassedCheckboxes.Burden {
 				exc.SetCellValue(locationSheetMap[location], "G"+strconv.Itoa(sheetRowMap[location]), "+")
 			}
-			if c.PassedCheckboxes.Tahografs2 != nil && *c.PassedCheckboxes.Tahografs2 {
+			if c.PassedCheckboxes.Regulations != nil && *c.PassedCheckboxes.Regulations {
 				exc.SetCellValue(locationSheetMap[location], "H"+strconv.Itoa(sheetRowMap[location]), "+")
+			}
+			if c.PassedCheckboxes.Tahografs2 != nil && *c.PassedCheckboxes.Tahografs2 {
+				exc.SetCellValue(locationSheetMap[location], "I"+strconv.Itoa(sheetRowMap[location]), "+")
 			}
 
 			for _, s := range c.Seminars {
 				switch s.Seminar.SeminarTheme.Code {
 				case "1":
-					exc.SetCellValue(locationSheetMap[location], "D"+strconv.Itoa(sheetRowMap[location]), s.Seminar.Start.Format("02.01.2006."))
-				case "2":
 					exc.SetCellValue(locationSheetMap[location], "E"+strconv.Itoa(sheetRowMap[location]), s.Seminar.Start.Format("02.01.2006."))
-				case "3":
+				case "2":
 					exc.SetCellValue(locationSheetMap[location], "F"+strconv.Itoa(sheetRowMap[location]), s.Seminar.Start.Format("02.01.2006."))
-				case "4":
+				case "3":
 					exc.SetCellValue(locationSheetMap[location], "G"+strconv.Itoa(sheetRowMap[location]), s.Seminar.Start.Format("02.01.2006."))
-				case "5":
+				case "4":
 					exc.SetCellValue(locationSheetMap[location], "H"+strconv.Itoa(sheetRowMap[location]), s.Seminar.Start.Format("02.01.2006."))
+				case "5":
+					exc.SetCellValue(locationSheetMap[location], "I"+strconv.Itoa(sheetRowMap[location]), s.Seminar.Start.Format("02.01.2006."))
 				}
 			}
 
