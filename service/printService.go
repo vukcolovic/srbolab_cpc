@@ -2025,7 +2025,6 @@ func (p *printService) PrintSeminarReport(seminar *model.Seminar) ([]byte, error
 	num = 1
 	for i := 0; i < len(seminar.Trainees); i++ {
 		if _, exist := notPassedClientIds[seminar.Trainees[i].ClientID]; exist {
-			fmt.Println("Preskocio")
 			continue
 		}
 		p := ""
