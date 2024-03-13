@@ -141,7 +141,11 @@ func (excelService) CreateListClientsBySeminarDayReport(seminarDay *model.Semina
 		return *seminarDay.Presence[i].Client.JMBG < *seminarDay.Presence[j].Client.JMBG
 	})
 
-	for i, t := range seminarDay.Presence {
+	i := 0
+	for _, t := range seminarDay.Presence {
+		if t.Presence == nil || !*t.Presence {
+			continue
+		}
 		exc.SetCellValue("Sheet1", "B"+strconv.Itoa(i+4), strconv.Itoa(i+1))
 		exc.SetCellValue("Sheet1", "C"+strconv.Itoa(i+4), t.Client.Person.FullNameWithMiddleName())
 		exc.SetCellValue("Sheet1", "D"+strconv.Itoa(i+4), *t.Client.JMBG)
@@ -162,6 +166,7 @@ func (excelService) CreateListClientsBySeminarDayReport(seminarDay *model.Semina
 			payedBy = *clientSeminar.PayedBy
 		}
 		exc.SetCellValue("Sheet1", "I"+strconv.Itoa(i+4), payedBy)
+		i++
 	}
 
 	var buf bytes.Buffer

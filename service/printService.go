@@ -141,8 +141,21 @@ func (p *printService) PrintSeminarStudentList(seminar *model.Seminar) ([]byte, 
 		return *seminar.Trainees[i].Client.JMBG < *seminar.Trainees[j].Client.JMBG
 	})
 
+	notPassedClientIds := make(map[uint]string)
+	for _, day := range seminar.Days {
+		for _, p := range day.Presence {
+			if !*p.Presence && !day.Date.After(time.Now()) {
+				notPassedClientIds[p.ClientID] = ""
+			}
+		}
+	}
+
 	pdf.Ln(ch)
-	for i, cs := range seminar.Trainees {
+	i := 0
+	for _, cs := range seminar.Trainees {
+		if _, exists := notPassedClientIds[cs.ClientID]; exists {
+			continue
+		}
 		lines, num := splitLine(cs.Client.Company.Name, 40)
 
 		chc := ch
@@ -160,6 +173,7 @@ func (p *printService) PrintSeminarStudentList(seminar *model.Seminar) ([]byte, 
 			pdf.Text(130, current+float64(i)*4.0, trObj.translDef(line))
 		}
 		pdf.Ln(chc)
+		i++
 	}
 
 	var buf bytes.Buffer
@@ -427,9 +441,21 @@ func (p *printService) PrintConfirmationReceives(seminar *model.Seminar) ([]byte
 		}
 	}
 
+	notPassedClientIds := make(map[uint]string)
+	for _, day := range seminar.Days {
+		for _, p := range day.Presence {
+			if !*p.Presence && !day.Date.After(time.Now()) {
+				notPassedClientIds[p.ClientID] = ""
+			}
+		}
+	}
+
 	companyClientsMap := map[string][]model.ClientSeminar{}
 
 	for _, client := range seminar.Trainees {
+		if _, exists := notPassedClientIds[client.ClientID]; exists {
+			continue
+		}
 		if client.Client.Company.ID > 0 {
 			val, ok := companyClientsMap[client.Client.Company.Name]
 			if ok {
@@ -679,8 +705,19 @@ func (p *printService) PrintCheckIn(seminar *model.Seminar) ([]byte, error) {
 	fontSize := 11.0
 	ch := 6.0
 
+	notPassedClientIds := make(map[uint]string)
+	for _, day := range seminar.Days {
+		for _, p := range day.Presence {
+			if !*p.Presence && !day.Date.After(time.Now()) {
+				notPassedClientIds[p.ClientID] = ""
+			}
+		}
+	}
+
 	for _, client := range seminar.Trainees {
-		fmt.Println(client.ClientID)
+		if _, exists := notPassedClientIds[client.ClientID]; exists {
+			continue
+		}
 		pdf.AddPage()
 
 		//pdf.SetFont("Arimo-Bold", "", 15)
