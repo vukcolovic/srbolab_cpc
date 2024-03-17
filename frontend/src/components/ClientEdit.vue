@@ -793,6 +793,30 @@ export default {
           this.toast.warning("Ne možete izabrati seminar sa koji je istog dana kao seminar na koji ste već prijavljeni!");
           return;
         }
+        if (this.selectedOpenSeminar.seminar_theme.code === "1" && this.client.passed_checkboxes.work_time_and_tahografs) {
+          this.toast.warning("Vozač je već završio izabrani seminar!");
+          return;
+        }
+        if (this.selectedOpenSeminar.seminar_theme.code === "2" && this.client.passed_checkboxes.theme_documents) {
+          this.toast.warning("Vozač je već završio izabrani seminar!");
+          return;
+        }
+        if (this.selectedOpenSeminar.seminar_theme.code === "3" && this.client.passed_checkboxes.burden) {
+          this.toast.warning("Vozač je već završio izabrani seminar!");
+          return;
+        }
+        if (this.selectedOpenSeminar.seminar_theme.code === "4" && this.client.passed_checkboxes.regulations) {
+          this.toast.warning("Vozač je već završio izabrani seminar!");
+          return;
+        }
+        if (this.selectedOpenSeminar.seminar_theme.code === "5" && this.client.passed_checkboxes.tahografs_2) {
+          this.toast.warning("Vozač je već završio izabrani seminar!");
+          return;
+        }
+        
+        if (confirm("Da li ste sigurni da želite da prijavite vozača na seminar " + this.selectedOpenSeminar.seminar_theme.name + "?") == false) {
+          return;
+        }
         if (!this.client.seminars.find(s => s.seminar_id === this.selectedOpenSeminar.ID)) {
           this.client.seminars.push({"client_id": this.client.ID, "seminar_id": this.selectedOpenSeminar.ID, payed: this.selectedOpenSeminar.payed, payed_by: this.selectedOpenSeminar.payed_by, pay_date: payDate});
         }
@@ -806,6 +830,31 @@ export default {
         }
         if (this.client.seminars.find(s => this.sameDayFromString(s.seminar.start_date, this.selectedInProgressSeminar.start_date))) {
           this.toast.warning("Ne možete izabrati seminar sa koji je istog dana kao seminar na koji ste već prijavljeni!");
+          return;
+        }
+      
+        if (this.selectedInProgressSeminar.seminar_theme.code === "1" && this.client.passed_checkboxes.work_time_and_tahografs) {
+          this.toast.warning("Vozač je već završio izabrani seminar!");
+          return;
+        }
+        if (this.selectedInProgressSeminar.seminar_theme.code === "2" && this.client.passed_checkboxes.theme_documents) {
+          this.toast.warning("Vozač je već završio izabrani seminar!");
+          return;
+        }
+        if (this.selectedInProgressSeminar.seminar_theme.code === "3" && this.client.passed_checkboxes.burden) {
+          this.toast.warning("Vozač je već završio izabrani seminar!");
+          return;
+        }
+        if (this.selectedInProgressSeminar.seminar_theme.code === "4" && this.client.passed_checkboxes.regulations) {
+          this.toast.warning("Vozač je već završio izabrani seminar!");
+          return;
+        }
+        if (this.selectedInProgressSeminar.seminar_theme.code === "5" && this.client.passed_checkboxes.tahografs_2) {
+          this.toast.warning("Vozač je već završio izabrani seminar!");
+          return;
+        }
+  
+        if (confirm("Da li ste sigurni da želite da prijavite vozača na seminar " + this.selectedInProgressSeminar.seminar_theme.name + "?") == false) {
           return;
         }
         if (!this.client.seminars.find(s => s.seminar_id === this.selectedInProgressSeminar.ID)) {
