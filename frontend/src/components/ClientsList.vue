@@ -111,6 +111,7 @@
           :rowClasses=table.rowClasess
           :is-loading="table.isLoading"
           @return-checked-rows="updateCheckedRows"
+          @is-finished="tableLoadingFinish"
       ></vue-table-lite>
     </div>
   </div>
@@ -195,7 +196,19 @@ export default {
           label: 'Čeka seminar',
           field: 'waiting_seminar_text',
           width: '10%',
-        }
+        },
+        {
+          label: '',
+          field: '',
+          width: '2%',
+          display: function (row) {
+            return (
+                '<button data-id="' +
+                row.ID +
+                '" class="is-rows-el name-btn"><i class="fa fa-external-link" aria-hidden="true"></i></button>'
+            );
+          },
+        },
       ],
       rows: [],
       totalCount: 0,
@@ -219,6 +232,18 @@ export default {
       table.selectedClient = rowData;
     }
 
+    const tableLoadingFinish = (elements) => {
+      table.isLoading = false;
+      Array.prototype.forEach.call(elements, function (element) {
+        if (element.classList.contains("name-btn")) {
+          element.addEventListener("click", function () {
+            const routeData = router.resolve({name: 'ClientEdit', query: {id: this.dataset.id, action: 'update'}});
+            window.open(routeData.href, '_blank');
+          });
+        }
+      });
+    };
+
     const doubleClick = () => {
       router.push("/client?action=update&id=" + table.selectedClient.ID);
     }
@@ -238,6 +263,7 @@ export default {
       selectClient,
       doubleClick,
       updateCheckedRows,
+      tableLoadingFinish,
     };
   },
   methods: {
