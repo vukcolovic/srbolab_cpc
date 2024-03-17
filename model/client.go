@@ -40,11 +40,11 @@ type Client struct {
 }
 
 type PassedCheckboxes struct {
-	WorkTimeAndTahografs *bool `json:"work_time_and_tahografs"`
-	Tahografs2           *bool `json:"tahografs_2"`
-	Regulations          *bool `json:"regulations"`
-	Burden               *bool `json:"burden"`
-	ThemeDocuments       *bool `json:"theme_documents"`
+	WorkTimeAndTahografs *bool `json:"work_time_and_tahografs"` //1
+	Tahografs2           *bool `json:"tahografs_2"`             //5
+	Regulations          *bool `json:"regulations"`             //4
+	Burden               *bool `json:"burden"`                  //3
+	ThemeDocuments       *bool `json:"theme_documents"`         //2
 }
 
 func (a Address) GetStreetWithNumber() string {
