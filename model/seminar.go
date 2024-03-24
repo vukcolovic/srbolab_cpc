@@ -74,7 +74,7 @@ func (b BaseSeminarType) GetSeminarTypeForSentence() string {
 	if b.Code == "ADDITIONAL" {
 		return "додатној"
 	}
-	if b.Code == "BASE" {
+	if b.Code == "BASIC" {
 		return "основној"
 	}
 	return "периодичној"

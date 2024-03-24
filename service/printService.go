@@ -122,7 +122,7 @@ func (p *printService) PrintSeminarStudentList(seminar *model.Seminar) ([]byte, 
 	if seminar.SeminarTheme.BaseSeminarType.Code == "ADDITIONAL" {
 		seminarType = "додатну"
 	}
-	if seminar.SeminarTheme.BaseSeminarType.Code == "BASE" {
+	if seminar.SeminarTheme.BaseSeminarType.Code == "BASIC" {
 		seminarType = "основну"
 	}
 	pdf.Text(15, pdf.GetY(), trObj.translDef(fmt.Sprintf("Регистрациони лист - списак полазника за %s обуку", seminarType)))
@@ -353,7 +353,7 @@ func (p *printService) PrintConfirmations(seminar *model.Seminar) ([]byte, error
 		if seminar.SeminarTheme.BaseSeminarType.Code == "ADDITIONAL" {
 			seminarType = "додатне"
 		}
-		if seminar.SeminarTheme.BaseSeminarType.Code == "BASE" {
+		if seminar.SeminarTheme.BaseSeminarType.Code == "BASIC" {
 			seminarType = "основне"
 		}
 		pdf.CellFormat(wl, ch-1, trObj.translDef(fmt.Sprintf("%s обуке", seminarType)), "LRB", 0, "L", false, 0, "")
@@ -389,7 +389,7 @@ func (p *printService) PrintConfirmations(seminar *model.Seminar) ([]byte, error
 		if seminar.SeminarTheme.BaseSeminarType.Code == "ADDITIONAL" {
 			seminarType = "додатне"
 		}
-		if seminar.SeminarTheme.BaseSeminarType.Code == "BASE" {
+		if seminar.SeminarTheme.BaseSeminarType.Code == "BASIC" {
 			seminarType = "основне"
 		}
 		pdf.Text(50, pdf.GetY(), trObj.translDef(fmt.Sprintf("Ова потврда се издаје на основу одслушане обавезне %s обуке", seminarType)))
@@ -398,7 +398,7 @@ func (p *printService) PrintConfirmations(seminar *model.Seminar) ([]byte, error
 		if seminar.SeminarTheme.BaseSeminarType.Code == "ADDITIONAL" {
 			seminarType = "додатног"
 		}
-		if seminar.SeminarTheme.BaseSeminarType.Code == "BASE" {
+		if seminar.SeminarTheme.BaseSeminarType.Code == "BASIC" {
 			seminarType = "основног"
 		}
 		pdf.Text(15, pdf.GetY(), trObj.translDef(fmt.Sprintf("за потребе стицања %s ЦПЦ и не може се користити у друге сврхе.", seminarType)))
@@ -1075,7 +1075,7 @@ func (p *printService) PrintPlanTreningRealization(day *model.SeminarDay) ([]byt
 	if day.Seminar.SeminarTheme.BaseSeminarType.Code == "ADDITIONAL" {
 		seminarTypeSentence = "додатну"
 	}
-	if day.Seminar.SeminarTheme.BaseSeminarType.Code == "BASE" {
+	if day.Seminar.SeminarTheme.BaseSeminarType.Code == "BASIC" {
 		seminarTypeSentence = "основну"
 	}
 	pdf.Text(38, pdf.GetY(), trObj.translate(fmt.Sprintf("План реализације наставе за %s обуку - 7 часова", seminarTypeSentence), 14))
