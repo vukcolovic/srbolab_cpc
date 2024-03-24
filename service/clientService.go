@@ -228,6 +228,10 @@ func (c *clientService) UpdateClient(client model.Client, userID int) (*model.Cl
 		return nil, err
 	}
 
+	if client.CompanyID != nil && *client.CompanyID > 0 && client.Company.ID == 0 {
+		db.Client.Model(&client).Association("Company").Clear()
+	}
+
 	userIDUint := uint(userID)
 
 	if !*oldClient.Verified && *client.Verified {
