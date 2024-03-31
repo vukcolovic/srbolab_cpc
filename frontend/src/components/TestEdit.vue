@@ -33,6 +33,10 @@
               <input id="includeMultiTheme" v-model="test.include_multi_theme" @change="onIncludeMultiThemeChange" :hidden="readonly" type="checkbox"/>
             </div>
 
+            <button class="iconBtn" :disabled="!test.ID" title="Štampaj test" @click.prevent="printTest()">
+            <i class="fa fa-print"></i>
+          </button>
+
           <hr>
           <h6>Pitanja</h6>
           <div v-for="(question, index) in questions" :key="question.ID" class="row">
@@ -93,6 +97,27 @@ export default {
     }
   },
   methods: {
+    async printTest() {
+      await axios.get('/print/test/' + this.test.ID).then((response) => {
+        if (response.data === null || response.data.Status === 'error') {
+          this.toast.error(response.data != null ? response.data.ErrorMessage : "");
+          return;
+        }
+        var fileContent = JSON.parse(response.data.Data);
+        var sampleArr = this.base64ToArrayBuffer(fileContent);
+        const blob = new Blob([sampleArr], {type: 'application/pdf'});
+
+        var iframe = document.createElement('iframe');
+        iframe.src = URL.createObjectURL(blob);
+        document.body.appendChild(iframe);
+
+        URL.revokeObjectURL(iframe.src);
+        iframe.contentWindow.print();
+        iframe.setAttribute("hidden", "hidden");
+      }, (error) => {
+        this.errorToast(error, "/print/test");
+      });
+    },
     async onSeminarThemeChange() {
       this.test.questions = [];
       if (!this.test.seminar_theme) {

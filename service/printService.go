@@ -2,7 +2,9 @@ package service
 
 import (
 	"bytes"
+	"encoding/base64"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sort"
@@ -85,6 +87,7 @@ type printServiceInterface interface {
 	PrintPayments(seminar *model.Seminar) ([]byte, error)
 	PrintSeminarReport(seminar *model.Seminar) ([]byte, error)
 	PrintSeminarReport2(seminar *model.Seminar) ([]byte, error)
+	PrintTest(test *model.Test) ([]byte, error)
 }
 
 func (p *printService) PrintSeminarStudentList(seminar *model.Seminar) ([]byte, error) {
@@ -2269,6 +2272,107 @@ func (p *printService) PrintSeminarReport2(seminar *model.Seminar) ([]byte, erro
 	pdf.Text(50, pdf.GetY()+5, strconv.Itoa(totalNum))
 	pdf.Rect(65, pdf.GetY(), 130, ch, "FD")
 	pdf.Text(74, pdf.GetY()+5, trObj.translate("Напомена:", 12))
+
+	var buf bytes.Buffer
+	err = pdf.Output(&buf)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return buf.Bytes(), nil
+}
+
+func (p *printService) PrintTest(test *model.Test) ([]byte, error) {
+	pwd, err := os.Getwd()
+	if err != nil {
+		logoped.ErrorLog.Println("Error getting pwd: ", err)
+		return []byte{}, err
+	}
+	pdf := fpdf.New("P", "mm", "A4", filepath.Join(pwd, "font"))
+	pdf.AddFont("Arimo-Regular", "", "Arimo-Regular.json")
+	pdf.AddFont("Arimo-Bold", "", "Arimo-Bold.json")
+	pdf.AddFont("Helvetica", "", "helvetica_1251.json")
+	latTr := pdf.UnicodeTranslatorFromDescriptor("iso-8859-16")
+	cirTr := pdf.UnicodeTranslatorFromDescriptor("cp1251")
+	fontSize := 12.0
+	trObj := newTranslationDetails(pdf, "Helvetica", "Arimo-Regular", fontSize, latTr, cirTr)
+
+	pdf.SetMargins(marginLeft, marginTop, marginRight)
+	pdf.AddPage()
+
+	pdf.SetFont("Helvetica", "", fontSize)
+	pdf.Image("./images/cers_logo.png", 180, 10, 20, 10, false, "png", 0, "")
+
+	pdf.Text(15, pdf.GetY(), trObj.translDef("Име и презиме:"))
+	pdf.Line(52, pdf.GetY(), 120, pdf.GetY())
+	pdf.Ln(7)
+	pdf.Text(15, pdf.GetY(), trObj.translDef("ЈМБГ:"))
+	pdf.Line(52, pdf.GetY(), 120, pdf.GetY())
+
+	pdf.Ln(9)
+	pdf.Text(15, pdf.GetY(), trObj.translate("Питања:", 13))
+	pdf.Ln(9)
+
+	for i, q := range test.Questions {
+		if q.Image == nil || *q.Image == "" {
+			if pdf.GetY() > 260 {
+				pdf.AddPage()
+			}
+		} else {
+			if pdf.GetY() > 220 {
+				pdf.AddPage()
+			}
+		}
+		pdf.Text(6, pdf.GetY(), trObj.translDef(strconv.Itoa(i+1)+")"))
+		questionLines, _ := splitLine(q.Content, 88)
+		for _, l := range questionLines {
+			pdf.Text(12, pdf.GetY(), trObj.translDef(l))
+			pdf.Ln(5)
+		}
+
+		if q.Image != nil && *q.Image != "" {
+			doc := *q.Image
+			idx := strings.Index(doc, ";base64,")
+			if idx < 0 {
+				return []byte{}, err
+			}
+			reader := base64.NewDecoder(base64.StdEncoding, strings.NewReader(doc[idx+8:]))
+			buff := bytes.Buffer{}
+			_, err := buff.ReadFrom(reader)
+			if err != nil {
+				return []byte{}, err
+			}
+
+			err = ioutil.WriteFile("./temp_images/"+strconv.Itoa(int(q.ID)), buff.Bytes(), 0644)
+			if err != nil {
+				return []byte{}, err
+			}
+
+			h := 30.0
+			w := 30.0
+			info := pdf.RegisterImage("./temp_images/"+strconv.Itoa(int(q.ID)), strings.Split(doc[11:], ";")[0])
+			if info != nil && info.Width() > 0 && info.Height() > 0 {
+				scale := info.Width() / info.Height()
+				w = w * scale
+			}
+
+			pdf.Image("./temp_images/"+strconv.Itoa(int(q.ID)), 20, pdf.GetY(), w, h, false, "", 0, "")
+			e := os.Remove("./temp_images/" + strconv.Itoa(int(q.ID)))
+			if e != nil {
+				return []byte{}, err
+			}
+
+			pdf.Ln(33)
+		}
+
+		for _, a := range q.Answers {
+			pdf.Circle(8, pdf.GetY(), 2, "D")
+			pdf.Text(12, pdf.GetY()+1, trObj.translDef(a.Content))
+			pdf.Ln(5)
+		}
+
+		pdf.Ln(7)
+	}
 
 	var buf bytes.Buffer
 	err = pdf.Output(&buf)

@@ -21,6 +21,7 @@ type testServiceInterface interface {
 	GetAllTests() ([]model.Test, error)
 	GetAllTestsBySeminarTheme(seminarThemeID int) ([]model.Test, error)
 	GetTestByID(id int) (*model.Test, error)
+	GetTestWithAnswersByID(id int) (*model.Test, error)
 	CreateTest(test model.Test) (*model.Test, error)
 	UpdateTest(test model.Test) (*model.Test, error)
 	CreateClientTest(clientTest model.ClientTest) (*model.ClientTest, error)
@@ -47,6 +48,15 @@ func (c *testService) GetAllTestsBySeminarTheme(seminarThemeID int) ([]model.Tes
 func (c *testService) GetTestByID(id int) (*model.Test, error) {
 	var test *model.Test
 	if err := db.Client.Preload("SeminarTheme").Preload("SeminarTheme.BaseSeminarType").Preload("Questions").First(&test, id).Error; err != nil {
+		return nil, err
+	}
+
+	return test, nil
+}
+
+func (c *testService) GetTestWithAnswersByID(id int) (*model.Test, error) {
+	var test *model.Test
+	if err := db.Client.Preload("SeminarTheme").Preload("SeminarTheme.BaseSeminarType").Preload("Questions").Preload("Questions.Answers").First(&test, id).Error; err != nil {
 		return nil, err
 	}
 

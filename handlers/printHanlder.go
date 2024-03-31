@@ -2,11 +2,12 @@ package handlers
 
 import (
 	"errors"
-	"github.com/gorilla/mux"
 	"net/http"
 	"srbolab_cpc/logoped"
 	"srbolab_cpc/service"
 	"strconv"
+
+	"github.com/gorilla/mux"
 )
 
 func PrintSeminarStudentList(w http.ResponseWriter, req *http.Request) {
@@ -331,6 +332,38 @@ func PrintReport2(w http.ResponseWriter, req *http.Request) {
 	}
 
 	report, err := service.PrintService.PrintSeminarReport2(seminar)
+	if err != nil {
+		logoped.ErrorLog.Println(err.Error())
+		SetErrorResponse(w, errors.New("Greška štampanja: "+err.Error()))
+		return
+	}
+
+	SetSuccessResponse(w, report)
+}
+
+func PrintTest(w http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	testIdParam, ok := vars["test_id"]
+	if !ok {
+		logoped.ErrorLog.Println("missing parameter test_id")
+		SetErrorResponse(w, NewMissingRequestParamError("test_id"))
+		return
+	}
+
+	test_id, err := strconv.Atoi(testIdParam)
+	if err != nil {
+		logoped.ErrorLog.Println(err.Error())
+		SetErrorResponse(w, NewWrongParamFormatErrorError("testId", testIdParam))
+		return
+	}
+	test, err := service.TestService.GetTestWithAnswersByID(test_id)
+	if err != nil {
+		logoped.ErrorLog.Println(err.Error())
+		SetErrorResponse(w, errors.New("Greška štampanja, greška prilikom povlačenja testa: "+err.Error()))
+		return
+	}
+
+	report, err := service.PrintService.PrintTest(test)
 	if err != nil {
 		logoped.ErrorLog.Println(err.Error())
 		SetErrorResponse(w, errors.New("Greška štampanja: "+err.Error()))
