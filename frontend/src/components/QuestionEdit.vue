@@ -27,6 +27,11 @@
               type="text">
           </text-area-input>
 
+          <div class="my-1">
+              <label :style=styleLabel for="multi_theme">Pitanje je za više tema:&nbsp;&nbsp;</label>
+              <input id="multi_theme" v-model="question.multi_theme" :hidden="readonly" type="checkbox"/>
+            </div>
+
         <img id="img"  :src="question.image" alt="" />
         <button v-if="question.image" class="iconBtn" title="Obriši" @click.prevent="removeImage()">
           <i class="fa fa-remove"></i>
@@ -96,6 +101,7 @@ export default {
         seminar_theme: null,
         image: "",
         answers: [],
+        multi_theme: false,
       },
       action: "view",
       questionId: "",

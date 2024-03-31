@@ -58,12 +58,17 @@ export default {
         {
           label: 'Pitanje',
           field: 'content',
-          width: '70%',
+          width: '63%',
         },
         {
           label: 'Vrsta seminara',
           field: 'seminar_type',
           width: '23%',
+        },
+        {
+          label: 'Više tema',
+          field: 'multi_theme_str',
+          width: '7%',
         }
       ],
       rows: [],
@@ -109,7 +114,7 @@ export default {
           if (s.seminar_theme) {
             s.seminar_type = this.getSeminarFullType(s.seminar_theme.base_seminar_type, s.seminar_theme);
           }
-
+          s.multi_theme_str = s.multi_theme == true ? "Da" : "Ne";
         });
       }, (error) => {
         this.errorToast(error, "/questions/list");

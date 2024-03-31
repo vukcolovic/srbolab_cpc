@@ -1,9 +1,10 @@
 package service
 
 import (
-	"gorm.io/gorm"
 	"srbolab_cpc/db"
 	"srbolab_cpc/model"
+
+	"gorm.io/gorm"
 )
 
 var (
@@ -15,7 +16,7 @@ type questionService struct {
 
 type questionServiceInterface interface {
 	GetAllQuestions(skip, take int) ([]model.Question, error)
-	GetAllQuestionsBySeminarTheme(seminarThemeID int) ([]model.Question, error)
+	GetAllQuestionsBySeminarTheme(seminarThemeID int, includeMultiTheme bool) ([]model.Question, error)
 	GetQuestionByID(id int) (*model.Question, error)
 	GetQuestionsCount() (int64, error)
 	DeleteQuestion(id int) error
@@ -25,17 +26,24 @@ type questionServiceInterface interface {
 
 func (c *questionService) GetAllQuestions(skip, take int) ([]model.Question, error) {
 	var questions []model.Question
-	if err := db.Client.Select("id", "content", "seminar_theme_id").Order("id desc").Limit(take).Offset(skip).Preload("SeminarTheme").Preload("SeminarTheme.BaseSeminarType").Find(&questions).Error; err != nil {
+	if err := db.Client.Select("id", "content", "seminar_theme_id", "multi_theme").Order("id desc").Limit(take).Offset(skip).Preload("SeminarTheme").Preload("SeminarTheme.BaseSeminarType").Find(&questions).Error; err != nil {
 		return nil, err
 	}
 	return questions, nil
 }
 
-func (c *questionService) GetAllQuestionsBySeminarTheme(seminarThemeID int) ([]model.Question, error) {
+func (c *questionService) GetAllQuestionsBySeminarTheme(seminarThemeID int, includeMultiTheme bool) ([]model.Question, error) {
 	var questions []model.Question
-	if err := db.Client.Order("id desc").Where("seminar_theme_id = ?", seminarThemeID).Find(&questions).Error; err != nil {
-		return nil, err
+	if includeMultiTheme {
+		if err := db.Client.Order("id desc").Where("seminar_theme_id = ? OR multi_theme = true", seminarThemeID).Find(&questions).Error; err != nil {
+			return nil, err
+		}
+	} else {
+		if err := db.Client.Order("id desc").Where("seminar_theme_id = ?", seminarThemeID).Find(&questions).Error; err != nil {
+			return nil, err
+		}
 	}
+
 	return questions, nil
 }
 

@@ -6,10 +6,11 @@ import (
 
 type Test struct {
 	gorm.Model
-	Name           string        `json:"name"`
-	SeminarTheme   *SeminarTheme `json:"seminar_theme"`
-	SeminarThemeID *uint         `json:"seminar_theme_id"`
-	Questions      []Question    `json:"questions" gorm:"many2many:test_question;"`
+	Name              string        `json:"name"`
+	SeminarTheme      *SeminarTheme `json:"seminar_theme"`
+	SeminarThemeID    *uint         `json:"seminar_theme_id"`
+	Questions         []Question    `json:"questions" gorm:"many2many:test_question;"`
+	IncludeMultiTheme *bool         `json:"include_multi_theme"`
 }
 
 type ClientTest struct {
@@ -39,6 +40,7 @@ type Question struct {
 	SeminarThemeID *uint         `json:"seminar_theme_id"`
 	Answers        []Answer      `json:"answers"`
 	Image          *string       `gorm:"type:bytea" json:"image"`
+	MultiTheme     *bool         `json:"multi_theme"`
 }
 
 type Answer struct {

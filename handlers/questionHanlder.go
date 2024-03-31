@@ -3,12 +3,13 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
-	"github.com/gorilla/mux"
 	"net/http"
 	"srbolab_cpc/logoped"
 	"srbolab_cpc/model"
 	"srbolab_cpc/service"
 	"strconv"
+
+	"github.com/gorilla/mux"
 )
 
 func ListQuestions(w http.ResponseWriter, r *http.Request) {
@@ -37,7 +38,19 @@ func ListQuestionsBySeminarThemeID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	questions, err := service.QuestionService.GetAllQuestionsBySeminarTheme(seminarThemeId)
+	queryParams := r.URL.Query()
+	includeMultiThemeParam, ok := queryParams["includeMultiTheme"]
+	includeMultiTheme := false
+	if ok && includeMultiThemeParam[0] != "null" {
+		includeMultiTheme, err = strconv.ParseBool(includeMultiThemeParam[0])
+		if err != nil {
+			logoped.ErrorLog.Println(err.Error())
+			SetErrorResponse(w, NewWrongParamFormatErrorError("includeMultiTheme", includeMultiThemeParam[0]))
+			return
+		}
+	}
+
+	questions, err := service.QuestionService.GetAllQuestionsBySeminarTheme(seminarThemeId, includeMultiTheme)
 	if err != nil {
 		logoped.ErrorLog.Println(err.Error())
 		SetErrorResponse(w, errors.New("Greška prilikom povlačenja liste pitanja: "+err.Error()))

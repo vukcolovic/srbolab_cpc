@@ -28,6 +28,11 @@
               @option:selected="onSeminarThemeChange">
           </v-select>
 
+          <div class="my-1">
+              <label :style=styleLabelSmall for="includeMultiTheme">Uključi pitanja za više tema:&nbsp;&nbsp;</label>
+              <input id="includeMultiTheme" v-model="test.include_multi_theme" @change="onIncludeMultiThemeChange" :hidden="readonly" type="checkbox"/>
+            </div>
+
           <hr>
           <h6>Pitanja</h6>
           <div v-for="(question, index) in questions" :key="question.ID" class="row">
@@ -80,6 +85,7 @@ export default {
         name: "",
         seminar_theme: null,
         questions: [],
+        include_multi_theme: false,
       },
       questions: [],
       action: "view",
@@ -95,9 +101,16 @@ export default {
       }
       await this.getQuestionsBySeminarTheme();
     },
+    async onIncludeMultiThemeChange() {
+      if (!this.test.seminar_theme) {
+        return;
+      }
+      this.test.questions = [];
+      await this.getQuestionsBySeminarTheme();
+    },
     async getQuestionsBySeminarTheme() {
-      await axios.get('/questions/list/seminar-theme/' + this.test.seminar_theme.ID).then((response) => {
-        if (response.data === null || response.data.Status === 'error') {
+      await axios.get('/questions/list/seminar-theme/' + this.test.seminar_theme.ID + "?includeMultiTheme=" + this.test.include_multi_theme).then((response) => {
+        if (response.data === null || response.data.Status === 'error') { 
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");
           return;
         }
