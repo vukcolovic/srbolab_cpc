@@ -49,7 +49,7 @@ func (c *clientSeminarService) GetMaxConfirmationNumber() (int, error) {
 
 func (c *clientSeminarService) GetNumberOfPassedSeminars(clientID uint) (int, error) {
 	var count *int
-	err := db.Client.Raw("select count(*) from client_seminars cs where cs.client_id = ? and (cs.confirmation_number  > 0 or cs.pass = true)", clientID).Scan(&count).Error
+	err := db.Client.Raw("select count(*) from client_seminars cs where cs.client_id = ? and cs.pass = true", clientID).Scan(&count).Error
 	if err != nil {
 		return 0, err
 	}

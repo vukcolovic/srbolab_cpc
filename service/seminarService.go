@@ -198,6 +198,18 @@ func (c *seminarService) UpdateSeminar(seminar model.Seminar) (*model.Seminar, e
 			if _, ok := notPassed[pr.ClientID]; !ok {
 				b := true
 				seminar.Trainees[i].Pass = &b
+				switch seminar.SeminarTheme.Code {
+				case "1":
+					seminar.Trainees[i].Client.PassedCheckboxes.WorkTimeAndTahografs = &b
+				case "2":
+					seminar.Trainees[i].Client.PassedCheckboxes.ThemeDocuments = &b
+				case "3":
+					seminar.Trainees[i].Client.PassedCheckboxes.Burden = &b
+				case "4":
+					seminar.Trainees[i].Client.PassedCheckboxes.Regulations = &b
+				case "5":
+					seminar.Trainees[i].Client.PassedCheckboxes.Tahografs2 = &b
+				}
 			} else {
 				b := false
 				seminar.Trainees[i].Pass = &b

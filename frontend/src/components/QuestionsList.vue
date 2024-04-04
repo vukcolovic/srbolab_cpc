@@ -15,6 +15,7 @@
       <vue-table-lite
           ref="localTable"
           @row-clicked="selectQuestion"
+          @dblclick="doubleClick"
           :total= "table.totalCount"
           :columns="table.columns"
           :messages="table.messages"
@@ -35,6 +36,7 @@ import {useToast} from "vue-toastification";
 import {dateMixin} from "@/mixins/dateMixin";
 import {apiMixin} from "@/mixins/apiMixin";
 import {commonMixin} from "@/mixins/commonMixin";
+import router from "@/router";
 
 export default {
   name: 'QuestionsList',
@@ -93,10 +95,15 @@ export default {
       table.selectedQuestion = rowData;
     }
 
+    const doubleClick = () => {
+      router.push("/question?action=update&id=" + table.selectedQuestion.ID);
+    }
+
     const toast = useToast();
     return {
       toast,
       table,
+      doubleClick,
       selectQuestion,
     };
   },
