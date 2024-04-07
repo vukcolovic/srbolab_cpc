@@ -19,6 +19,7 @@
           :columns="table.columns"
           :messages="table.messages"
           :rows="table.rows"
+          :is-hide-paging="true"
           @do-search="doSearch"
           :rowClasses=table.rowClasess
           :is-loading="table.isLoading"
@@ -119,7 +120,7 @@ export default {
     }
   },
   async created() {
-    await this.doSearch(0, 10, 'id', 'asc');
+    await this.doSearch(0, 100, 'id', 'asc');
   }
   }
 </script>

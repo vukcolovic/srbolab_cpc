@@ -18,6 +18,7 @@
           @dblclick="doubleClick"
           :total= "table.totalCount"
           :columns="table.columns"
+          :is-hide-paging="true"
           :messages="table.messages"
           :rows="table.rows"
           @do-search="doSearch"
@@ -131,7 +132,7 @@ export default {
     }
   },
   async created() {
-    await this.doSearch(0, 10, 'id', 'asc');
+    await this.doSearch(0, 1000, 'id', 'asc');
   }
   }
 </script>
