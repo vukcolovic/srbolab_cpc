@@ -381,6 +381,7 @@ func (excelService) CreateClientsReport() ([]byte, error) {
 		exc.SetColWidth(sheet, "G", "G", 15.0)
 		exc.SetColWidth(sheet, "H", "H", 15.0)
 		exc.SetColWidth(sheet, "I", "I", 15.0)
+		exc.SetColWidth(sheet, "J", "J", 15.0)
 
 		exc.SetCellValue(sheet, "B1", "Ime i prezime")
 		exc.SetCellValue(sheet, "C1", "Firma")
@@ -390,6 +391,7 @@ func (excelService) CreateClientsReport() ([]byte, error) {
 		exc.SetCellValue(sheet, "G1", "Teret")
 		exc.SetCellValue(sheet, "H1", "Propisi")
 		exc.SetCellValue(sheet, "I1", "Tahografi 2")
+		exc.SetCellValue(sheet, "J1", "CPC Ističe")
 	}
 
 	clientCount, err := ClientService.GetClientsCount()
@@ -433,6 +435,10 @@ func (excelService) CreateClientsReport() ([]byte, error) {
 			}
 			if c.PassedCheckboxes.Tahografs2 != nil && *c.PassedCheckboxes.Tahografs2 {
 				exc.SetCellValue(locationSheetMap[location], "I"+strconv.Itoa(sheetRowMap[location]), "+")
+			}
+
+			if c.CPCDate != nil {
+				exc.SetCellValue(locationSheetMap[location], "J"+strconv.Itoa(sheetRowMap[location]), c.CPCDate.Format("02.01.2006."))
 			}
 
 			for _, s := range c.Seminars {

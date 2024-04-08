@@ -162,6 +162,13 @@ func RunServer(host string) {
 	s.HandleFunc("/active", handlers.GetActiveSurveys).Methods("GET")
 	s.HandleFunc("/client-survey/create", handlers.SaveClientSurvey).Methods("POST")
 
+	s = r.PathPrefix("/api/partners").Subrouter()
+	s.HandleFunc("/list", handlers.ListPartners).Methods("GET")
+	s.HandleFunc("/create", handlers.CreatePartner).Methods("POST")
+	s.HandleFunc("/update", handlers.UpdatePartner).Methods("POST")
+	s.HandleFunc("/id/{id}", handlers.GetPartnerByID).Methods("GET")
+	s.HandleFunc("/count", handlers.CountPartners).Methods("GET")
+
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{"*"}, // All origins
 		AllowedHeaders: []string{"*"},

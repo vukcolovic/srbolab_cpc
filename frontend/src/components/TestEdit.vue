@@ -33,9 +33,18 @@
               <input id="includeMultiTheme" v-model="test.include_multi_theme" @change="onIncludeMultiThemeChange" :hidden="readonly" type="checkbox"/>
             </div>
 
+            <div class="my-1">
+              <label :style=styleLabelSmall for="practice">Test za vežbu:&nbsp;&nbsp;</label>
+              <input id="practice" v-model="test.practice" :hidden="readonly" type="checkbox"/>
+            </div>
+            
+
             <button class="iconBtn" :disabled="!test.ID" title="Štampaj test" @click.prevent="printTest()">
             <i class="fa fa-print"></i>
           </button>
+          <button v-if="test.practice" class="iconBtn ml-5" :disabled="!test.ID" title="Startuj test" @click.prevent="startPractice()">
+            <i class="fa fa-hourglass-start"></i>
+          </button><i v-if="test.practice">Kada startujete test, narednih dva sata će biti dozvoljno polaznicima da koriste test za vežbanje, rezultati se neće trajno beležiti!</i>
 
           <hr>
           <h6>Pitanja</h6>
@@ -90,6 +99,8 @@ export default {
         seminar_theme: null,
         questions: [],
         include_multi_theme: false,
+        practice: false,
+        practice_time: null,
       },
       questions: [],
       action: "view",
@@ -117,6 +128,12 @@ export default {
       }, (error) => {
         this.errorToast(error, "/print/test");
       });
+    },
+    async startPractice() {
+      this.test.practice_time =  new Date(); 
+      console.log(this.test.practice_time);
+      await this.updateTest();
+      this.toast.info("Test je startovan za vežbanje.");
     },
     async onSeminarThemeChange() {
       this.test.questions = [];

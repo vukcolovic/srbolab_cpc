@@ -76,6 +76,9 @@
               <li>
                 <router-link class="dropdown-item" to="/surveys">Ankete</router-link>
               </li>
+              <li>
+                <router-link class="dropdown-item" to="/partners">Partneri</router-link>
+              </li>
             </ul>
           </li>
           <li class="nav-item">

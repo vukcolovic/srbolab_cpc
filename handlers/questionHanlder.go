@@ -13,7 +13,7 @@ import (
 )
 
 func ListQuestions(w http.ResponseWriter, r *http.Request) {
-	questions, err := service.QuestionService.GetAllQuestions(0, 10000)
+	questions, err := service.QuestionService.GetAllQuestions(0, 1000)
 	if err != nil {
 		logoped.ErrorLog.Println(err.Error())
 		SetErrorResponse(w, errors.New("Greška prilikom povlačenja liste pitanja: "+err.Error()))

@@ -16,6 +16,8 @@ type Client struct {
 	CountryBirth       *string    `json:"country_birth"`
 	CompanyID          *uint      `json:"company_id"`
 	Company            Company    `json:"company"`
+	PartnerID          *uint      `json:"partner_id"`
+	Partner            Partner    `json:"partner"`
 	CompanyPIB         *string    `json:"company_pib"`
 	Verified           *bool      `json:"verified"`
 	WaitSeminar        *bool      `json:"wait_seminar"`

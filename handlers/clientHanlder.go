@@ -3,12 +3,13 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
-	"github.com/gorilla/mux"
 	"net/http"
 	"srbolab_cpc/logoped"
 	"srbolab_cpc/model"
 	"srbolab_cpc/service"
 	"strconv"
+
+	"github.com/gorilla/mux"
 )
 
 func CreateClient(w http.ResponseWriter, r *http.Request) {

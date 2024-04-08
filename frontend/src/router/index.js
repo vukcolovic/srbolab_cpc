@@ -30,6 +30,8 @@ import SurveyQuestionsList from '../components/SurveyQuestionsList.vue'
 import SurveyQuestionEdit from '../components/SurveyQuestionEdit.vue'
 import SurveysList from '../components/SurveysList.vue'
 import SurveyEdit from '../components/SurveyEdit.vue'
+import PartnersList from '../components/PartnersList.vue'
+import PartnerEdit from '../components/PartnerEdit.vue'
 
 const routes = [
   {
@@ -199,6 +201,17 @@ const routes = [
     path: '/survey',
     name: 'SurveyEdit',
     component: SurveyEdit,
+    props: true,
+  },
+  {
+    path: '/partners',
+    name: 'Partners',
+    component: PartnersList,
+  },
+  {
+    path: '/partner',
+    name: 'PartnerEdit',
+    component: PartnerEdit,
     props: true,
   },
 ]

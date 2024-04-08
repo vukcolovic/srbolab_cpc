@@ -31,7 +31,7 @@ func init() {
 
 func AuthToken(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if strings.Contains(r.URL.Path, "login") || strings.Contains(r.URL.Path, "corporate-ip") || strings.Contains(r.URL.Path, "create-not-verified") || strings.Contains(r.URL.Path, "seminar-days/jmbg") || strings.Contains(r.URL.Path, "/client-test/create") || strings.Contains(r.URL.Path, "/surveys/active") || strings.Contains(r.URL.Path, "/surveys/client-survey/create") || strings.Contains(r.URL.Path, "/seminar-days/teachers/id") {
+		if strings.Contains(r.URL.Path, "login") || strings.Contains(r.URL.Path, "corporate-ip") || strings.Contains(r.URL.Path, "create-not-verified") || strings.Contains(r.URL.Path, "seminar-days/jmbg") || strings.Contains(r.URL.Path, "/client-test/create") || strings.Contains(r.URL.Path, "/surveys/active") || strings.Contains(r.URL.Path, "/surveys/client-survey/create") || strings.Contains(r.URL.Path, "/seminar-days/teachers/id") || strings.Contains(r.URL.Path, "/partners/list") {
 			w.Header().Set("Access-Control-Allow-Origin", "*")
 			next.ServeHTTP(w, r)
 			return

@@ -237,6 +237,16 @@
               :styleLabel=styleLabel>
           </text-input>
 
+          <label :style="styleLabel" class="mb-1 mt-1">Partner (ako prijavljujete sami sebe nije potrebno da popunjavate ovo polje)</label>
+          <v-select
+              v-model="client.partner"
+              :disabled=readonly
+              :options="partners"
+              :style="styleInputSmall"
+              label="name"
+              placeholder="Traži">
+          </v-select>
+
           <label :style=styleLabel>Dokumenta: </label>
           <ul>
             <li v-for="(doc, index) in client.documents" :key="index" style="list-style-type: none;">
@@ -387,6 +397,7 @@ export default {
   },
   async mounted() {
     this.isCorporateIp();
+    this.getAllPartners();
   },
   create() {
 

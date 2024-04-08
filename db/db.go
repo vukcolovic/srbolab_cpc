@@ -40,6 +40,7 @@ func Connect(conf config.Config) error {
 		&model.Survey{},
 		&model.ClientSurvey{},
 		&model.SurveyQuestionAnswer{},
+		&model.Partner{},
 	)
 	if err != nil {
 		return err

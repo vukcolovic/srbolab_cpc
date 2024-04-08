@@ -14,6 +14,7 @@ export const apiMixin = {
             companies: [],
             users: [],
             teachers: [],
+            partners: [],
         }
     },
     methods: {
@@ -51,6 +52,17 @@ export const apiMixin = {
                 });
             }, (error) => {
                 this.errorToast(error, "/users/teachers");
+            });
+        },
+        async getAllPartners() {
+            await axios.get('/partners/list?skip=' + 0 + '&take=' + 1000).then((response) => {
+                if (response.data === null || response.data.Status === 'error') {
+                    this.toast.error(response.data != null ? response.data.ErrorMessage : "");
+                    return;
+                }
+                this.partners = JSON.parse(response.data.Data);
+            }, (error) => {
+                this.errorToast(error, "/partners/list");
             });
         },
         async getAllLocations() {

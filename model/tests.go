@@ -1,6 +1,8 @@
 package model
 
 import (
+	"time"
+
 	"gorm.io/gorm"
 )
 
@@ -11,6 +13,8 @@ type Test struct {
 	SeminarThemeID    *uint         `json:"seminar_theme_id"`
 	Questions         []Question    `json:"questions" gorm:"many2many:test_question;"`
 	IncludeMultiTheme *bool         `json:"include_multi_theme"`
+	Practice          *bool         `json:"practice"`
+	PracticeTime      time.Time     `json:"practice_time"`
 }
 
 type ClientTest struct {

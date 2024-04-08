@@ -306,6 +306,16 @@
               placeholder="Traži">
           </v-select>
 
+          <label :style="styleLabel" class="mb-1 mt-1">Partner</label>
+          <v-select
+              v-model="client.partner"
+              :disabled=readonly
+              :options="partners"
+              :style="styleInputSmall"
+              label="name"
+              placeholder="Traži">
+          </v-select>
+
           <label :style=styleLabelSmall>Dokumenta: </label>
           <ul>
             <li v-for="(doc, index) in client.documents" :key="index" style="list-style-type: none;">
@@ -550,6 +560,7 @@ export default {
         country_birth: "Србија",
         documents: [],
         company: null,
+        partner: null,
         company_pib: "",
         comment: "",
         resident: true,
@@ -908,6 +919,7 @@ export default {
     return {toast}
   },
   async mounted() {
+    this.getAllPartners();
     await this.getAllLocations();
     await this.getSeminarsByStatusCode("OPENED").then(result => this.openedSeminars = result);
     this.filteredAndOpenedSeminars = this.openedSeminars;
