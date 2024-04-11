@@ -209,6 +209,10 @@ func SaveClientTest(w http.ResponseWriter, r *http.Request) {
 }
 
 func isTestValid(clientTest *model.ClientTest) (string, bool, error) {
+	isTestPractice := false
+	if clientTest.Test.Practice != nil && *clientTest.Test.Practice {
+		isTestPractice = true
+	}
 	client, err := service.ClientService.GetClientByJMBG(clientTest.Jmbg)
 	if err != nil {
 		return "", false, err
@@ -253,12 +257,12 @@ func isTestValid(clientTest *model.ClientTest) (string, bool, error) {
 		return "", false, err
 	}
 
-	if len(tests) > 1 {
+	if len(tests) > 1 && !isTestPractice {
 		return "Ovaj test nije dozvoljeno, klijent je već odradio dva testa u toku dana.", false, nil
 	}
 
 	second := false
-	if len(tests) == 1 {
+	if len(tests) == 1 && !isTestPractice {
 		if !tests[0].CreatedAt.Add(2 * time.Hour).Before(time.Now()) {
 			//return "Nije dozvoljeno snimiti test, rađen je skoro.", nil
 		}

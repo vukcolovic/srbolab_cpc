@@ -101,9 +101,11 @@ func (c *testService) CreateClientTest(clientTest model.ClientTest) (*model.Clie
 	}
 	clientTest.Result = float64(correctAnswers) / float64(len(clientTest.Test.Questions))
 
-	result := db.Client.Create(&clientTest)
-	if result.Error != nil {
-		return nil, result.Error
+	if clientTest.Test.Practice == nil || !*clientTest.Test.Practice {
+		result := db.Client.Create(&clientTest)
+		if result.Error != nil {
+			return nil, result.Error
+		}
 	}
 
 	return &clientTest, nil
@@ -149,6 +151,12 @@ func (c *testService) GetClientTestBySeminarDayIDAndJMBG(seminarDayID int, jmbg 
 	var clientTests []model.ClientTest
 	if err := db.Client.Where("seminar_day_id = ? AND client_id = ?", seminarDayID, client.ID).Find(&clientTests).Error; err != nil {
 		return nil, err
+	}
+
+	for i, _ := range clientTests {
+		if clientTests[i].Test.Practice != nil && *clientTests[i].Test.Practice {
+			clientTests = append(clientTests[:i], clientTests[i+1:]...)
+		}
 	}
 
 	return clientTests, nil

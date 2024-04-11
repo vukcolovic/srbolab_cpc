@@ -42,9 +42,9 @@
             <button class="iconBtn" :disabled="!test.ID" title="Štampaj test" @click.prevent="printTest()">
             <i class="fa fa-print"></i>
           </button>
-          <button v-if="test.practice" class="iconBtn ml-5" :disabled="!test.ID" title="Startuj test" @click.prevent="startPractice()">
+          <!-- <button v-if="test.practice" class="iconBtn ml-5" :disabled="!test.ID" title="Startuj test" @click.prevent="startPractice()">
             <i class="fa fa-hourglass-start"></i>
-          </button><i v-if="test.practice">Kada startujete test, narednih dva sata će biti dozvoljno polaznicima da koriste test za vežbanje, rezultati se neće trajno beležiti!</i>
+          </button><i v-if="test.practice">Kada startujete test, narednih dva sata će biti dozvoljno polaznicima da koriste test za vežbanje, rezultati se neće trajno beležiti!</i> -->
 
           <hr>
           <h6>Pitanja</h6>

@@ -160,9 +160,21 @@ func GetSeminarDayWithTestByJMBG(w http.ResponseWriter, req *http.Request) {
 		if day.Date.Day() != time.Now().Day() || day.Date.Month() != time.Now().Month() || day.Date.Year() != time.Now().Year() {
 			continue
 		}
+
 		if day.TestID == nil || *day.TestID == 0 {
 			SetErrorResponse(w, errors.New("Seminar dan nema izabran test."))
 			return
+		}
+
+		fullDay, err := service.SeminarDayService.GetSeminarDayWithTestByID(int(day.ID))
+		if err != nil {
+			SetErrorResponse(w, err)
+			return
+		}
+
+		isTestPractice := false
+		if fullDay.Test.Practice != nil && *fullDay.Test.Practice {
+			isTestPractice = true
 		}
 
 		tests, err := service.TestService.GetClientTestBySeminarDayIDAndJMBG(int(day.ID), jmbg)
@@ -171,12 +183,12 @@ func GetSeminarDayWithTestByJMBG(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		if len(tests) > 1 {
+		if len(tests) > 1 && !isTestPractice {
 			SetErrorResponse(w, errors.New("Ovaj test nije dozvoljen, klijent je već odradio dva testa u toku dana."))
 			return
 		}
 
-		if len(tests) == 1 {
+		if len(tests) == 1 && !isTestPractice {
 			if !tests[0].CreatedAt.Add(2 * time.Hour).Before(time.Now()) {
 				SetErrorResponse(w, errors.New("Nije dozvoljeno snimiti test, rađen je skoro."))
 				return
