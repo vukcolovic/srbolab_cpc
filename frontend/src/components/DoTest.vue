@@ -51,7 +51,7 @@
             style="margin-bottom: 3px">
             <div class="col-xs-12 col-sm-12 col-md-12">
               <p> {{ index + 1 }}. {{ question.content }}</p>
-              <div class="col-6 col-sm-12 col-md-6">
+              <div class="col-8 col-sm-12 col-md-8">
                 1<input style="margin-left: 5px" id={{question.ID}}
                   v-model="clientSurveys[0].survey_questions_answers[index].grade" :value=1 type="radio">
                 2<input style="margin-left: 5px" id={{question.ID}}
@@ -76,7 +76,7 @@
               style="margin-bottom: 3px">
               <div class="col-xs-12 col-sm-12 col-md-12">
                 <p> {{ index + 1 }}. {{ question.content }}</p>
-                <div class="col-6 col-sm-12 col-md-6">
+                <div class="col-8 col-sm-12 col-md-8">
                   1<input style="margin-left: 5px" id={{question.ID}}
                     v-model="clientSurveys[i + 1].survey_questions_answers[index].grade" :value=1 type="radio">
                   2<input style="margin-left: 5px" id={{question.ID}}
