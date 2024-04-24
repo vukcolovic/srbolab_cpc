@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"srbolab_cpc/db"
+	"srbolab_cpc/logoped"
 	"srbolab_cpc/model"
 	"strconv"
 	"strings"
@@ -196,6 +197,7 @@ func (c *clientService) CreateClient(client model.Client, userID int) (*model.Cl
 		seminar, err := SeminarService.GetSeminarByID(int(s.SeminarID))
 		if seminar.SeminarStatusID == model.SEMINAR_STATUS_IN_PROGRESS {
 			SeminarDayService.AddClientToInProgressSeminar(s)
+			logoped.InfoLog.Printf("AddClientToInProgressSeminar seminar %d, client %d, user %d", seminar.ID, client.ID, userID)
 		}
 	}
 
@@ -307,6 +309,7 @@ func (c *clientService) UpdateClient(client model.Client, userID int) (*model.Cl
 
 		if !found {
 			SeminarService.DeleteSeminarClient(os)
+			logoped.InfoLog.Printf("DeleteSeminarClient seminar %d, client %d, user %d", os.SeminarID, client.ID, userID)
 		}
 	}
 
@@ -327,6 +330,9 @@ func (c *clientService) UpdateClient(client model.Client, userID int) (*model.Cl
 			err = SeminarService.UpdateSeminarStatusIfNeed(int(ns.SeminarID))
 			if ns.Seminar.SeminarStatusID == model.SEMINAR_STATUS_IN_PROGRESS {
 				SeminarDayService.AddClientToInProgressSeminar(ns)
+				logoped.InfoLog.Printf("AddClientToInProgressSeminar seminar %d, client %d, user %d", ns.SeminarID, client.ID, userID)
+			} else {
+				logoped.InfoLog.Printf("AddClientToSeminar seminar %d, client %d, user %d", ns.SeminarID, client.ID, userID)
 			}
 		}
 	}
