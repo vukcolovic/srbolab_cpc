@@ -202,7 +202,11 @@ func (p *printService) PrintConfirmations(seminar *model.Seminar) ([]byte, error
 	cirTr := pdf.UnicodeTranslatorFromDescriptor("cp1251")
 	trObj := newTranslationDetails(pdf, "Helvetica", "Arimo-Regular", 11, latTr, cirTr)
 
-	pdf.SetMargins(15, 40, marginRight)
+	if seminar.SeminarTheme.BaseSeminarType.Code == "BASIC" {
+		pdf.SetMargins(15, 15, marginRight)
+	} else {
+		pdf.SetMargins(15, 40, marginRight)
+	}
 
 	startSeminar := seminar.Start
 	endSeminar := seminar.Start
@@ -259,159 +263,259 @@ func (p *printService) PrintConfirmations(seminar *model.Seminar) ([]byte, error
 			}
 		}
 
-		pdf.Ln(25)
-		pdf.Text(15, pdf.GetY(), trObj.translDef("Број:"))
-		pdf.Text(30, pdf.GetY(), trObj.translDef(seminar.GetCode()+"/"+strconv.Itoa(i+1)))
-		pdf.Ln(5)
-		pdf.SetFont("Arimo-Regular", "", 11)
-		pdf.Text(15, pdf.GetY(), trObj.translDef("Дана:"))
-		//pdf.SetFont("Arimo-Bold", "", 11)
-		dateOfLastDay := seminar.Start
-		maxNumber := 0
-		for _, day := range seminar.Days {
-			if day.Number > maxNumber {
-				dateOfLastDay = day.Date
-				maxNumber = day.Number
+		if seminar.SeminarTheme.BaseSeminarType.Code == "BASIC" {
+			pdf.Text(140, pdf.GetY(), trObj.translDef("Образац 1."))
+
+			pdf.Ln(10)
+			pdf.Text(15, pdf.GetY(), trObj.translDef("Број:"))
+			pdf.Text(30, pdf.GetY(), trObj.translDef(seminar.GetCode()+"/"+strconv.Itoa(i+1)))
+			pdf.Ln(5)
+			pdf.SetFont("Arimo-Regular", "", 11)
+			pdf.Text(15, pdf.GetY(), trObj.translDef("Дана:"))
+			//pdf.SetFont("Arimo-Bold", "", 11)
+			pdf.Ln(5)
+			pdf.SetFont("Arimo-Regular", "", 11)
+			pdf.Text(15, pdf.GetY(), trObj.translDef("Место:"))
+			//pdf.SetFont("Arimo-Bold", "", 11)
+			pdf.Text(30, pdf.GetY(), trObj.translDef(seminar.ClassRoom.Location.Address.Place))
+			pdf.Ln(15)
+
+			pdf.Text(95, pdf.GetY(), trObj.translDef("ПОТВРДА"))
+			pdf.Ln(10)
+
+			pdf.SetFont("Arimo-Regular", "", 11)
+			pdf.Text(55, pdf.GetY(), trObj.translDef("о завршеној обавезној обуци за стицање почетног СРС"))
+			pdf.Ln(10)
+
+			ch := 9.0
+			wl := 80.0
+			wr := 100.0
+
+			pdf.CellFormat(wl, ch-1, trObj.translDef("Име, име једног"), "LRT", 0, "L", false, 0, "")
+			//pdf.SetFont("Arimo-Bold", "", 11)
+			pdf.CellFormat(wr, ch-1, trObj.translDef(client.Client.Person.FirstName+" ("+client.Client.Person.MiddleName+") "+client.Client.Person.LastName), "LRT", 0, "L", false, 0, "")
+			pdf.Ln(ch - 1)
+			pdf.SetFont("Arimo-Regular", "", 11)
+			pdf.CellFormat(wl, ch-1, trObj.translDef("родитеља, презиме"), "LRB", 0, "L", false, 0, "")
+			pdf.CellFormat(wr, ch-1, "", "LRB", 0, "L", false, 0, "")
+			pdf.Ln(ch - 1)
+			pdf.CellFormat(wl, ch, trObj.translDef("ЈМБГ"), "1", 0, "L", false, 0, "")
+			//pdf.SetFont("Arimo-Bold", "", 11)
+			for _, l := range trObj.translDef(*client.Client.JMBG) {
+				pdf.CellFormat(wr/13, ch, string(l), "1", 0, "C", false, 0, "")
 			}
-		}
-		pdf.Text(30, pdf.GetY(), dateOfLastDay.Format("02.01.2006."))
-		pdf.Ln(5)
-		pdf.SetFont("Arimo-Regular", "", 11)
-		pdf.Text(15, pdf.GetY(), trObj.translDef("Место:"))
-		//pdf.SetFont("Arimo-Bold", "", 11)
-		pdf.Text(30, pdf.GetY(), trObj.translDef(seminar.ClassRoom.Location.Address.Place))
-		pdf.Ln(15)
+			pdf.Ln(ch)
+			pdf.SetFont("Arimo-Regular", "", 11)
+			pdf.CellFormat(wl, ch, trObj.translDef("Место пребивалишта"), "1", 0, "L", false, 0, "")
+			//pdf.SetFont("Arimo-Bold", "", 11)
+			pdf.CellFormat(wr, ch, trObj.translDef(client.Client.Address.Place), "1", 0, "L", false, 0, "")
+			pdf.Ln(ch)
+			pdf.SetFont("Arimo-Regular", "", 11)
+			pdf.CellFormat(wl, ch, trObj.translDef("Адреса пребивалишта"), "1", 0, "L", false, 0, "")
+			//pdf.SetFont("Arimo-Bold", "", 11)
+			pdf.CellFormat(wr, ch, trObj.translDef(client.Client.Address.Street+" "+client.Client.Address.HouseNumber), "1", 0, "L", false, 0, "")
+			pdf.Ln(ch)
 
-		pdf.Text(95, pdf.GetY(), trObj.translDef("ПОТВРДА"))
-		pdf.Ln(10)
+			pdf.CellFormat(wl, ch-3, trObj.translDef("Датум похађања"), "LRT", 0, "L", false, 0, "")
+			pdf.CellFormat(wr, ch-3, trObj.translDef("од"), "1", 0, "L", false, 0, "")
+			pdf.Ln(ch - 3)
+			pdf.CellFormat(wl, ch-3, trObj.translDef("обавезне обуке"), "LRB", 0, "L", false, 0, "")
+			pdf.CellFormat(wr, ch-3, trObj.translDef("до"), "1", 0, "L", false, 0, "")
+			pdf.Ln(ch - 3)
 
-		pdf.SetFont("Arimo-Regular", "", 11)
-		pdf.Text(25, pdf.GetY(), trObj.translDef(fmt.Sprintf("о завршеној %s обуци на обавезним семинарима унапређења знања", seminar.SeminarTheme.BaseSeminarType.GetSeminarTypeForSentence())))
-		pdf.Ln(10)
+			pdf.CellFormat(wl, ch-3, trObj.translDef("Место похађања"), "LRT", 0, "L", false, 0, "")
+			pdf.CellFormat(wr, ch-3, trObj.translDef(seminar.ClassRoom.Location.Address.Place+", "+seminar.ClassRoom.Location.Address.Street+" "+seminar.ClassRoom.Location.Address.HouseNumber), "LRT", 0, "L", false, 0, "")
+			pdf.Ln(ch - 3)
+			pdf.CellFormat(wl, ch-3, trObj.translDef("обавезне обуке"), "LRB", 0, "L", false, 0, "")
+			pdf.CellFormat(wr, ch-3, trObj.translDef(""), "LRB", 0, "L", false, 0, "")
+			pdf.Ln(ch - 3)
+			pdf.CellFormat(wl, ch*4, trObj.translDef("Врсте обуке"), "1", 0, "L", false, 0, "")
+			pdf.CellFormat(wr, ch*4, trObj.translDef(""), "1", 0, "L", false, 0, "")
+			pdf.Text(120, pdf.GetY()+7, trObj.translDef("1. основна - 280 н.ч."))
+			pdf.Text(120, pdf.GetY()+13, trObj.translDef("(2.) основна убрзана - 140 н.ч."))
+			pdf.Text(120, pdf.GetY()+19, trObj.translDef("3. додатна - 70 н.ч."))
+			pdf.Text(120, pdf.GetY()+25, trObj.translDef("4. додатна - 35 н.ч."))
+			pdf.Text(120, pdf.GetY()+31, trObj.translDef("5. допунска - 14 н.ч."))
+			pdf.Ln(ch * 4)
 
-		ch := 9.0
-		wl := 80.0
-		wr := 100.0
+			pdf.CellFormat(wl, ch, trObj.translDef("Врста СРС"), "1", 0, "L", false, 0, "")
+			if client.Client.CLicence != nil && *client.Client.CLicence {
+				pdf.Circle(97.5, 177.5, 2.5, "")
+			}
+			if client.Client.DLicence != nil && *client.Client.DLicence {
+				pdf.Circle(129.5, 177.5, 2.5, "")
+			}
+			pdf.CellFormat(wr, ch, trObj.translDef("1. превоз терета  2. превоз путника"), "1", 0, "L", false, 0, "")
+			pdf.Ln(20)
+			pdf.Text(15, pdf.GetY(), trObj.translDef("НАПОМЕНА:"))
+			pdf.SetFont("Arimo-Regular", "", 11)
+			pdf.Text(40, pdf.GetY(), trObj.translDef("Ова потврда се издаје за потребе полагања стручног испита за стицање почетног"))
+			pdf.Text(15, pdf.GetY()+5, trObj.translDef("СРС и не може се користити у друге сврхе."))
 
-		pdf.CellFormat(wl, ch-1, trObj.translDef("Име, име једног"), "LRT", 0, "L", false, 0, "")
-		//pdf.SetFont("Arimo-Bold", "", 11)
-		pdf.CellFormat(wr, ch-1, trObj.translDef(client.Client.Person.FirstName+" ("+client.Client.Person.MiddleName+") "+client.Client.Person.LastName), "LRT", 0, "L", false, 0, "")
-		pdf.Ln(ch - 1)
-		pdf.SetFont("Arimo-Regular", "", 11)
-		pdf.CellFormat(wl, ch-1, trObj.translDef("родитеља, презиме"), "LRB", 0, "L", false, 0, "")
-		pdf.CellFormat(wr, ch-1, "", "LRB", 0, "L", false, 0, "")
-		pdf.Ln(ch - 1)
-		pdf.CellFormat(wl, ch, trObj.translDef("ЈМБГ"), "1", 0, "L", false, 0, "")
-		//pdf.SetFont("Arimo-Bold", "", 11)
-		for _, l := range trObj.translDef(*client.Client.JMBG) {
-			pdf.CellFormat(wr/13, ch, string(l), "1", 0, "C", false, 0, "")
-		}
-		pdf.Ln(ch)
-		pdf.SetFont("Arimo-Regular", "", 11)
-		pdf.CellFormat(wl, ch, trObj.translDef("Место пребивалишта"), "1", 0, "L", false, 0, "")
-		//pdf.SetFont("Arimo-Bold", "", 11)
-		pdf.CellFormat(wr, ch, trObj.translDef(client.Client.Address.Place), "1", 0, "L", false, 0, "")
-		pdf.Ln(ch)
-		pdf.SetFont("Arimo-Regular", "", 11)
-		pdf.CellFormat(wl, ch, trObj.translDef("Адреса пребивалишта"), "1", 0, "L", false, 0, "")
-		//pdf.SetFont("Arimo-Bold", "", 11)
-		pdf.CellFormat(wr, ch, trObj.translDef(client.Client.Address.Street+" "+client.Client.Address.HouseNumber), "1", 0, "L", false, 0, "")
-		pdf.Ln(ch)
-		pdf.SetFont("Arimo-Regular", "", 11)
-		pdf.CellFormat(wl, ch, trObj.translDef("Редни број семинара"), "1", 0, "L", false, 0, "")
-		//pdf.SetFont("Arimo-Bold", "", 11)
-		//fixme just closed seminars and passed
-		completedSeminarsBeforeSrbolab := 0
-		if client.Client.InitialCompletedSeminars != nil {
-			completedSeminarsBeforeSrbolab = *client.Client.InitialCompletedSeminars
+			pdf.Ln(40)
+			pdf.Text(80, pdf.GetY(), trObj.translDef("М.П."))
+
+			pdf.Text(135, pdf.GetY()-10, trObj.translDef("Овлашћено лице:"))
+			pdf.Line(125, pdf.GetY(), 185, pdf.GetY())
+
+			pdf.Ln(25)
+			pdf.Text(15, pdf.GetY(), strconv.Itoa(client.ConfirmationNumber))
+		} else {
+			pdf.Ln(25)
+			pdf.Text(15, pdf.GetY(), trObj.translDef("Број:"))
+			pdf.Text(30, pdf.GetY(), trObj.translDef(seminar.GetCode()+"/"+strconv.Itoa(i+1)))
+			pdf.Ln(5)
+			pdf.SetFont("Arimo-Regular", "", 11)
+			pdf.Text(15, pdf.GetY(), trObj.translDef("Дана:"))
+			//pdf.SetFont("Arimo-Bold", "", 11)
+			dateOfLastDay := seminar.Start
+			maxNumber := 0
+			for _, day := range seminar.Days {
+				if day.Number > maxNumber {
+					dateOfLastDay = day.Date
+					maxNumber = day.Number
+				}
+			}
+			pdf.Text(30, pdf.GetY(), dateOfLastDay.Format("02.01.2006."))
+			pdf.Ln(5)
+			pdf.SetFont("Arimo-Regular", "", 11)
+			pdf.Text(15, pdf.GetY(), trObj.translDef("Место:"))
+			//pdf.SetFont("Arimo-Bold", "", 11)
+			pdf.Text(30, pdf.GetY(), trObj.translDef(seminar.ClassRoom.Location.Address.Place))
+			pdf.Ln(15)
+
+			pdf.Text(95, pdf.GetY(), trObj.translDef("ПОТВРДА"))
+			pdf.Ln(10)
+
+			pdf.SetFont("Arimo-Regular", "", 11)
+			pdf.Text(25, pdf.GetY(), trObj.translDef(fmt.Sprintf("о завршеној %s обуци на обавезним семинарима унапређења знања", seminar.SeminarTheme.BaseSeminarType.GetSeminarTypeForSentence())))
+			pdf.Ln(10)
+
+			ch := 9.0
+			wl := 80.0
+			wr := 100.0
+
+			pdf.CellFormat(wl, ch-1, trObj.translDef("Име, име једног"), "LRT", 0, "L", false, 0, "")
+			//pdf.SetFont("Arimo-Bold", "", 11)
+			pdf.CellFormat(wr, ch-1, trObj.translDef(client.Client.Person.FirstName+" ("+client.Client.Person.MiddleName+") "+client.Client.Person.LastName), "LRT", 0, "L", false, 0, "")
+			pdf.Ln(ch - 1)
+			pdf.SetFont("Arimo-Regular", "", 11)
+			pdf.CellFormat(wl, ch-1, trObj.translDef("родитеља, презиме"), "LRB", 0, "L", false, 0, "")
+			pdf.CellFormat(wr, ch-1, "", "LRB", 0, "L", false, 0, "")
+			pdf.Ln(ch - 1)
+			pdf.CellFormat(wl, ch, trObj.translDef("ЈМБГ"), "1", 0, "L", false, 0, "")
+			//pdf.SetFont("Arimo-Bold", "", 11)
+			for _, l := range trObj.translDef(*client.Client.JMBG) {
+				pdf.CellFormat(wr/13, ch, string(l), "1", 0, "C", false, 0, "")
+			}
+			pdf.Ln(ch)
+			pdf.SetFont("Arimo-Regular", "", 11)
+			pdf.CellFormat(wl, ch, trObj.translDef("Место пребивалишта"), "1", 0, "L", false, 0, "")
+			//pdf.SetFont("Arimo-Bold", "", 11)
+			pdf.CellFormat(wr, ch, trObj.translDef(client.Client.Address.Place), "1", 0, "L", false, 0, "")
+			pdf.Ln(ch)
+			pdf.SetFont("Arimo-Regular", "", 11)
+			pdf.CellFormat(wl, ch, trObj.translDef("Адреса пребивалишта"), "1", 0, "L", false, 0, "")
+			//pdf.SetFont("Arimo-Bold", "", 11)
+			pdf.CellFormat(wr, ch, trObj.translDef(client.Client.Address.Street+" "+client.Client.Address.HouseNumber), "1", 0, "L", false, 0, "")
+			pdf.Ln(ch)
+			pdf.SetFont("Arimo-Regular", "", 11)
+			pdf.CellFormat(wl, ch, trObj.translDef("Редни број семинара"), "1", 0, "L", false, 0, "")
+			//pdf.SetFont("Arimo-Bold", "", 11)
+			//fixme just closed seminars and passed
+			completedSeminarsBeforeSrbolab := 0
+			if client.Client.InitialCompletedSeminars != nil {
+				completedSeminarsBeforeSrbolab = *client.Client.InitialCompletedSeminars
+			}
+
+			completedInSrbolab, err := ClientSeminarService.GetNumberOfPassedSeminars(client.ClientID)
+			if err != nil {
+				return nil, err
+			}
+			//+1 for current seminar
+			seminarNumber := completedInSrbolab + completedSeminarsBeforeSrbolab
+			if seminar.SeminarStatusID != model.SEMINAR_STATUS_CLOSED {
+				seminarNumber = seminarNumber + 1
+			}
+			if seminarNumber > 5 {
+				seminarNumber = seminarNumber - 5
+			}
+			cx := 89.5 + float64(seminarNumber)*7
+			if seminarNumber == 1 {
+				cx = cx + 1
+			}
+			if seminarNumber == 5 {
+				cx = cx + 1
+			}
+			if seminarNumber > 0 {
+				pdf.Circle(cx, 157, 3, "")
+			}
+			pdf.CellFormat(wr, ch, " I    II    III    IV    V", "1", 0, "L", false, 0, "")
+			pdf.Ln(ch)
+			pdf.SetFont("Arimo-Regular", "", 11)
+			pdf.CellFormat(wl, ch-1, trObj.translDef("Датум похађања"), "LRT", 0, "L", false, 0, "")
+			//pdf.SetFont("Arimo-Bold", "", 11)
+			pdf.CellFormat(wr, ch-1, trObj.translDef("од ")+startSeminar.Format("02.01.2006"), "LRT", 0, "L", false, 0, "")
+			pdf.Ln(ch - 1)
+			pdf.SetFont("Arimo-Regular", "", 11)
+			seminarType := "периодичне"
+			if seminar.SeminarTheme.BaseSeminarType.Code == "ADDITIONAL" {
+				seminarType = "додатне"
+			}
+			if seminar.SeminarTheme.BaseSeminarType.Code == "BASIC" {
+				seminarType = "основне"
+			}
+			pdf.CellFormat(wl, ch-1, trObj.translDef(fmt.Sprintf("%s обуке", seminarType)), "LRB", 0, "L", false, 0, "")
+			//pdf.SetFont("Arimo-Bold", "", 11)
+			pdf.CellFormat(wr, ch-1, trObj.translDef("до ")+endSeminar.Format("02.01.2006"), "LRB", 0, "L", false, 0, "")
+			pdf.Ln(ch - 1)
+			pdf.SetFont("Arimo-Regular", "", 11)
+			pdf.CellFormat(wl, ch-1, trObj.translDef("Место похађања"), "LRT", 0, "L", false, 0, "")
+			//pdf.SetFont("Arimo-Bold", "", 11)
+			pdf.CellFormat(wr, ch-1, trObj.translDef(seminar.ClassRoom.Location.Address.Place+", "+seminar.ClassRoom.Location.Address.Street+" "+seminar.ClassRoom.Location.Address.HouseNumber), "LRT", 0, "L", false, 0, "")
+			pdf.Ln(ch - 1)
+			pdf.SetFont("Arimo-Regular", "", 11)
+
+			pdf.CellFormat(wl, ch-1, trObj.translDef(fmt.Sprintf("%s обуке", seminarType)), "LRB", 0, "L", false, 0, "")
+			pdf.CellFormat(wr, ch-1, "", "LRB", 0, "L", false, 0, "")
+			pdf.Ln(ch - 1)
+			pdf.SetFont("Arimo-Regular", "", 11)
+			pdf.CellFormat(wl, ch, trObj.translDef("Врста ЦПЦ"), "1", 0, "L", false, 0, "")
+			//pdf.SetFont("Arimo-Bold", "", 11)
+			if client.Client.CLicence != nil && *client.Client.CLicence {
+				pdf.Circle(97.5, 198.5, 2.5, "")
+			}
+			if client.Client.DLicence != nil && *client.Client.DLicence {
+				pdf.Circle(129.5, 198.5, 2.5, "")
+			}
+			pdf.CellFormat(wr, ch, trObj.translDef("1. превоз терета  2. превоз путника"), "1", 0, "L", false, 0, "")
+			pdf.Ln(20)
+
+			//pdf.SetFont("Arimo-Bold", "", 11)
+			pdf.Text(15, pdf.GetY(), trObj.translDef("НАПОМЕНА:"))
+			pdf.SetFont("Arimo-Regular", "", 11)
+			seminarType = "периодичне"
+			if seminar.SeminarTheme.BaseSeminarType.Code == "ADDITIONAL" {
+				seminarType = "додатне"
+			}
+			if seminar.SeminarTheme.BaseSeminarType.Code == "BASIC" {
+				seminarType = "основне"
+			}
+			pdf.Text(50, pdf.GetY(), trObj.translDef(fmt.Sprintf("Ова потврда се издаје на основу одслушане обавезне %s обуке", seminarType)))
+			pdf.Ln(5)
+			seminarType = "периодичног"
+			if seminar.SeminarTheme.BaseSeminarType.Code == "ADDITIONAL" {
+				seminarType = "додатног"
+			}
+			if seminar.SeminarTheme.BaseSeminarType.Code == "BASIC" {
+				seminarType = "основног"
+			}
+			pdf.Text(15, pdf.GetY(), trObj.translDef(fmt.Sprintf("за потребе стицања %s ЦПЦ и не може се користити у друге сврхе.", seminarType)))
+
+			pdf.Ln(40)
+			pdf.Text(15, pdf.GetY(), strconv.Itoa(client.ConfirmationNumber))
 		}
 
-		completedInSrbolab, err := ClientSeminarService.GetNumberOfPassedSeminars(client.ClientID)
-		if err != nil {
-			return nil, err
-		}
-		//+1 for current seminar
-		seminarNumber := completedInSrbolab + completedSeminarsBeforeSrbolab
-		if seminar.SeminarStatusID != model.SEMINAR_STATUS_CLOSED {
-			seminarNumber = seminarNumber + 1
-		}
-		if seminarNumber > 5 {
-			seminarNumber = seminarNumber - 5
-		}
-		cx := 89.5 + float64(seminarNumber)*7
-		if seminarNumber == 1 {
-			cx = cx + 1
-		}
-		if seminarNumber == 5 {
-			cx = cx + 1
-		}
-		if seminarNumber > 0 {
-			pdf.Circle(cx, 157, 3, "")
-		}
-		pdf.CellFormat(wr, ch, " I    II    III    IV    V", "1", 0, "L", false, 0, "")
-		pdf.Ln(ch)
-		pdf.SetFont("Arimo-Regular", "", 11)
-		pdf.CellFormat(wl, ch-1, trObj.translDef("Датум похађања"), "LRT", 0, "L", false, 0, "")
-		//pdf.SetFont("Arimo-Bold", "", 11)
-		pdf.CellFormat(wr, ch-1, trObj.translDef("од ")+startSeminar.Format("02.01.2006"), "LRT", 0, "L", false, 0, "")
-		pdf.Ln(ch - 1)
-		pdf.SetFont("Arimo-Regular", "", 11)
-		seminarType := "периодичне"
-		if seminar.SeminarTheme.BaseSeminarType.Code == "ADDITIONAL" {
-			seminarType = "додатне"
-		}
-		if seminar.SeminarTheme.BaseSeminarType.Code == "BASIC" {
-			seminarType = "основне"
-		}
-		pdf.CellFormat(wl, ch-1, trObj.translDef(fmt.Sprintf("%s обуке", seminarType)), "LRB", 0, "L", false, 0, "")
-		//pdf.SetFont("Arimo-Bold", "", 11)
-		pdf.CellFormat(wr, ch-1, trObj.translDef("до ")+endSeminar.Format("02.01.2006"), "LRB", 0, "L", false, 0, "")
-		pdf.Ln(ch - 1)
-		pdf.SetFont("Arimo-Regular", "", 11)
-		pdf.CellFormat(wl, ch-1, trObj.translDef("Место похађања"), "LRT", 0, "L", false, 0, "")
-		//pdf.SetFont("Arimo-Bold", "", 11)
-		pdf.CellFormat(wr, ch-1, trObj.translDef(seminar.ClassRoom.Location.Address.Place+", "+seminar.ClassRoom.Location.Address.Street+" "+seminar.ClassRoom.Location.Address.HouseNumber), "LRT", 0, "L", false, 0, "")
-		pdf.Ln(ch - 1)
-		pdf.SetFont("Arimo-Regular", "", 11)
-
-		pdf.CellFormat(wl, ch-1, trObj.translDef(fmt.Sprintf("%s обуке", seminarType)), "LRB", 0, "L", false, 0, "")
-		pdf.CellFormat(wr, ch-1, "", "LRB", 0, "L", false, 0, "")
-		pdf.Ln(ch - 1)
-		pdf.SetFont("Arimo-Regular", "", 11)
-		pdf.CellFormat(wl, ch, trObj.translDef("Врста ЦПЦ"), "1", 0, "L", false, 0, "")
-		//pdf.SetFont("Arimo-Bold", "", 11)
-		if client.Client.CLicence != nil && *client.Client.CLicence {
-			pdf.Circle(97.5, 198.5, 2.5, "")
-		}
-		if client.Client.DLicence != nil && *client.Client.DLicence {
-			pdf.Circle(129.5, 198.5, 2.5, "")
-		}
-		pdf.CellFormat(wr, ch, trObj.translDef("1. превоз терета  2. превоз путника"), "1", 0, "L", false, 0, "")
-		pdf.Ln(20)
-
-		//pdf.SetFont("Arimo-Bold", "", 11)
-		pdf.Text(15, pdf.GetY(), trObj.translDef("НАПОМЕНА:"))
-		pdf.SetFont("Arimo-Regular", "", 11)
-		seminarType = "периодичне"
-		if seminar.SeminarTheme.BaseSeminarType.Code == "ADDITIONAL" {
-			seminarType = "додатне"
-		}
-		if seminar.SeminarTheme.BaseSeminarType.Code == "BASIC" {
-			seminarType = "основне"
-		}
-		pdf.Text(50, pdf.GetY(), trObj.translDef(fmt.Sprintf("Ова потврда се издаје на основу одслушане обавезне %s обуке", seminarType)))
-		pdf.Ln(5)
-		seminarType = "периодичног"
-		if seminar.SeminarTheme.BaseSeminarType.Code == "ADDITIONAL" {
-			seminarType = "додатног"
-		}
-		if seminar.SeminarTheme.BaseSeminarType.Code == "BASIC" {
-			seminarType = "основног"
-		}
-		pdf.Text(15, pdf.GetY(), trObj.translDef(fmt.Sprintf("за потребе стицања %s ЦПЦ и не може се користити у друге сврхе.", seminarType)))
-
-		pdf.Ln(40)
-		pdf.Text(15, pdf.GetY(), strconv.Itoa(client.ConfirmationNumber))
 	}
 
 	var buf bytes.Buffer
