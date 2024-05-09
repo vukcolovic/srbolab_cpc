@@ -87,6 +87,7 @@ type printServiceInterface interface {
 	PrintPayments(seminar *model.Seminar) ([]byte, error)
 	PrintSeminarReport(seminar *model.Seminar) ([]byte, error)
 	PrintSeminarReport2(seminar *model.Seminar) ([]byte, error)
+	PrintSeminarExamRegistration(seminar *model.Seminar) ([]byte, error)
 	PrintTest(test *model.Test) ([]byte, error)
 }
 
@@ -272,6 +273,7 @@ func (p *printService) PrintConfirmations(seminar *model.Seminar) ([]byte, error
 			pdf.Ln(5)
 			pdf.SetFont("Arimo-Regular", "", 11)
 			pdf.Text(15, pdf.GetY(), trObj.translDef("Дана:"))
+			pdf.Text(30, pdf.GetY(), trObj.translDef(time.Now().Format("02.01.2006.")))
 			//pdf.SetFont("Arimo-Bold", "", 11)
 			pdf.Ln(5)
 			pdf.SetFont("Arimo-Regular", "", 11)
@@ -284,7 +286,7 @@ func (p *printService) PrintConfirmations(seminar *model.Seminar) ([]byte, error
 			pdf.Ln(10)
 
 			pdf.SetFont("Arimo-Regular", "", 11)
-			pdf.Text(55, pdf.GetY(), trObj.translDef("о завршеној обавезној обуци за стицање почетног СРС"))
+			pdf.Text(55, pdf.GetY(), trObj.translDef("о завршеној обавезној обуци за стицање почетног ЦПЦ"))
 			pdf.Ln(10)
 
 			ch := 9.0
@@ -317,7 +319,7 @@ func (p *printService) PrintConfirmations(seminar *model.Seminar) ([]byte, error
 			pdf.Ln(ch)
 
 			pdf.CellFormat(wl, ch-3, trObj.translDef("Датум похађања"), "LRT", 0, "L", false, 0, "")
-			pdf.CellFormat(wr, ch-3, trObj.translDef("од"), "1", 0, "L", false, 0, "")
+			pdf.CellFormat(wr, ch-3, trObj.translDef("од "+seminar.Start.Format("02.01.2006.")), "1", 0, "L", false, 0, "")
 			pdf.Ln(ch - 3)
 			pdf.CellFormat(wl, ch-3, trObj.translDef("обавезне обуке"), "LRB", 0, "L", false, 0, "")
 			pdf.CellFormat(wr, ch-3, trObj.translDef("до"), "1", 0, "L", false, 0, "")
@@ -338,7 +340,7 @@ func (p *printService) PrintConfirmations(seminar *model.Seminar) ([]byte, error
 			pdf.Text(120, pdf.GetY()+31, trObj.translDef("5. допунска - 14 н.ч."))
 			pdf.Ln(ch * 4)
 
-			pdf.CellFormat(wl, ch, trObj.translDef("Врста СРС"), "1", 0, "L", false, 0, "")
+			pdf.CellFormat(wl, ch, trObj.translDef("Врста ЦПЦ"), "1", 0, "L", false, 0, "")
 			if client.Client.CLicence != nil && *client.Client.CLicence {
 				pdf.Circle(97.5, 177.5, 2.5, "")
 			}
@@ -350,7 +352,7 @@ func (p *printService) PrintConfirmations(seminar *model.Seminar) ([]byte, error
 			pdf.Text(15, pdf.GetY(), trObj.translDef("НАПОМЕНА:"))
 			pdf.SetFont("Arimo-Regular", "", 11)
 			pdf.Text(40, pdf.GetY(), trObj.translDef("Ова потврда се издаје за потребе полагања стручног испита за стицање почетног"))
-			pdf.Text(15, pdf.GetY()+5, trObj.translDef("СРС и не може се користити у друге сврхе."))
+			pdf.Text(15, pdf.GetY()+5, trObj.translDef("ЦПЦ и не може се користити у друге сврхе."))
 
 			pdf.Ln(40)
 			pdf.Text(80, pdf.GetY(), trObj.translDef("М.П."))
@@ -839,7 +841,7 @@ func (p *printService) PrintCheckIn(seminar *model.Seminar) ([]byte, error) {
 			pdf.Ln(10)
 			pdf.Text(74, pdf.GetY(), trObj.translDef("за похађање обавезне обуке за"))
 			pdf.Ln(5)
-			pdf.Text(81, pdf.GetY(), trObj.translDef("стицање почетног СРС"))
+			pdf.Text(81, pdf.GetY(), trObj.translDef("стицање почетног ЦПЦ"))
 			pdf.Ln(10)
 
 			// pdf.SetFont("Arimo-Bold", "", fontSize)
@@ -2617,6 +2619,160 @@ func (p *printService) PrintTest(test *model.Test) ([]byte, error) {
 		}
 
 		pdf.Ln(7)
+	}
+
+	var buf bytes.Buffer
+	err = pdf.Output(&buf)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return buf.Bytes(), nil
+}
+
+func (p *printService) PrintSeminarExamRegistration(seminar *model.Seminar) ([]byte, error) {
+	pwd, err := os.Getwd()
+	if err != nil {
+		logoped.ErrorLog.Println("Error getting pwd: ", err)
+		return []byte{}, err
+	}
+	pdf := fpdf.New("P", "mm", "A4", filepath.Join(pwd, "font"))
+	pdf.AddFont("Arimo-Regular", "", "Arimo-Regular.json")
+	pdf.AddFont("Arimo-Bold", "", "Arimo-Bold.json")
+	pdf.AddFont("Helvetica", "", "helvetica_1251.json")
+	latTr := pdf.UnicodeTranslatorFromDescriptor("iso-8859-16")
+	cirTr := pdf.UnicodeTranslatorFromDescriptor("cp1251")
+	trObj := newTranslationDetails(pdf, "Helvetica", "Arimo-Regular", 11, latTr, cirTr)
+
+	pdf.SetMargins(15, 20, marginRight)
+	fontSize := 11.0
+	ch := 6.0
+
+	sort.Slice(seminar.Trainees, func(i, j int) bool {
+		return *seminar.Trainees[i].Client.JMBG < *seminar.Trainees[j].Client.JMBG
+	})
+
+	for _, client := range seminar.Trainees {
+		pdf.AddPage()
+
+		pdf.SetFont("Arimo-Regular", "", 11)
+
+		pdf.Text(92, pdf.GetY(), trObj.translDef("ПРИЈАВА*"))
+		pdf.Ln(7)
+
+		pdf.SetFont("Arimo-Regular", "", 11)
+		pdf.Text(70, pdf.GetY(), trObj.translDef("за полагање стручног испита за"))
+		pdf.Ln(7)
+		pdf.Text(77, pdf.GetY(), trObj.translDef("стицање почетног ЦПЦ"))
+		pdf.Ln(10)
+
+		// pdf.SetFont("Arimo-Bold", "", fontSize)
+		pdf.Text(15, pdf.GetY(), trObj.translDef("ЛИЧНИ ПОДАЦИ"))
+		pdf.Ln(1)
+		pdf.SetFont("Arimo-Regular", "", fontSize)
+		pdf.CellFormat(70, ch, trObj.translDef("Име (име једног родитеља) презиме:"), "1", 0, "L", false, 0, "")
+		// pdf.SetFont("Arimo-Bold", "", fontSize)
+		pdf.CellFormat(110, ch, trObj.translDef(client.Client.Person.FullNameWithMiddleName()), "1", 0, "L", false, 0, "")
+		pdf.Ln(ch)
+		pdf.SetFont("Arimo-Regular", "", fontSize)
+		pdf.CellFormat(70, ch, trObj.translDef("ЈМБГ:"), "1", 0, "L", false, 0, "")
+		// pdf.SetFont("Arimo-Bold", "", fontSize)
+		pdf.CellFormat(110, ch, *client.Client.JMBG, "1", 0, "L", false, 0, "")
+		pdf.Ln(ch)
+		pdf.SetFont("Arimo-Regular", "", fontSize)
+		pdf.CellFormat(70, ch, trObj.translDef("Датум рођења:"), "1", 0, "L", false, 0, "")
+		// pdf.SetFont("Arimo-Bold", "", fontSize)
+		pdf.CellFormat(110, ch, client.Client.GetBirthDate(), "1", 0, "L", false, 0, "")
+		pdf.Ln(ch)
+		pdf.SetFont("Arimo-Regular", "", fontSize)
+		pdf.CellFormat(70, ch, trObj.translDef("Место рођења, држава:"), "1", 0, "L", false, 0, "")
+		// pdf.SetFont("Arimo-Bold", "", fontSize)
+		pdf.CellFormat(110, ch, trObj.translDef(*client.Client.PlaceBirth+", "+*client.Client.CountryBirth), "1", 0, "L", false, 0, "")
+
+		pdf.Ln(17)
+		// pdf.SetFont("Arimo-Bold", "", fontSize)
+		pdf.Text(15, pdf.GetY(), trObj.translDef("ПОДАЦИ О ПРЕБИВАЛИШТУ/БОРАВИШТУ"))
+		pdf.Ln(1)
+		pdf.SetFont("Arimo-Regular", "", fontSize)
+		pdf.CellFormat(70, ch, trObj.translDef("Место:"), "1", 0, "L", false, 0, "")
+		// pdf.SetFont("Arimo-Bold", "", fontSize)
+		pdf.CellFormat(110, ch, trObj.translDef(client.Client.Address.Place), "1", 0, "L", false, 0, "")
+		pdf.Ln(ch)
+		pdf.SetFont("Arimo-Regular", "", fontSize)
+		pdf.CellFormat(70, ch, trObj.translDef("Поштански број:"), "1", 0, "L", false, 0, "")
+		// pdf.SetFont("Arimo-Bold", "", fontSize)
+		pdf.CellFormat(110, ch, trObj.translDef(client.Client.Address.PostCode), "1", 0, "L", false, 0, "")
+		pdf.Ln(ch)
+		pdf.SetFont("Arimo-Regular", "", fontSize)
+		pdf.CellFormat(70, ch, trObj.translDef("Улица и кућни број:"), "1", 0, "L", false, 0, "")
+		// pdf.SetFont("Arimo-Bold", "", fontSize)
+		pdf.CellFormat(110, ch, trObj.translDef(client.Client.Address.GetStreetWithNumber()), "1", 0, "L", false, 0, "")
+		pdf.Ln(ch)
+		pdf.SetFont("Arimo-Regular", "", fontSize)
+		pdf.CellFormat(70, ch, trObj.translDef("Телефон/Мобилни:"), "1", 0, "L", false, 0, "")
+		// pdf.SetFont("Arimo-Bold", "", fontSize)
+		pdf.CellFormat(110, ch, trObj.translDef(client.Client.Person.PhoneNumber), "1", 0, "L", false, 0, "")
+		pdf.Ln(ch)
+		pdf.SetFont("Arimo-Regular", "", fontSize)
+		pdf.CellFormat(70, ch, trObj.translDef("е-маил:"), "1", 0, "L", false, 0, "")
+		// pdf.SetFont("Arimo-Bold", "", fontSize)
+		pdf.CellFormat(110, ch, trObj.translDef(client.Client.Person.Email), "1", 0, "L", false, 0, "")
+
+		pdf.Ln(17)
+		//pdf.SetFont("Arimo-Bold", "", fontSize)
+		pdf.Text(15, pdf.GetY(), trObj.translDef("ВРСТА ПРЕВОЗА (заокружени број испред врсте превоза)"))
+		pdf.Ln(1)
+		pdf.SetFont("Arimo-Regular", "", fontSize)
+		if client.Client.CLicence != nil && *client.Client.CLicence {
+			pdf.Circle(17, 126, 2.5, "")
+		}
+		if client.Client.DLicence != nil && *client.Client.DLicence {
+			pdf.Circle(107.5, 126, 2.5, "")
+		}
+
+		pdf.CellFormat(90, ch, trObj.translDef("1. Превоз терета"), "1", 0, "L", false, 0, "")
+		pdf.CellFormat(90, ch, trObj.translDef("2. Превоз путника"), "1", 0, "L", false, 0, "")
+
+		pdf.Ln(17)
+		//pdf.SetFont("Arimo-Bold", "", fontSize)
+		pdf.Text(15, pdf.GetY(), trObj.translDef("ВРСТА ОБУКЕ (заокружени број испред одговарајуће обуке)"))
+		pdf.Ln(1)
+		pdf.CellFormat(90, ch, trObj.translDef("1. Основна обука"), "1", 0, "L", false, 0, "")
+		pdf.CellFormat(90, ch, trObj.translDef("2. Додатна обука**"), "1", 0, "L", false, 0, "")
+		pdf.Circle(17, 143.5, 2.5, "")
+
+		pdf.Ln(15)
+		pdf.Text(15, pdf.GetY(), trObj.translDef("НАПОМЕНА: Уз пријаву за полагање стручног испита возач који стиче почетни ЦПЦ похађањем"))
+		pdf.Ln(5)
+		pdf.Text(15, pdf.GetY(), trObj.translDef("основне обуке и полагањем стручног испита прилаже:"))
+		pdf.Ln(5)
+		pdf.Text(35, pdf.GetY(), trObj.translDef("1. потврду о завршеној обавезној обуци за стицање почетног ЦПЦ и"))
+		pdf.Ln(5)
+		pdf.Text(35, pdf.GetY(), trObj.translDef("2. доказ о уплати трошкова за полагање стручног испита по тарифи агенције	"))
+
+		pdf.Ln(15)
+		pdf.Text(18, pdf.GetY(), trObj.translDef("У "))
+		pdf.Text(23, pdf.GetY(), trObj.translDef(seminar.ClassRoom.Location.Address.Place))
+		pdf.Line(23, pdf.GetY()+1, 65, pdf.GetY()+1)
+		pdf.SetFont("Arimo-Regular", "", fontSize)
+		pdf.Text(65.5, pdf.GetY(), trObj.translDef(", дана"))
+		pdf.Line(78, pdf.GetY()+1, 110, pdf.GetY()+1)
+		pdf.Text(80, pdf.GetY(), seminar.Start.Format("02.01.2006."))
+		pdf.SetFont("Arimo-Regular", "", fontSize)
+		pdf.Text(110.5, pdf.GetY(), trObj.translDef(", године"))
+
+		pdf.Ln(17)
+		pdf.Text(135, pdf.GetY(), trObj.translDef("Потпис подносиоца пријаве: "))
+		pdf.Ln(15)
+		pdf.Line(135, pdf.GetY(), 190, pdf.GetY())
+		pdf.Ln(50)
+
+		pdf.SetFont("Arimo-Regular", "", 9)
+		pdf.Text(15, pdf.GetY(), trObj.translate("*Образац пријаве попунити читко штампаним словима", 9))
+		pdf.Ln(5)
+		pdf.Text(15, pdf.GetY(), trObj.translate("*У случају додатне обуке, уписати број картице (СРБ број) или број \"Потврде о пријему захтева за ", 9))
+		pdf.Ln(5)
+		pdf.Text(15, pdf.GetY(), trObj.translate("издавање сертификата и стручној компетенцији и квалификационе картице возача \"", 9))
 	}
 
 	var buf bytes.Buffer
