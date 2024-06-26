@@ -26,7 +26,7 @@
         <button class="iconBtn" title="Dodaj vozače na seminar" :disabled="!selectedSeminar" @click.prevent="saveToSeminar()">
           <i class="fa fa-floppy-o"></i>
         </button>
-        <button class="iconBtn" title="Lista vozača" @click.prevent="downloadExcelWithClientsList()">
+        <button v-can="'ADMINISTRATOR'" class="iconBtn" title="Lista vozača" @click.prevent="downloadExcelWithClientsList()">
           <i class="fa fa-file-excel-o"></i>
         </button>
       </div>
