@@ -47,6 +47,7 @@ type PassedCheckboxes struct {
 	Regulations          *bool `json:"regulations"`             //4
 	Burden               *bool `json:"burden"`                  //3
 	ThemeDocuments       *bool `json:"theme_documents"`         //2
+	EmergencySituations  *bool `json:"emergency_situations"`    //6
 }
 
 func (a Address) GetStreetWithNumber() string {

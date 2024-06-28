@@ -511,6 +511,10 @@
               <label :style=styleLabelSmall for="theme_documents">Dokumenta:&nbsp;&nbsp;</label>
               <input id="theme_documents" v-model="client.passed_checkboxes.theme_documents" :hidden="readonly" type="checkbox"/>
             </div>
+            <div class="my-1">
+              <label :style=styleLabelSmall for="theme_documents">Vanredne situacije:&nbsp;&nbsp;</label>
+              <input id="emergency_situations" v-model="client.passed_checkboxes.emergency_situations" :hidden="readonly" type="checkbox"/>
+            </div>
           </div>
 
         </div>

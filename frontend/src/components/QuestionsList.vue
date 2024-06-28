@@ -111,7 +111,7 @@ export default {
   methods: {
     async doSearch(offset, limit, order, sort) {
       console.log(order, sort)
-      this.isLoading = true;
+      this.table.isLoading = true;
       await axios.get('/questions/list?skip=' + offset + '&take=' + limit).then((response) => {
         if (response.data === null || response.data.Status === 'error') {
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");
@@ -127,8 +127,8 @@ export default {
       }, (error) => {
         this.errorToast(error, "/questions/list");
       });
-
-      this.isLoading = false;
+      this.table.totalCount = this.table.rows.length;
+      this.table.isLoading = false;
     }
   },
   async created() {

@@ -24,7 +24,6 @@ var apiRoleMap = make(map[string]string)
 func init() {
 	//fill route name - role map
 	apiRoleMap["users_register"] = ADMIN
-	apiRoleMap["users_list"] = ADMIN
 	apiRoleMap["users_delete"] = ADMIN
 	apiRoleMap["users_update"] = ADMIN
 }

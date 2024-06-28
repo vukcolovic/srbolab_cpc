@@ -94,7 +94,7 @@ export default {
   methods: {
     async doSearch(offset, limit, order, sort) {
       console.log(order, sort, offset, limit)
-      this.isLoading = true;
+      this.table.isLoading = true;
       await axios.get('/partners/list?skip=0&take=1000').then((response) => {
         if (response.data === null || response.data.Status === 'error') {
           this.toast.error(response.data != null ? response.data.ErrorMessage : "");
@@ -105,8 +105,8 @@ export default {
         this.errorToast(error, "/partners/list");
       });
 
-      this.totalCount = this.table.rows.length;
-      this.isLoading = false;
+      this.table.totalCount = this.table.rows.length;
+      this.table.isLoading = false;
     },
   },
   async created() {

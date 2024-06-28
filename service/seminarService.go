@@ -209,6 +209,8 @@ func (c *seminarService) UpdateSeminar(seminar model.Seminar) (*model.Seminar, e
 					seminar.Trainees[i].Client.PassedCheckboxes.Regulations = &b
 				case "5":
 					seminar.Trainees[i].Client.PassedCheckboxes.Tahografs2 = &b
+				case "6":
+					seminar.Trainees[i].Client.PassedCheckboxes.EmergencySituations = &b
 				}
 			} else {
 				b := false
